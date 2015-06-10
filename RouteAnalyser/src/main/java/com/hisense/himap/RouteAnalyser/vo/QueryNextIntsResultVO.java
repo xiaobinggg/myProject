@@ -24,7 +24,7 @@ public class QueryNextIntsResultVO {
     private String arclength; //路线长度
     private String strcoords; //路线坐标
     private String roadid; // 路线所属路段
-    private String ndirection; //路线前进方向
+    private int ndirection; //路线前进方向
 
     public String getPointid() {
         return pointid;
@@ -122,11 +122,11 @@ public class QueryNextIntsResultVO {
         this.roadid = roadid;
     }
 
-    public String getNdirection() {
+    public int getNdirection() {
         return ndirection;
     }
 
-    public void setNdirection(String ndirection) {
+    public void setNdirection(int ndirection) {
         this.ndirection = ndirection;
     }
 }

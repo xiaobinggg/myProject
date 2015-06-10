@@ -6,7 +6,7 @@ import com.hisense.himap.RouteAnalyser.vo.QueryNextIntsVO;
 import java.util.List;
 
 /**
- * Created by lxb on 2015/6/3.
+ * Created by lxb on 2015/6/3
  */
 public interface IRouteAnalyser {
 

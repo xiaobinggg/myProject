@@ -1,6 +1,7 @@
 package com.hisense.himap.RouteAnalyser.logic.impl;
 
 import com.hisense.himap.RouteAnalyser.logic.IRouteAnalyser;
+import com.hisense.himap.RouteAnalyser.utils.BeanUtils;
 import com.hisense.himap.RouteAnalyser.vo.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -12,17 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Administrator on 2015-6-8.
+ * Created by lxb on 2015-6-8.
  */
 
 @Service("RouteAnalyser")
 public class RouteAnalyserImpl implements IRouteAnalyser {
 
     //弧段 @TODO 初始化时生成弧段数据
-    private Map<String,RtArcVO> routeArcMap;
+    private Map<String, RtArcVO> routeArcMap;
     private List<RtArcVO> rtArcList;
     //路口 @TODO 初始化时生成路口数据
-    private Map<String,RtIntsVO> rtIntsMap;
+    private Map<String, RtIntsVO> rtIntsMap;
     private List<RtIntsVO> rtIntsList;
     //路口车道 @TODO 初始化时生成车道数据
     private List<RtLaneVO> rtLaneList;
@@ -31,17 +32,20 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
 
     protected JdbcTemplate jdbcTemplate;
 
+
     @Inject
     @Named("jdbcTemplate")
-    public  RouteAnalyserImpl(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-        String sql = "select * from route_road";
-        try {
-            System.out.println("init route_road ");
-            List<RtRoad> list = this.jdbcTemplate.queryForList(sql,RtRoad.class);
-            this.rtRoadList = list;
-        } catch (Exception e) {
-            e.printStackTrace();
+    public RouteAnalyserImpl(JdbcTemplate jdbcTemplate) {
+        if(null != jdbcTemplate){
+            this.jdbcTemplate = jdbcTemplate;
+            String sql = "select * from route_road";
+            try {
+                System.out.println("init route_road ");
+                List<RtRoad> list = this.jdbcTemplate.queryForList(sql, RtRoad.class);
+                this.rtRoadList = list;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -55,6 +59,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
     public RtNodeVO getRtNodeByPointid(String pointid) {
         return null;
     }
+
     /**
      * 获得安装点所在的动态节点
      *
@@ -74,6 +79,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
     public RtArcVO getRtArcByArcid(String arcid) {
         return routeArcMap.get(arcid);
     }
+
     /**
      * 根据节点查找路口
      *
@@ -93,28 +99,28 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
     public List<RtArcVO> getRtArcByStartNode(RtNodeVO routeNodeVO) {
         return null;
     }
+
     /**
      * 获得下一路口列表
      *
      * @param query
      * @return
      */
-
     public List<QueryNextIntsResultVO> getNextInts(QueryNextIntsVO query) {
-        if(null == query.getPointid() || query.getPointid().equalsIgnoreCase("")){
+        if (null == query.getPointid() || query.getPointid().equalsIgnoreCase("")) {
             return null;
         }
         List<QueryNextIntsResultVO> nextInts = new ArrayList<QueryNextIntsResultVO>();
 
         RtNodeVO nodeVO = this.getRtNodeByPointid(query.getPointid());
-        if(null == nodeVO){ //如果安装点在路段上，根据安装点所在的动态节点计算下一路口列表
+        if (null == nodeVO) { //如果安装点在路段上，根据安装点所在的动态节点计算下一路口列表
             nodeVO = this.getRtDNodeByPointid(query.getPointid());//安装点所在的动态节点
             String[] arcids = nodeVO.getArcids().split(",");//从动态节点出发的弧段
             String[] edistances = nodeVO.getEdistances().split(",");//从动态节点出发到达下一结点的距离
             String[] pos = nodeVO.getPos().split(",");//动态节点在弧段中的位置
 
-            if(arcids.length==edistances.length && arcids.length == pos.length ){
-                for(int i= 0;i<arcids.length;i++){
+            if (arcids.length == edistances.length && arcids.length == pos.length) {
+                for (int i = 0; i < arcids.length; i++) {
                     String arcid = arcids[i];
                     try {
                         int spos = Integer.parseInt(pos[i]);
@@ -123,34 +129,30 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                         RtArcVO arcVO = this.getRtArcByArcid(arcid); //路线VO
 
                         String[] strcoords = arcVO.getStrcoords().split(",");
-                        if(strcoords.length/2<spos){
+                        if (strcoords.length / 2 < spos) {
                             continue;
                         }
-                        String strfromNodeToInts = nodeVO.getX()+","+nodeVO.getY()+",";
-                        for(int m=spos; m<strcoords.length/2;m++){
-                            strfromNodeToInts+=strcoords[m*2]+","+strcoords[m*2+1];
+                        String strfromNodeToInts = nodeVO.getX() + "," + nodeVO.getY() + ",";
+                        for (int m = spos; m < strcoords.length / 2; m++) {
+                            strfromNodeToInts += strcoords[m * 2] + "," + strcoords[m * 2 + 1];
                         }
-
                         RtIntsVO intsVO = this.getRtIntsByNodeid(arcVO.getEndnode()); //路口VO
                         QueryNextIntsResultVO resultVO = new QueryNextIntsResultVO();
 
-                        resultVO.setPointid(query.getPointid());
-                        resultVO.setDirection(query.getDirection());
-                        resultVO.setLaneno(query.getLaneno());
-                        resultVO.setSpeed(query.getSpeed());
-
-                        resultVO.setIntsid(intsVO.getIntsid());
-                        resultVO.setIntsname(intsVO.getIntsname());
-                        resultVO.setLatitude(intsVO.getLatitude());
-                        resultVO.setLongitude(intsVO.getLongitude());
-
-                        resultVO.setArcid(arcVO.getArcid());
+                        try{
+                            BeanUtils.copyPropertiesInclude(query,resultVO,new String[]{"pointid","direction","laneno","speed"});
+                            BeanUtils.copyPropertiesInclude(intsVO,resultVO,new String[]{"intsid","intsname","latitude","longitude"});
+                            BeanUtils.copyPropertiesInclude(arcVO,resultVO,new String[]{"arcid","roadid"});
+                        }catch(Exception e){
+                            e.printStackTrace();
+                            continue;
+                        }
                         resultVO.setArclength(Double.toString(elength));
                         resultVO.setStrcoords(strfromNodeToInts);
-                        resultVO.setRoadid(arcVO.getRoadid());
-                        resultVO.setNdirection(Integer.toString(arcVO.getDirection()));
+                        resultVO.setNdirection(arcVO.getDirection());
+
                         nextInts.add(resultVO);
-                    }catch(NumberFormatException e){
+                    } catch (NumberFormatException e) {
 
                     }
 
@@ -158,31 +160,36 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
             }
 
 
-        }else{ //如果安装点在路口，根据路口所属节点计算下一路口列表
+        } else { //如果安装点在路口，根据路口所属节点计算下一路口列表
             List<RtArcVO> arclist = this.getRtArcByStartNode(nodeVO);
-            for(RtArcVO arcVO:arclist){
+            for (RtArcVO arcVO : arclist) {
                 QueryNextIntsResultVO resultVO = new QueryNextIntsResultVO();
 
                 RtIntsVO intsVO = this.getRtIntsByNodeid(arcVO.getEndnode());
-                resultVO.setPointid(query.getPointid());
-                resultVO.setDirection(query.getDirection());
-                resultVO.setLaneno(query.getLaneno());
-                resultVO.setSpeed(query.getSpeed());
-
-                resultVO.setIntsid(intsVO.getIntsid());
-                resultVO.setIntsname(intsVO.getIntsname());
-                resultVO.setLatitude(intsVO.getLatitude());
-                resultVO.setLongitude(intsVO.getLongitude());
-
-                resultVO.setArcid(arcVO.getArcid());
-                resultVO.setArclength(arcVO.getArclength());
-                resultVO.setStrcoords(arcVO.getStrcoords());
-                resultVO.setRoadid(arcVO.getRoadid());
-                resultVO.setNdirection(Integer.toString(arcVO.getDirection()));
+                try {
+                    BeanUtils.copyPropertiesInclude(query,resultVO,new String[]{"pointid","direction","laneno","speed"});
+                    BeanUtils.copyPropertiesInclude(intsVO,resultVO,new String[]{"intsid","intsname","latitude","longitude"});
+                    BeanUtils.copyPropertiesInclude(arcVO,resultVO,new String[]{"arcid","arclength","strcoords","roadid"});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                resultVO.setNdirection(arcVO.getDirection());
                 nextInts.add(resultVO);
 
             }
         }
         return nextInts;
+    }
+
+
+    /**
+     * 根据查询条件筛选查询出的路口信息
+     * @param query
+     * @param nextIntsList
+     * @return
+     */
+    public List<QueryNextIntsResultVO> filterNextInts(QueryNextIntsVO query,List<QueryNextIntsResultVO> nextIntsList) {
+        List<QueryNextIntsResultVO> result = new ArrayList<QueryNextIntsResultVO>();
+        return result;
     }
 }
