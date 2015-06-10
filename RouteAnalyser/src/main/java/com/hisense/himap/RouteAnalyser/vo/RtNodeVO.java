@@ -9,9 +9,9 @@ public class RtNodeVO {
     private String y;
     private String instid;//路口编号
     private String distance;
+    private String pointids;//安装点编
 
     //动态节点专有属性
-    private String pointid;//安装点编号
     private String arcids;//从动态节点出发的弧段
     private String edistances;//从动态节点出发到达下一结点的距离
     private String pos;//动态节点在弧段中的位置
@@ -80,11 +80,11 @@ public class RtNodeVO {
         this.arcids = arcids;
     }
 
-    public String getPointid() {
-        return pointid;
+    public String getPointids() {
+        return pointids;
     }
 
-    public void setPointid(String pointid) {
-        this.pointid = pointid;
+    public void setPointids(String pointids) {
+        this.pointids = pointids;
     }
 }

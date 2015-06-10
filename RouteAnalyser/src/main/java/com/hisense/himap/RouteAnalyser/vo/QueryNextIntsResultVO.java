@@ -11,7 +11,7 @@ public class QueryNextIntsResultVO {
     private String pointid; //安装点编号
     private String direction; //行驶方向
     private String laneno; //车道号
-    private double speed; //形势速度
+    private double speed; //行驶速度
 
     //到达的路口信息
     private String intsid; //路口编号
@@ -25,6 +25,8 @@ public class QueryNextIntsResultVO {
     private String strcoords; //路线坐标
     private String roadid; // 路线所属路段
     private int ndirection; //路线前进方向
+
+    private int order;
 
     public String getPointid() {
         return pointid;
@@ -128,5 +130,13 @@ public class QueryNextIntsResultVO {
 
     public void setNdirection(int ndirection) {
         this.ndirection = ndirection;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }
