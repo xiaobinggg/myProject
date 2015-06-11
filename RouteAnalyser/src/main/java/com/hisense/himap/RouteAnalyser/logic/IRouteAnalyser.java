@@ -1,7 +1,6 @@
-package com.hisense.himap.RouteAnalyser.logic;
+package com.hisense.himap.routeAnalyser.logic;
 
-import com.hisense.himap.RouteAnalyser.vo.QueryNextIntsResultVO;
-import com.hisense.himap.RouteAnalyser.vo.QueryNextIntsVO;
+import com.hisense.himap.routeAnalyser.vo.*;
 
 import java.util.List;
 
@@ -17,7 +16,15 @@ public interface IRouteAnalyser {
      */
     public List<QueryNextIntsResultVO> getNextInts(QueryNextIntsVO query);
 
-
+    /**
+     * 最短路径查询
+     * @param points 途经点，可以为安装点编号或者具体的坐标，例如：
+     * {"010000213097","020000213069","010000213136"} or
+     * {"120.41428,36.15462","120.39398,36.20586","120.41133,36.15778"} or
+     * {"010000213097","120.41428,36.15462","010000213136"}
+     * @return 经过的路径列表
+     */
+    public List<QueryPathResultVO> getShortestPath(List<String> points);
 
 
 

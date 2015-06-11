@@ -1,4 +1,4 @@
-package com.hisense.himap.RouteAnalyser.vo;
+package com.hisense.himap.routeAnalyser.vo;
 
 /**
  * Created by lxb on 2015/6/3.

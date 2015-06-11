@@ -3,21 +3,10 @@ package com.hisense.himap.routeAnalyser.vo;
 
 /**
  * Created by lxb on 2015/6/3.
- * 下一路口查询结果VO
+ * 路径查询结果VO
  */
-public class QueryNextIntsResultVO {
+public class QueryPathResultVO {
 
-    //原始查询条件
-    //private String pointid; //安装点编号
-    //private String direction; //行驶方向
-    //private String laneno; //车道号
-    //private double speed; //行驶速度
-
-    //到达的路口信息
-    private String intsid; //路口编号
-    private String intsname; //路口名称
-    private String longitude; //路口经度
-    private String latitude; //路口纬度
 
     //经过的路线信息
     private String arcid; //路线编号
@@ -26,8 +15,11 @@ public class QueryNextIntsResultVO {
     private String roadid; // 路线所属路段
     private int ndirection; //路线前进方向
 
-    private int order;
-
+    //到达的路口信息
+    private String intsid; //路口编号
+    private String intsname; //路口名称
+    private String longitude; //路口经度
+    private String latitude; //路口纬度
 
 
     public String getIntsid() {
@@ -102,11 +94,4 @@ public class QueryNextIntsResultVO {
         this.ndirection = ndirection;
     }
 
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
-    }
 }

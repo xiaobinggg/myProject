@@ -1,4 +1,4 @@
-package com.hisense.himap.RouteAnalyser.vo;
+package com.hisense.himap.routeAnalyser.vo;
 
 /**
  * 节点VO

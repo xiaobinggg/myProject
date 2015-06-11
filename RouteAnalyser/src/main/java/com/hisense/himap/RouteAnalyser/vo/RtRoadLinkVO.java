@@ -1,4 +1,4 @@
-package com.hisense.himap.RouteAnalyser.vo;
+package com.hisense.himap.routeAnalyser.vo;
 
 /**
  * Created by hisense on 2015-4-24.
