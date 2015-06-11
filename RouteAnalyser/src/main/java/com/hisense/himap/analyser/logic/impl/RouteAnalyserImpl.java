@@ -178,7 +178,6 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
 
                         try {
                             //BeanUtils.copyPropertiesInclude(query, resultVO, new String[]{"pointid", "direction", "laneno", "speed"});
-
                             BeanUtils.copyPropertiesInclude(intsVO, resultVO, new String[]{"intsid", "intsname", "latitude", "longitude"});
                             BeanUtils.copyPropertiesInclude(arcVO, resultVO, new String[]{"arcid", "roadid"});
                         } catch (Exception e) {
