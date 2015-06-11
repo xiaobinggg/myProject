@@ -5,7 +5,7 @@
     <script type="text/javascript">
         //$ = jQuery.noConflict();
         $(function(){
-            var url = "/sayHello.do";
+            var url = "/sayHello.do?pointid='1001'";
             $.ajax({
                 url: url,
                 type: 'get',
