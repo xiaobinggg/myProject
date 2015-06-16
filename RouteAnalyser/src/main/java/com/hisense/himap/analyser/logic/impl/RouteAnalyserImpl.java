@@ -70,6 +70,8 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                     }
                 }
 
+
+                //@TODO 根据动态节点更新拓扑结构
                 System.out.println("init route_arc");
                 sql = "select * from route_arc";
                 MemRouteData.arcList = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtArcVO>(RtArcVO.class));

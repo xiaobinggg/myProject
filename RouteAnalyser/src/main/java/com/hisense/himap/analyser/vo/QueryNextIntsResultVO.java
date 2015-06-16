@@ -26,7 +26,7 @@ public class QueryNextIntsResultVO {
     private String roadid; // 路线所属路段
     private int ndirection; //路线前进方向
 
-    private int order;
+    private int order; //推荐顺序 1为符合车道前进规则行驶，0为未查询到车道信息 -1为违反车道前进规则行驶
 
 
 
