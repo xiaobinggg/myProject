@@ -27,13 +27,12 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
     public void preOperRoad() {
 
         roadList = routeDataHandlerDAO.getRtRoad();
-        //循环路段列表，将邻接的路段边合并
         int i = 0;
-        List<RtRoadLinkVO> newLinkList = new ArrayList<RtRoadLinkVO>();//合并后的link
         for (RtRoad road : roadList) {
+            //1.循环路段列表，将邻接的路段边合并
             i++;
             List<RtRoadLinkVO> linkList = routeDataHandlerDAO.getLinkByRoadID(road.getRoadid());//原始link
-
+            List<RtRoadLinkVO> newLinkList = new ArrayList<RtRoadLinkVO>();//合并后的link
             for (RtRoadLinkVO link : linkList) {
                 //如果已经合并
                 if (link.getIsformatted().equalsIgnoreCase("1")) {
@@ -45,9 +44,17 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 newLinkList.add(link);
             }
             System.out.println(i+":"+road.getRoadname()+"---"+newLinkList.size());
+            //routeDataHandlerDAO.insertFormattedLink(newLinkList);
+
+            //2.路口处理
+            //2.1 查询与该路相交的所有其他路段
+            for(RtRoadLinkVO link:newLinkList){
+                List<RtRoadLinkVO> list = routeDataHandlerDAO.getCrossLinkById(link.getLinkid());
+            }
+
 
         }
-        routeDataHandlerDAO.insertFormattedLink(newLinkList);
+
 
 
     }

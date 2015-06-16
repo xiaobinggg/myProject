@@ -24,6 +24,7 @@ public class RouteDataHandlerDAO {
 
     private static final String SQL_INSERT_LINK = "insert into route_roadlink(roadid,linkid,isformatted,strcoords) values(?,?,?,?)";
     private static final String SQL_DEL_LINK = "delete from route_roadlink r where r.isformatted = '1'";
+    private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords,sdo_geom.sdo_intersection(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),0.005).sdo_ordinates AS joinpoint from route_roadlink r WHERE  r.isformatted='1' AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=TOUCH')='TRUE'";
     private static final String SQL_QUERY_ALLROAD = "select * from route_road";
     private static final String SQL_QUERY_LINK_BYROADID = "SELECT r.roadid,r.linkid,r.strcoords,r.isformatted from route_roadlink r where (r.isformatted is null or r.isformatted = '0') and r.roadid = ?";
 
@@ -53,7 +54,20 @@ public class RouteDataHandlerDAO {
         }
     }
 
-
+    /**
+     * 获得与指定边相交的所有边
+     * @param linkid 边编号
+     * @return  与指定边相交的所有边的列表
+     */
+    public List<RtRoadLinkVO> getCrossLinkById(String linkid) {
+        try {
+            List<RtRoadLinkVO> list = this.jdbcTemplate.query(SQL_QUERY_JOINLINK, new String[]{linkid,linkid}, new BeanPropertyRowMapper<RtRoadLinkVO>(RtRoadLinkVO.class));
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     /**
      * 获得所有的路段
      *

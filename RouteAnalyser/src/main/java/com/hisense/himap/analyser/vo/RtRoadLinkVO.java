@@ -1,5 +1,7 @@
 package com.hisense.himap.analyser.vo;
 
+import java.sql.Array;
+
 /**
  * Created by hisense on 2015-4-24.
  */
@@ -13,7 +15,15 @@ public class RtRoadLinkVO {
     private String crosspoints;//与其他路段边的交叉点与位置次序，形如 "x,y,pos,x,y,pos"
     private String startPoint; //首节点的位置信息
     private String endPoint;//尾节点的位置信息
+    private Array joinpoint;
 
+    public Array getJoinpoint() {
+        return joinpoint;
+    }
+
+    public void setJoinpoint(Array joinpoint) {
+        this.joinpoint = joinpoint;
+    }
 
     public String getIsformatted() {
         return isformatted;
