@@ -2,6 +2,7 @@ package com.hisense.himap.analyser.logic.impl;
 
 import com.hisense.himap.analyser.astar.AStar;
 import com.hisense.himap.analyser.astar.ISearchNode;
+import com.hisense.himap.analyser.dao.RouteAnalyserDAO;
 import com.hisense.himap.analyser.logic.IRouteAnalyser;
 import com.hisense.himap.analyser.logic.MemRouteData;
 import com.hisense.himap.analyser.logic.RouteGoalNode;
@@ -25,22 +26,20 @@ import java.util.List;
 @Service("RouteAnalyser")
 public class RouteAnalyserImpl implements IRouteAnalyser {
 
-    protected JdbcTemplate jdbcTemplate;
+    private RouteAnalyserDAO routeAnalyserDAO;
 
     @Inject
-    @Named("jdbcTemplate")
-    public RouteAnalyserImpl(JdbcTemplate jdbcTemplate) {
-        if (null != jdbcTemplate) {
-            this.jdbcTemplate = jdbcTemplate;
-            String sql = "select * from route_road";
+    @Named("RouteAnalyserDAO")
+    public RouteAnalyserImpl(RouteAnalyserDAO routeAnalyserDAO) {
+        if (null != routeAnalyserDAO) {
+            this.routeAnalyserDAO = routeAnalyserDAO;
             try {
                 System.out.println("init route_road ");
-                List<RtRoad> list = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtRoad>(RtRoad.class));
+                List<RtRoad> list = this.routeAnalyserDAO.initRtRoad();
                 MemRouteData.roadList = list;
 
                 System.out.println("init route_node");
-                sql = "select n.nodeid,n.x,n.y,n.intsid, i.pointids from route_node n left join route_intersection i on i.intsid = n.intsid";
-                List<RtNodeVO> nodeList = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+                List<RtNodeVO> nodeList = this.routeAnalyserDAO.initRtNode();
                 MemRouteData.nodeList = nodeList;
                 MemRouteData.nodeMap = new HashMap<String, RtNodeVO>();
                 for (RtNodeVO node : nodeList) {
@@ -57,8 +56,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                 }
 
                 System.out.println("init dnode");
-                sql = "select * from route_dnode";
-                List<RtNodeVO> dnodeList = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+                List<RtNodeVO> dnodeList = this.routeAnalyserDAO.initRtDNode();
                 MemRouteData.dnodeList = dnodeList;
                 MemRouteData.dnodemap = new HashMap<String, RtNodeVO>();
                 for (RtNodeVO node : dnodeList) {
@@ -73,8 +71,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
 
                 //@TODO 根据动态节点更新拓扑结构
                 System.out.println("init route_arc");
-                sql = "select * from route_arc";
-                MemRouteData.arcList = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtArcVO>(RtArcVO.class));
+                MemRouteData.arcList = this.routeAnalyserDAO.initRtArc();
                 MemRouteData.arcMap = new HashMap<String, RtArcVO>();
                 for (RtArcVO arc : MemRouteData.arcList) {
                     if (MemRouteData.arcMap.get(arc.getArcid()) == null) {
@@ -83,8 +80,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                 }
 
                 System.out.println("init route_intersection");
-                sql = "SELECT r.*,n.nodeid from route_intersection r LEFT JOIN route_node n ON n.intsid = r.intsid";
-                MemRouteData.intsList = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtIntsVO>(RtIntsVO.class));
+                MemRouteData.intsList = this.routeAnalyserDAO.initRtInts();
                 MemRouteData.intsMap = new HashMap<String, RtIntsVO>();
                 for (RtIntsVO ints : MemRouteData.intsList) {
                     if (null == ints.getPointids() || ints.getPointids().equalsIgnoreCase("")) {
@@ -99,8 +95,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                 }
 
                 System.out.println("init route_lane");
-                sql = "SELECT l.intsid,l.laneno,l.direction,NVL(l.nthrough,0) as nthrough,NVL(l.nturnleft,0) as nturnleft,NVL(l.nturnright,0) as nturnright,NVL(l.nturnround,0) as nturnround from route_lane l";
-                MemRouteData.laneList = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtLaneVO>(RtLaneVO.class));
+                MemRouteData.laneList = this.routeAnalyserDAO.initRtLane();
 
 
                 //初始化方向信息
@@ -426,7 +421,12 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
             pathvo.setStrcoords(searchNode.getStrcoords());
             result.add(pathvo);
         }
-
+        //如果从路网中没有算出结果，返回两点之间的直线
+        if(result.size()<=0){
+            QueryPathResultVO pathvo = new QueryPathResultVO();
+            pathvo.setStrcoords(from.getX()+","+from.getY()+","+to.getX()+","+to.getY());
+            result.add(pathvo);
+        }
         return result;
     }
 

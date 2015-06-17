@@ -1,5 +1,7 @@
 package com.hisense.himap.dataHandler.dao;
 
+import com.hisense.himap.analyser.vo.RtIntsVO;
+import com.hisense.himap.analyser.vo.RtNodeVO;
 import com.hisense.himap.analyser.vo.RtRoad;
 import com.hisense.himap.analyser.vo.RtRoadLinkVO;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -27,6 +29,7 @@ public class RouteDataHandlerDAO {
     private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords,sdo_geom.sdo_intersection(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),0.005).sdo_ordinates AS joinpoint from route_roadlink r WHERE  r.isformatted='1' AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=TOUCH')='TRUE'";
     private static final String SQL_QUERY_ALLROAD = "select * from route_road";
     private static final String SQL_QUERY_LINK_BYROADID = "SELECT r.roadid,r.linkid,r.strcoords,r.isformatted from route_roadlink r where (r.isformatted is null or r.isformatted = '0') and r.roadid = ?";
+    private static final String SQL_QUERY_CENTROID = "SELECT sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.x as x,sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.y as y from dual";
 
     @Inject
     @Named("jdbcTemplate")
@@ -90,5 +93,24 @@ public class RouteDataHandlerDAO {
 
         List<RtRoadLinkVO> list = this.jdbcTemplate.query(SQL_QUERY_LINK_BYROADID, new String[]{roadid}, new BeanPropertyRowMapper<RtRoadLinkVO>(RtRoadLinkVO.class));
         return list;
+    }
+
+    /**
+     * 获得多边形的质心
+     * @param points 多边形坐标点
+     * @return 质心坐标
+     */
+    public String getCentroid(String points){
+        if(points.split(",").length<6){
+            return null;
+        }else{
+            String sql = SQL_QUERY_CENTROID.replaceAll("points",points);
+            List<RtNodeVO> list = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+            if(list!=null && list.size()>0){
+                RtNodeVO node = list.get(0);
+                return node.getX()+","+node.getY();
+            }
+        }
+        return null;
     }
 }
