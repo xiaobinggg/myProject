@@ -13,8 +13,16 @@ public class RtIntsVO {
     private String latitude;
     private String pointids;
     private String nodeid;
+    private String crosspoints;
 
 
+    public String getCrosspoints() {
+        return crosspoints;
+    }
+
+    public void setCrosspoints(String crosspoints) {
+        this.crosspoints = crosspoints;
+    }
 
     public String getNodeid() {
         return nodeid;

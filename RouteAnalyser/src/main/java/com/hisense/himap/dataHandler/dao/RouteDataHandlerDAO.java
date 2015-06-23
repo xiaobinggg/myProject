@@ -25,10 +25,10 @@ import java.util.Map;
 public class RouteDataHandlerDAO {
 
     private static final String SQL_INSERT_LINK = "insert into route_roadlink(roadid,linkid,isformatted,strcoords) values(?,?,?,?)";
-    private static final String SQL_INSERT_INTS = "insert into route_intersection(intsid,longitude,latitude,xzqh) values(?,?,?,?)";
+    private static final String SQL_INSERT_INTS = "insert into route_intersection(intsid,intsname,longitude,latitude,xzqh,CROSSPOINTS) values(?,?,?,?,?,?)";
     private static final String SQL_INSERT_NODE = "insert into route_node(nodeid,x,y,intsid) values(?,?,?,?)";
-    private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords,sdo_geom.sdo_intersection(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),0.005).sdo_ordinates AS joinpoint from route_roadlink r WHERE  r.isformatted='1' AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=ANYINTERACT')='TRUE'";
-    private static final String SQL_QUERY_ALLROAD = "select * from route_road r WHERE r.roadname='江西路'";
+    private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords from route_roadlink r WHERE  r.isformatted='1' and r.linkid!=? AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=ANYINTERACT')='TRUE'";
+    private static final String SQL_QUERY_ALLROAD = "select * from route_road r ";
     private static final String SQL_QUERY_LINK_BYROADID = "SELECT r.roadid,r.linkid,r.strcoords,r.isformatted from route_roadlink r where (r.isformatted is null or r.isformatted = '0') and r.roadid = ?";
     private static final String SQL_QUERY_CENTROID = "SELECT sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.x as x,sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.y as y from dual";
     private static final String SQL_UPDATE_CROSSPOINT = "update route_roadlink r set r.crosspoints = ? where r.linkid = ?";
@@ -118,7 +118,7 @@ public class RouteDataHandlerDAO {
     public void insertIntsAndNode(List<RtIntsVO> intslist,List<RtNodeVO> nodelist) {
 
         for (RtIntsVO ints: intslist) {
-            this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh());
+            this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(),ints.getIntsname(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh(),ints.getCrosspoints());
         }
         for (RtNodeVO node: nodelist) {
             this.jdbcTemplate.update(SQL_INSERT_NODE, node.getNodeid(),node.getX(),node.getY(),node.getInstid());

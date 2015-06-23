@@ -24,16 +24,18 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
     private RouteDataHandlerDAO routeDataHandlerDAO;
 
     private List<RtRoad> roadList;
-    private Map<String,RtRoad> roadMap;
+    private Map<String, RtRoad> roadMap;
+    private List<RtIntsVO> allIntsList;
 
     //预处理路网数据
     public void preOperRoad() {
-
+        roadMap = new HashMap<String, RtRoad>();
         roadList = routeDataHandlerDAO.getRtRoad();
         Map<String, RtRoad> handledRoad = new HashMap<String, RtRoad>();
-        for(RtRoad road:roadList){
-            roadMap.put(road.getRoadid(),road);
+        for (RtRoad road : roadList) {
+            roadMap.put(road.getRoadid(), road);
         }
+        allIntsList = new ArrayList<RtIntsVO>();
         int i = 0;
         for (RtRoad road : roadList) {
             handledRoad.put(road.getRoadid(), road);
@@ -57,32 +59,31 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
 
             //2.路口处理
             Map<String, String> crossMap = new HashMap<String, String>();
-            //2.1 弧段数据处理
+            //2.1 弧段数据处理,计算路段与其他路段的交叉点
             for (RtRoadLinkVO link : newLinkList) {
                 //System.out.println(link.getLinkid());
                 List<RtRoadLinkVO> list = routeDataHandlerDAO.getCrossLinkById(link.getLinkid());
                 for (RtRoadLinkVO crosslink : list) {
                     try {
-                        if (crosslink.getJoinpoint() == null) {
+                        String crosspoint = GISUtils.getIntersection(link.getStrcoords(), crosslink.getStrcoords());
+                        if (crosspoint == null || crosspoint.split(",").length != 2) {
                             continue;
                         }
-                        Object[] crosspoint = (Object[]) crosslink.getJoinpoint().getArray();
-                        String strCoord = crosspoint[0] + "," + crosspoint[1];
-                        int pos = this.getNodePosInLink(strCoord, link);
+                        int pos = this.getNodePosInLink(crosspoint, link);
                         if (link.getCrosspoints() == null) {
-                            link.setCrosspoints(strCoord + "," + pos);
+                            link.setCrosspoints(crosspoint + "," + pos);
                         } else {
-                            link.setCrosspoints(link.getCrosspoints() + "," + strCoord + "," + pos);
+                            link.setCrosspoints(link.getCrosspoints() + "," + crosspoint + "," + pos);
                         }
 
                         String roadid = crosslink.getRoadid();
-                        if (handledRoad.get(roadid) != null) {
+                        if (handledRoad.get(roadid) != null) {//如果该路段已经进行过交叉点计算，不进行重复计算
                             continue;
                         }
                         if (crossMap.get(roadid) == null) {
-                            crossMap.put(roadid, crosspoint[0] + "," + crosspoint[1]);
+                            crossMap.put(roadid, crosspoint.split(",")[0] + "," + crosspoint.split(",")[1]);
                         } else {
-                            crossMap.put(roadid, crossMap.get(roadid) + "," + crosspoint[0] + "," + crosspoint[1]);
+                            crossMap.put(roadid, crossMap.get(roadid) + "," + crosspoint.split(",")[0] + "," + crosspoint.split(",")[1]);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -91,7 +92,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             }
             this.routeDataHandlerDAO.updateCrossPoint(newLinkList);
 
-            //2.2 路口数据处理
+            //2.2 路口数据处理，根据交叉点生成路口数据和节点数据
             List<RtIntsVO> intslist = new ArrayList<RtIntsVO>();
             Iterator iter = crossMap.keySet().iterator();
             List<RtNodeVO> nodelist = new ArrayList<RtNodeVO>();
@@ -104,11 +105,13 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                     continue;
                 }
                 intsVO.setIntsid(UUID.randomUUID().toString().replaceAll("-", ""));
-                intsVO.setLongitude(this.formatPos(centroid.split(",")[0]));
-                intsVO.setLatitude(this.formatPos(centroid.split(",")[1]));
+                intsVO.setLongitude(GISUtils.formatPos(centroid.split(",")[0]));
+                intsVO.setLatitude(GISUtils.formatPos(centroid.split(",")[1]));
                 intsVO.setXzqh(road.getXzqh());
-                intsVO.setIntsname(road.getRoadname()+roadMap.get(crossroadid));
+                intsVO.setIntsname(road.getRoadname() + roadMap.get(crossroadid).getRoadname());
+                intsVO.setCrosspoints(crossMap.get(crossroadid));
                 intslist.add(intsVO);
+                allIntsList.add(intsVO);
 
                 RtNodeVO nodeVO = new RtNodeVO();
                 nodeVO.setNodeid(centroid);
@@ -117,9 +120,72 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 nodeVO.setInstid(intsVO.getIntsid());
                 nodelist.add(nodeVO);
             }
-            this.routeDataHandlerDAO.insertIntsAndNode(intslist,nodelist);
-            //break;
+            this.routeDataHandlerDAO.insertIntsAndNode(intslist, nodelist);
 
+
+            //3 弧段数据处理
+            for (RtRoadLinkVO link : newLinkList) {
+                //3.1 根据交叉点将roadlink断链
+                String[] temparr = link.getStrcoords().split(",");
+                int pointnum = temparr.length / 2;
+                List<String> prePointList = new ArrayList<String>();
+                String newstrcoords = "";
+                String[] cpstr = link.getCrosspoints().split(",");
+                Map<Integer, String> crosspints = new HashMap<Integer, String>();
+                if (cpstr.length < 3) {
+                    continue;
+                }
+                for (int cpcount = 0; cpcount < cpstr.length / 3; cpcount++) {
+                    int pos = Integer.parseInt(cpstr[cpcount * 3 + 2]);
+                    String strcoord = cpstr[cpcount * 3] + "," + cpstr[cpcount * 3 + 1];
+                    crosspints.put(pos, strcoord);
+                }
+                int m;
+                for (m = 0; m < pointnum; m++) {
+                    prePointList.add(temparr[m * 2] + "," + temparr[m * 2 + 1]);
+                }
+                for (m = 0; m < pointnum; m++) {
+                    if(crosspints.get(m)==null){
+                        newstrcoords+=prePointList.get(m)+",";
+                    }else{
+                        if(prePointList.get(m).equalsIgnoreCase(crosspints.get(m))){
+                            newstrcoords+=prePointList.get(m)+"&";
+                        }else{
+                            newstrcoords+=prePointList.get(m)+","+crosspints.get(m)+"&";
+                        }
+                    }
+                }
+
+                newstrcoords = newstrcoords.substring(0,newstrcoords.length()-1);
+                String[] arcs = newstrcoords.split("&");
+                //3.2 判断新生成的arc的开始、结束节点
+                for(String arcstr:arcs){
+                    RtArcVO arc = new RtArcVO();
+                    arc.setArcid(UUID.randomUUID().toString().replaceAll("-", ""));
+                    arc.setArclength(Double.toString(GISUtils.getRoadLength(arcstr)));
+                    arc.setStrcoords(arcstr);
+                    arc.setRoadid(road.getRoadid());
+
+
+                    String[] tempstr = arcstr.split(",");
+                    String startpoint = tempstr[0]+","+tempstr[1];
+                    String endpoint = tempstr[tempstr.length-2]+","+tempstr[tempstr.length-1];
+                    for(RtIntsVO ints:allIntsList){
+                        if(arc.getStartnode()!=null && arc.getEndnode()!=null){
+                            break;
+                        }
+                        if(ints.getCrosspoints().indexOf(endpoint)>=0){
+                            arc.setEndnode(ints.getLongitude()+","+ints.getLatitude());
+                        }
+                        if(ints.getCrosspoints().indexOf(startpoint)>=0){
+                            arc.setStartnode(ints.getLongitude()+","+ints.getLatitude());
+                        }
+                    }
+
+                }
+
+            }
+            //4 计算安装点与路口的关系
 
         }
 
@@ -141,9 +207,9 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         String currLink = startNode;
         int i = 1;
         for (i = 1; i < linknodecount; i++) {
-            Double qdis = this.getRoadLength(currLink + "," + nodeCoord);
+            Double qdis = GISUtils.getRoadLength(currLink + "," + nodeCoord);
             currLink = currLink + "," + linkNodes[i * 2] + "," + linkNodes[i * 2 + 1];
-            Double dis = this.getRoadLength(currLink);
+            Double dis = GISUtils.getRoadLength(currLink);
             if (dis >= qdis) {
                 break;
             }
@@ -151,102 +217,34 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         return i;
     }
 
-    /**
-     * 计算路段长度
-     *
-     * @param coordinates 路段的坐标点集合
-     * @return
-     */
-    public Double getRoadLength(String coordinates) {
-        Double result = 0d;
-        String[] points = coordinates.split(",");
-        if (points.length < 4) {
-            return 0d;
-        }
-        Double fromx = Double.parseDouble(points[0]);
-        Double fromy = Double.parseDouble(points[1]);
-        for (int i = 1; i < points.length / 2; i++) {
-            Double tox = Double.parseDouble(points[i * 2]);
-            Double toy = Double.parseDouble(points[i * 2 + 1]);
-            result += GISUtils.dist(fromx, fromy, tox, toy);
-            fromx = tox;
-            fromy = toy;
-        }
-        return result;
-    }
+
 
     /**
      * 计算多边形质心
+     *
      * @param pointstr
      * @return
      */
-    public String  getCentroid(String pointstr) {
+    public String getCentroid(String pointstr) {
         //System.out.println("------"+pointstr);
         String result = "";
 
         String[] pointStrArr = pointstr.split(",");
-        result = this.formatPos(pointStrArr[0])+","+this.formatPos(pointStrArr[1]);
 
-        /*String[] points = new String[pointStrArr.length/2];
-        for (int m = 0; m < pointStrArr.length/2; m++) {
-            points[m] = pointStrArr[m*2]+","+pointStrArr[m*2+1];
+        Double x = 0d;
+        Double y = 0d;
+        String[] points = new String[pointStrArr.length / 2];
+        for (int m = 0; m < pointStrArr.length / 2; m++) {
+            x += Double.parseDouble(pointStrArr[m * 2]);
+            y += Double.parseDouble(pointStrArr[m * 2 + 1]);
         }
-
-
-        Double x = 0d,
-                y = 0d;
-        int i,j;
-        Double f;
-        String point1;
-        String point2;
-
-        for (i = 0, j = points.length - 1; i < points.length; j = i, i++) {
-            point1 = points[i];
-            point2 = points[j];
-            f = Double.parseDouble(point1.split(",")[0]) * Double.parseDouble(point2.split(",")[1]) - Double.parseDouble(point2.split(",")[0]) * Double.parseDouble(point1.split(",")[1]);
-            x += (Double.parseDouble(point1.split(",")[0]) + Double.parseDouble(point2.split(",")[0])) * f;
-            y += (Double.parseDouble(point2.split(",")[1]) + Double.parseDouble(point2.split(",")[1])) * f;
-        }
-
-        Double area = 0d;
-
-
-        for (i = 0, j = points.length - 1; i < points.length; j = i, i++) {
-            point1 = points[i];
-            point2 = points[j];
-            area += Double.parseDouble(point1.split(",")[0]) * Double.parseDouble(point2.split(",")[1]);
-            area -= Double.parseDouble(point1.split(",")[1]) * Double.parseDouble(point2.split(",")[1]);
-        }
-        area /= 2;
-
-
-        f = area * 6;
-
-        if (x == 0 || y == 0 || f==0) {
-            result = this.formatPos(pointStrArr[0])+","+this.formatPos(pointStrArr[1]);
-        } else {
-            String lng = this.formatPos(Double.toString(x / f));
-            String lat = this.formatPos(Double.toString(y / f));
-            result = lng+","+lat;
-        }*/
-
-
+        x = x / points.length;
+        y = y / points.length;
+        result = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
 
         return result;
     }
 
-    /**
-     * 坐标格式化方法 保留小数点后五位，四舍五入
-     *
-     * @param pos
-     * @return
-     */
-    public String formatPos(String pos) {
-        DecimalFormat decimalFormat = new DecimalFormat(".0000");
-
-        return decimalFormat.format(Double.parseDouble(pos));
-
-    }
 
     private String joinLink(RtRoadLinkVO link, List<RtRoadLinkVO> linkList, int direction) {
         if (link.getIsformatted().equalsIgnoreCase("1")) {
