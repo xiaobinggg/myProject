@@ -24,12 +24,16 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
     private RouteDataHandlerDAO routeDataHandlerDAO;
 
     private List<RtRoad> roadList;
+    private Map<String,RtRoad> roadMap;
 
     //预处理路网数据
     public void preOperRoad() {
 
         roadList = routeDataHandlerDAO.getRtRoad();
         Map<String, RtRoad> handledRoad = new HashMap<String, RtRoad>();
+        for(RtRoad road:roadList){
+            roadMap.put(road.getRoadid(),road);
+        }
         int i = 0;
         for (RtRoad road : roadList) {
             handledRoad.put(road.getRoadid(), road);
@@ -92,8 +96,9 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             Iterator iter = crossMap.keySet().iterator();
             List<RtNodeVO> nodelist = new ArrayList<RtNodeVO>();
             while (iter.hasNext()) {
+                String crossroadid = iter.next().toString();
                 RtIntsVO intsVO = new RtIntsVO();
-                String centroid = this.getCentroid(crossMap.get(iter.next()));
+                String centroid = this.getCentroid(crossMap.get(crossroadid));
                 //System.out.println(centroid);
                 if (null == centroid || centroid.split(",").length != 2) {
                     continue;
@@ -102,6 +107,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 intsVO.setLongitude(this.formatPos(centroid.split(",")[0]));
                 intsVO.setLatitude(this.formatPos(centroid.split(",")[1]));
                 intsVO.setXzqh(road.getXzqh());
+                intsVO.setIntsname(road.getRoadname()+roadMap.get(crossroadid));
                 intslist.add(intsVO);
 
                 RtNodeVO nodeVO = new RtNodeVO();
