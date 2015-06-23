@@ -25,11 +25,13 @@ import java.util.Map;
 public class RouteDataHandlerDAO {
 
     private static final String SQL_INSERT_LINK = "insert into route_roadlink(roadid,linkid,isformatted,strcoords) values(?,?,?,?)";
-    private static final String SQL_DEL_LINK = "delete from route_roadlink r where r.isformatted = '1'";
-    private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords,sdo_geom.sdo_intersection(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),0.005).sdo_ordinates AS joinpoint from route_roadlink r WHERE  r.isformatted='1' AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=TOUCH')='TRUE'";
-    private static final String SQL_QUERY_ALLROAD = "select * from route_road";
+    private static final String SQL_INSERT_INTS = "insert into route_intersection(intsid,longitude,latitude,xzqh) values(?,?,?,?)";
+    private static final String SQL_INSERT_NODE = "insert into route_node(nodeid,x,y,intsid) values(?,?,?,?)";
+    private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords,sdo_geom.sdo_intersection(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),0.005).sdo_ordinates AS joinpoint from route_roadlink r WHERE  r.isformatted='1' AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=ANYINTERACT')='TRUE'";
+    private static final String SQL_QUERY_ALLROAD = "select * from route_road r WHERE r.roadname='江西路'";
     private static final String SQL_QUERY_LINK_BYROADID = "SELECT r.roadid,r.linkid,r.strcoords,r.isformatted from route_roadlink r where (r.isformatted is null or r.isformatted = '0') and r.roadid = ?";
     private static final String SQL_QUERY_CENTROID = "SELECT sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.x as x,sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.y as y from dual";
+    private static final String SQL_UPDATE_CROSSPOINT = "update route_roadlink r set r.crosspoints = ? where r.linkid = ?";
 
     @Inject
     @Named("jdbcTemplate")
@@ -54,6 +56,19 @@ public class RouteDataHandlerDAO {
                     .append(" EXECUTE IMMEDIATE 'UPDATE route_roadlink r SET r.geometry=:geom where r.linkid=:linkid'  USING geom,linkid;")
                     .append(" END;");
             this.jdbcTemplate.execute(updategoem.toString());
+        }
+    }
+
+    /**
+     * 更新link的交叉点
+     *
+     * @param newLinkList link集合
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void updateCrossPoint(List<RtRoadLinkVO> newLinkList) {
+
+        for (RtRoadLinkVO link : newLinkList) {
+            this.jdbcTemplate.update(SQL_UPDATE_CROSSPOINT, link.getCrosspoints(), link.getLinkid());
         }
     }
 
@@ -96,21 +111,25 @@ public class RouteDataHandlerDAO {
     }
 
     /**
-     * 获得多边形的质心
-     * @param points 多边形坐标点
-     * @return 质心坐标
+     * 保存合并后的link
+     *
      */
-    public String getCentroid(String points){
-        if(points.split(",").length<6){
-            return null;
-        }else{
-            String sql = SQL_QUERY_CENTROID.replaceAll("points",points);
-            List<RtNodeVO> list = this.jdbcTemplate.query(sql, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
-            if(list!=null && list.size()>0){
-                RtNodeVO node = list.get(0);
-                return node.getX()+","+node.getY();
-            }
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void insertIntsAndNode(List<RtIntsVO> intslist,List<RtNodeVO> nodelist) {
+
+        for (RtIntsVO ints: intslist) {
+            this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh());
         }
-        return null;
+        for (RtNodeVO node: nodelist) {
+            this.jdbcTemplate.update(SQL_INSERT_NODE, node.getNodeid(),node.getX(),node.getY(),node.getInstid());
+            StringBuffer updategoem = new StringBuffer("DECLARE geom Sdo_Geometry;")
+                    .append(" nodeid VARCHAR2(200);")
+                    .append(" BEGIN ")
+                    .append(" nodeid:='").append(node.getNodeid()).append("';")
+                    .append(" geom:=MDSYS.SDO_GEOMETRY(2001,8307,MDSYS.SDO_POINT_TYPE(").append(node.getX()+"," + node.getY()).append(", 0),null, null);")
+                    .append(" EXECUTE IMMEDIATE 'UPDATE route_node r SET r.geometry=:geom where r.nodeid=:nodeid'  USING geom,nodeid;")
+                    .append(" END;");
+            this.jdbcTemplate.execute(updategoem.toString());
+        }
     }
 }

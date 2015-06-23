@@ -29,6 +29,7 @@
             _MapApp.centerAndZoom(new Point(120.35729,36.08672), 5);
 
             showheatmap();
+            showints();
             //showArcByStartNode("120.38013,36.08662");
 
         }
@@ -39,6 +40,12 @@
             legendfunc=new LegendFunc();
 
             legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:route_road&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
+            legendfunc.open(_MapApp);
+        }
+        function showints(){
+            legendfunc=new LegendFunc();
+
+            legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:route_node&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
             legendfunc.open(_MapApp);
         }
 
