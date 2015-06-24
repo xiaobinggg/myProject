@@ -1,9 +1,6 @@
 package com.hisense.himap.dataHandler.dao;
 
-import com.hisense.himap.analyser.vo.RtIntsVO;
-import com.hisense.himap.analyser.vo.RtNodeVO;
-import com.hisense.himap.analyser.vo.RtRoad;
-import com.hisense.himap.analyser.vo.RtRoadLinkVO;
+import com.hisense.himap.analyser.vo.*;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -25,13 +22,13 @@ import java.util.Map;
 public class RouteDataHandlerDAO {
 
     private static final String SQL_INSERT_LINK = "insert into route_roadlink(roadid,linkid,isformatted,strcoords) values(?,?,?,?)";
-    private static final String SQL_INSERT_INTS = "insert into route_intersection(intsid,intsname,longitude,latitude,xzqh,CROSSPOINTS) values(?,?,?,?,?,?)";
+    private static final String SQL_INSERT_INTS = "insert into route_intersection(intsid,intsname,longitude,latitude,xzqh,CROSSPOINTS,pointids) values(?,?,?,?,?,?,?)";
     private static final String SQL_INSERT_NODE = "insert into route_node(nodeid,x,y,intsid) values(?,?,?,?)";
     private static final String SQL_QUERY_JOINLINK = "SELECT r.roadid,r.linkid,r.strcoords from route_roadlink r WHERE  r.isformatted='1' and r.linkid!=? AND sdo_relate(r.geometry,(select p.geometry from route_roadlink p where p.linkid=?),'mask=ANYINTERACT')='TRUE'";
     private static final String SQL_QUERY_ALLROAD = "select * from route_road r ";
     private static final String SQL_QUERY_LINK_BYROADID = "SELECT r.roadid,r.linkid,r.strcoords,r.isformatted from route_roadlink r where (r.isformatted is null or r.isformatted = '0') and r.roadid = ?";
-    private static final String SQL_QUERY_CENTROID = "SELECT sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.x as x,sdo_geom.sdo_centroid(MDSYS.SDO_GEOMETRY(2003,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 1003, 1),MDSYS.SDO_ORDINATE_ARRAY(points)),0.005).sdo_point.y as y from dual";
     private static final String SQL_UPDATE_CROSSPOINT = "update route_roadlink r set r.crosspoints = ? where r.linkid = ?";
+    private static final String SQL_INSERT_ARC= "insert into route_arc(arcid,arclength,strcoords,startnode,endnode,direction,roadid) values(?,?,?,?,?,?,?)";
 
     @Inject
     @Named("jdbcTemplate")
@@ -59,6 +56,27 @@ public class RouteDataHandlerDAO {
         }
     }
 
+    /**
+     * 保存arc
+     *
+     * @param arcList arc集合
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void insertRouteArc(List<RtArcVO> arcList) {
+
+        for(RtArcVO arc:arcList){
+            this.jdbcTemplate.update(SQL_INSERT_ARC,arc.getArcid(),arc.getArclength(),arc.getStrcoords(),arc.getStartnode(),arc.getEndnode(),arc.getDirection(),arc.getRoadid());
+            StringBuffer updategoem = new StringBuffer("DECLARE geom Sdo_Geometry;")
+                    .append(" arcid VARCHAR2(32);")
+                    .append(" BEGIN ")
+                    .append(" arcid:='").append(arc.getArcid()).append("';")
+                    .append(" geom:=MDSYS.SDO_GEOMETRY(2002,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 2, 1),")
+                    .append(" MDSYS.SDO_ORDINATE_ARRAY(").append(arc.getStrcoords()).append("));")
+                    .append(" EXECUTE IMMEDIATE 'UPDATE route_arc r SET r.geometry=:geom where r.arcid=:arcid'  USING geom,arcid;")
+                    .append(" END;");
+            this.jdbcTemplate.execute(updategoem.toString());
+        }
+    }
     /**
      * 更新link的交叉点
      *
@@ -118,7 +136,18 @@ public class RouteDataHandlerDAO {
     public void insertIntsAndNode(List<RtIntsVO> intslist,List<RtNodeVO> nodelist) {
 
         for (RtIntsVO ints: intslist) {
-            this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(),ints.getIntsname(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh(),ints.getCrosspoints());
+            String sql = "SELECT g.pointcode as pointids from monitor_point_geometry g WHERE  SDO_WITHIN_DISTANCE(g.GEOMETRY,MDSYS.SDO_GEOMETRY(2001, 8307,MDSYS.SDO_POINT_TYPE("+ints.getLongitude()+","+ints.getLatitude()+",0), NULL,NULL),'distance=20') = 'TRUE'";
+            List<RtIntsVO> pointlist = this.jdbcTemplate.query(sql,new BeanPropertyRowMapper<RtIntsVO>(RtIntsVO.class));
+            String pointids = "";
+            for(RtIntsVO tempints:pointlist){
+                pointids+=tempints.getPointids()+",";
+            }
+            if(pointids.length()>=1){
+                pointids = pointids.substring(0,pointids.length()-1);
+            }
+
+            ints.setPointids(pointids);
+            this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(),ints.getIntsname(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh(),ints.getCrosspoints(),ints.getPointids());
         }
         for (RtNodeVO node: nodelist) {
             this.jdbcTemplate.update(SQL_INSERT_NODE, node.getNodeid(),node.getX(),node.getY(),node.getInstid());

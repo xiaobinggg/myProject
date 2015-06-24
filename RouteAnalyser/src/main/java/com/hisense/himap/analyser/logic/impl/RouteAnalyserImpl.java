@@ -146,7 +146,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
         RtNodeVO nodeVO = MemRouteData.nodeMap.get(query.getPointid());
         if (null == nodeVO) { //如果当前在路段上，根据动态节点表进行定位
             nodeVO = MemRouteData.dnodemap.get(query.getPointid());//安装点所在的动态节点
-            if(nodeVO.getArcids() == null){
+            if(nodeVO == null ||nodeVO.getArcids() == null){
                 return null;
             }
             String[] arcids = nodeVO.getArcids().split(",");//从动态节点出发的弧段

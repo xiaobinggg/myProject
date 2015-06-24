@@ -52,15 +52,15 @@ public class GISUtils {
         }
         Double x1 = Double.parseDouble(segment1[0]);
         Double y1 = Double.parseDouble(segment1[1]);
-        if(segm2.indexOf(segment1[0]+","+segment1[1])>=0){
-            return GISUtils.formatPos(segment1[0])+","+GISUtils.formatPos(segment1[1]);
+        if (segm2.indexOf(segment1[0] + "," + segment1[1]) >= 0) {
+            return GISUtils.formatPos(segment1[0]) + "," + GISUtils.formatPos(segment1[1]);
         }
         Double a, ma, b, mb;
         for (int i = 1; i < segment1.length / 2; i++) {
             Double x2 = Double.parseDouble(segment1[i * 2]);
             Double y2 = Double.parseDouble(segment1[i * 2 + 1]);
-            if(segm2.indexOf(segment1[i * 2]+","+segment1[i * 2+1])>=0){
-                return GISUtils.formatPos(segment1[i * 2])+","+GISUtils.formatPos(segment1[i * 2+1]);
+            if (segm2.indexOf(segment1[i * 2] + "," + segment1[i * 2 + 1]) >= 0) {
+                return GISUtils.formatPos(segment1[i * 2]) + "," + GISUtils.formatPos(segment1[i * 2 + 1]);
             }
 
             Double mx1 = Double.parseDouble(segment2[0]);
@@ -68,39 +68,39 @@ public class GISUtils {
             for (int j = 1; j < segment2.length / 2; j++) {
                 Double mx2 = Double.parseDouble(segment2[j * 2]);
                 Double my2 = Double.parseDouble(segment2[j * 2 + 1]);
-                Double minx = x1>x2?x2:x1;
-                Double maxx = x1>x2?x1:x2;
-                Double miny = y1>y2?y2:y1;
-                Double maxy = y1>y2?y1:y2;
+                Double minx = x1 > x2 ? x2 : x1;
+                Double maxx = x1 > x2 ? x1 : x2;
+                Double miny = y1 > y2 ? y2 : y1;
+                Double maxy = y1 > y2 ? y1 : y2;
 
-                Double minmx = mx1>mx2?mx2:mx1;
-                Double maxmx = mx1>mx2?mx1:mx2;
-                Double minmy = my1>my2?my2:my1;
-                Double maxmy = my1>my2?my1:my2;
+                Double minmx = mx1 > mx2 ? mx2 : mx1;
+                Double maxmx = mx1 > mx2 ? mx1 : mx2;
+                Double minmy = my1 > my2 ? my2 : my1;
+                Double maxmy = my1 > my2 ? my1 : my2;
 
                 if (x2 - x1 == 0d) {
-                   if(mx1 - mx2 == 0d){
-                       continue;
-                   }else{
-                       ma = (my1 - my2) / (mx1 - mx2);
-                       mb = my1 - ma * mx1;
-                       Double x = x1;
-                       Double y = ma*x1+mb;
-                       if(x<=maxx && x>=minx && x<=maxmx && x>=minmx && y<=maxy && y>=miny && y<=maxmy && y>=minmy){
-                           intersection = GISUtils.formatPos(Double.toString(x))+","+GISUtils.formatPos(Double.toString(y));
-                           return intersection;
-                       }
-                   }
-                } else if (mx1 - mx2 == 0d) {
-                    if(x1 - x2 == 0d){
+                    if (mx1 - mx2 == 0d) {
                         continue;
-                    }else{
+                    } else {
+                        ma = (my1 - my2) / (mx1 - mx2);
+                        mb = my1 - ma * mx1;
+                        Double x = x1;
+                        Double y = ma * x1 + mb;
+                        if (x <= maxx && x >= minx && x <= maxmx && x >= minmx && y <= maxy && y >= miny && y <= maxmy && y >= minmy) {
+                            intersection = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
+                            return intersection;
+                        }
+                    }
+                } else if (mx1 - mx2 == 0d) {
+                    if (x1 - x2 == 0d) {
+                        continue;
+                    } else {
                         a = (y1 - y2) / (x1 - x2);
                         b = y1 - a * x1;
                         Double x = x1;
-                        Double y = a*x1+b;
-                        if(x<=maxx && x>=minx && x<=maxmx && x>=minmx && y<=maxy && y>=miny && y<=maxmy && y>=minmy){
-                            intersection = GISUtils.formatPos(Double.toString(x))+","+GISUtils.formatPos(Double.toString(y));
+                        Double y = a * x1 + b;
+                        if (x <= maxx && x >= minx && x <= maxmx && x >= minmx && y <= maxy && y >= miny && y <= maxmy && y >= minmy) {
+                            intersection = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
                             return intersection;
                         }
                     }
@@ -109,13 +109,13 @@ public class GISUtils {
                     b = y1 - a * x1;
                     ma = (my1 - my2) / (mx1 - mx2);
                     mb = my1 - ma * mx1;
-                    if (a -ma == 0d) {
+                    if (a - ma == 0d) {
                         continue;
                     }
                     Double x = (mb - b) / (a - ma);
                     Double y = a * x + b;
-                    if(x<=maxx && x>=minx && x<=maxmx && x>=minmx && y<=maxy && y>=miny && y<=maxmy && y>=minmy){
-                        intersection = GISUtils.formatPos(Double.toString(x))+","+GISUtils.formatPos(Double.toString(y));
+                    if (x <= maxx && x >= minx && x <= maxmx && x >= minmx && y <= maxy && y >= miny && y <= maxmy && y >= minmy) {
+                        intersection = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
                         return intersection;
                     }
                 }
@@ -169,11 +169,12 @@ public class GISUtils {
 
     /**
      * 计算指定路段的进口道方向
+     *
      * @param coordinates
      * @return
      */
-    public static final int getDirection(String coordinates){
-        int direction =0;
+    public static final int getDirection(String coordinates) {
+        int direction = 0;
         String[] points = coordinates.split(",");
         if (points.length < 4) {
             return direction;
@@ -182,6 +183,46 @@ public class GISUtils {
         Double y1 = Double.parseDouble(points[1]);
         Double x2 = Double.parseDouble(points[2]);
         Double y2 = Double.parseDouble(points[3]);
+        if (x1 - x2 == 0d) {
+            if (y2 > y1) {
+                direction = 3;
+            } else {
+                direction = 4;
+            }
+        } else if (y1 - y2 == 0d) {
+            if (x2 > x1) {
+                direction = 2;
+            } else {
+                direction = 1;
+            }
+        } else {
+            Double a = (y2 - y1) / (x2 - x1);
+            if(a>=-0.577 && a<0.577){
+                if(x1<x2){
+                    direction = 2;
+                }else{
+                    direction = 1;
+                }
+            }else if(a>=0.577 && a<1.732){
+                if (x1<x2){
+                    direction = 6;
+                }else{
+                    direction = 5;
+                }
+            }else if(a>=1.732 || a<-1.732){
+                if(y1<y2){
+                    direction = 3;
+                }else{
+                    direction = 4;
+                }
+            }else if(a>=-1.732 && a<-0.577){
+                if(x1<x2){
+                    direction = 8;
+                }else{
+                    direction = 7;
+                }
+            }
+        }
         return direction;
     }
 
