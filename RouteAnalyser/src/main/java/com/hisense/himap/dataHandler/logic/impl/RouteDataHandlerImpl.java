@@ -25,7 +25,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
 
     private List<RtRoad> roadList;
     private Map<String, RtRoad> roadMap;
-    private List<RtIntsVO> allIntsList;
+    private Map<String,String> allIntsMap;
 
     //预处理路网数据
     public void preOperRoad() {
@@ -35,7 +35,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         for (RtRoad road : roadList) {
             roadMap.put(road.getRoadid(), road);
         }
-        allIntsList = new ArrayList<RtIntsVO>();
+        allIntsMap = new HashMap<String, String>();
         int i = 0;
         for (RtRoad road : roadList) {
             handledRoad.put(road.getRoadid(), road);
@@ -53,7 +53,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 link.setLinkid("F" + link.getLinkid());
                 newLinkList.add(link);
             }
-            System.out.println(i + ":" + road.getRoadname() + "---" + newLinkList.size());
+
             //routeDataHandlerDAO.insertFormattedLink(newLinkList);
 
 
@@ -90,7 +90,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                     }
                 }
             }
-            //this.routeDataHandlerDAO.updateCrossPoint(newLinkList);
+            this.routeDataHandlerDAO.updateCrossPoint(newLinkList);
 
             //2.2 路口数据处理，根据交叉点生成路口数据和节点数据
             List<RtIntsVO> intslist = new ArrayList<RtIntsVO>();
@@ -99,7 +99,8 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             while (iter.hasNext()) {
                 String crossroadid = iter.next().toString();
                 RtIntsVO intsVO = new RtIntsVO();
-                String centroid = this.getCentroid(crossMap.get(crossroadid));
+                String crosspoints = crossMap.get(crossroadid);
+                String centroid = this.getCentroid(crosspoints);
                 //System.out.println(centroid);
                 if (null == centroid || centroid.split(",").length != 2) {
                     continue;
@@ -111,7 +112,10 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 intsVO.setIntsname(road.getRoadname() + roadMap.get(crossroadid).getRoadname());
                 intsVO.setCrosspoints(crossMap.get(crossroadid));
                 intslist.add(intsVO);
-                allIntsList.add(intsVO);
+                String[] pointStrArr = crosspoints.split(",");
+                for (int m = 0; m < pointStrArr.length / 2; m++) {
+                    allIntsMap.put(pointStrArr[m*2]+","+pointStrArr[m*2+1],centroid);
+                }
 
                 RtNodeVO nodeVO = new RtNodeVO();
                 nodeVO.setNodeid(centroid);
@@ -120,7 +124,6 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 nodeVO.setInstid(intsVO.getIntsid());
                 nodelist.add(nodeVO);
             }
-            this.routeDataHandlerDAO.insertIntsAndNode(intslist, nodelist);
 
 
             //3 弧段数据处理
@@ -135,11 +138,11 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                     continue;
                 }
                 String[] cpstr = link.getCrosspoints().split(",");
-
-                Map<Integer, String> crosspints = new HashMap<Integer, String>();
                 if (cpstr.length < 3) {
                     continue;
                 }
+                Map<Integer, String> crosspints = new HashMap<Integer, String>();
+
                 for (int cpcount = 0; cpcount < cpstr.length / 3; cpcount++) {
                     int pos = Integer.parseInt(cpstr[cpcount * 3 + 2]);
                     String strcoord = cpstr[cpcount * 3] + "," + cpstr[cpcount * 3 + 1];
@@ -150,19 +153,21 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                     prePointList.add(temparr[m * 2] + "," + temparr[m * 2 + 1]);
                 }
                 for (m = 0; m < pointnum; m++) {
-                    if(crosspints.get(m-1)==null){
+                    if(crosspints.get(m)==null || m==0 || m==pointnum-1){
                         newstrcoords+=prePointList.get(m)+",";
                     }else{
-                        if(prePointList.get(m).equalsIgnoreCase(crosspints.get(m-1))){
+                        String pointstr = GISUtils.formatPos(prePointList.get(m).split(",")[0])+","+GISUtils.formatPos(prePointList.get(m).split(",")[1]);
+                        if(pointstr.equalsIgnoreCase(crosspints.get(m))){
                             newstrcoords+=prePointList.get(m)+"&"+prePointList.get(m)+",";
                         }else{
-                            newstrcoords+=prePointList.get(m)+","+crosspints.get(m-1)+"&"+crosspints.get(m-1)+",";
+                            newstrcoords+=crosspints.get(m)+"&"+crosspints.get(m)+","+prePointList.get(m)+",";
                         }
                     }
                 }
 
                 newstrcoords = newstrcoords.substring(0,newstrcoords.length()-1);
                 String[] arcs = newstrcoords.split("&");
+                //System.out.println(newstrcoords);
                 //3.2 判断新生成的arc的开始、结束节点
                 for(String arcstr:arcs){
                     if(arcstr.split(",").length<4){
@@ -174,27 +179,55 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                     arc.setStrcoords(arcstr);
                     arc.setRoadid(road.getRoadid());
                     arc.setDirection(GISUtils.getDirection(arcstr));
+                    arc.setLinkid(link.getLinkid());
 
 
                     String[] tempstr = arcstr.split(",");
                     String startpoint = GISUtils.formatPos(tempstr[0])+","+GISUtils.formatPos(tempstr[1]);
                     String endpoint = GISUtils.formatPos(tempstr[tempstr.length-2])+","+GISUtils.formatPos(tempstr[tempstr.length-1]);
-                    for(RtIntsVO ints:allIntsList){
-                        if(arc.getStartnode()!=null && arc.getEndnode()!=null){
-                            break;
-                        }
-                        if(ints.getCrosspoints().indexOf(endpoint)>=0){
-                            arc.setEndnode(ints.getLongitude()+","+ints.getLatitude());
-                        }
-                        if(ints.getCrosspoints().indexOf(startpoint)>=0){
-                            arc.setStartnode(ints.getLongitude()+","+ints.getLatitude());
-                        }
-                    }
-                    if(arc.getStartnode() == null){
+                    if(allIntsMap.get(startpoint)!=null){
+                        arc.setStartnode(allIntsMap.get(startpoint));
+                        //arc.setStrcoords(arc.getStartnode()+","+arcstr);
+                    }else{
                         arc.setStartnode(startpoint);
+                        RtIntsVO intsVO = new RtIntsVO();
+                        intsVO.setIntsid(UUID.randomUUID().toString().replaceAll("-", ""));
+                        intsVO.setLongitude(startpoint.split(",")[0]);
+                        intsVO.setLatitude(startpoint.split(",")[1]);
+                        intsVO.setXzqh(road.getXzqh());
+                        intsVO.setIntsname(road.getRoadname()+"起点");
+                        intsVO.setCrosspoints("");
+                        intslist.add(intsVO);
+                        allIntsMap.put(startpoint,startpoint);
+
+                        RtNodeVO nodeVO = new RtNodeVO();
+                        nodeVO.setNodeid(startpoint);
+                        nodeVO.setX(intsVO.getLongitude());
+                        nodeVO.setY(intsVO.getLatitude());
+                        nodeVO.setInstid(intsVO.getIntsid());
+                        nodelist.add(nodeVO);
                     }
-                    if(arc.getEndnode() == null){
+                    if(allIntsMap.get(endpoint)!=null){
+                        arc.setEndnode(allIntsMap.get(endpoint));
+                        //arc.setStrcoords(arc.getStrcoords()+","+arc.getEndnode());
+                    }else{
                         arc.setEndnode(endpoint);
+                        RtIntsVO intsVO = new RtIntsVO();
+                        intsVO.setIntsid(UUID.randomUUID().toString().replaceAll("-", ""));
+                        intsVO.setLongitude(endpoint.split(",")[0]);
+                        intsVO.setLatitude(endpoint.split(",")[1]);
+                        intsVO.setXzqh(road.getXzqh());
+                        intsVO.setIntsname(road.getRoadname()+"终点");
+                        intsVO.setCrosspoints("");
+                        intslist.add(intsVO);
+                        allIntsMap.put(endpoint,endpoint);
+
+                        RtNodeVO nodeVO = new RtNodeVO();
+                        nodeVO.setNodeid(endpoint);
+                        nodeVO.setX(intsVO.getLongitude());
+                        nodeVO.setY(intsVO.getLatitude());
+                        nodeVO.setInstid(intsVO.getIntsid());
+                        nodelist.add(nodeVO);
                     }
                     arcList.add(arc);
 
@@ -202,11 +235,34 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
 
             }
             this.routeDataHandlerDAO.insertRouteArc(arcList);
-            //4 计算安装点与路口的关系
+            this.routeDataHandlerDAO.insertIntsAndNode(intslist, nodelist);
+            System.out.println(i + ":" + road.getRoadname() + " link---" + newLinkList.size()+" ints----"+intslist.size()+" arc----"+arcList.size());
 
+            //break;
         }
 
 
+    }
+
+    /**
+     * 反转roadlink
+     *
+     * @param linkid link编号
+     */
+    public void revertRoadLink(String linkid) {
+        RtRoadLinkVO link = this.routeDataHandlerDAO.getLinkByID(linkid);
+        link.setStrcoords(this.resetDirection(link.getStrcoords()));
+        this.routeDataHandlerDAO.updateLinkStrcoords(linkid,link.getStrcoords());
+        List<RtArcVO> arcList = this.routeDataHandlerDAO.getArcByLinkId(linkid);
+        List<RtArcVO> revertedArcList = new ArrayList<RtArcVO>();
+        for(RtArcVO arc:arcList){
+            arc.setStrcoords(this.resetDirection(arc.getStrcoords()));
+            String startnode = arc.getStartnode();
+            arc.setStartnode(arc.getEndnode());
+            arc.setEndnode(startnode);
+            revertedArcList.add(arc);
+        }
+        this.routeDataHandlerDAO.updateRouteArc(revertedArcList);
     }
 
     /**
@@ -222,13 +278,20 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         String startNode = linkNodes[0] + "," + linkNodes[1]; //边的起始节点
         int linknodecount = linkNodes.length / 2; //边的顶点数
         String currLink = startNode;
-        int i = 1;
+        int i = 0;
+        if(nodeCoord.equalsIgnoreCase(GISUtils.formatPos(linkNodes[0])+","+GISUtils.formatPos(linkNodes[1]))){
+            return i;
+        }
         for (i = 1; i < linknodecount; i++) {
-            Double qdis = GISUtils.getRoadLength(currLink + "," + nodeCoord);
-            currLink = currLink + "," + linkNodes[i * 2] + "," + linkNodes[i * 2 + 1];
-            Double dis = GISUtils.getRoadLength(currLink);
-            if (dis >= qdis) {
+            if(nodeCoord.equalsIgnoreCase(GISUtils.formatPos(linkNodes[i * 2])+","+GISUtils.formatPos(linkNodes[i * 2+1]))){
                 break;
+            }else{
+                Double qdis = GISUtils.getRoadLength(currLink + "," + nodeCoord);
+                currLink = currLink + "," + linkNodes[i * 2] + "," + linkNodes[i * 2 + 1];
+                Double dis = GISUtils.getRoadLength(currLink);
+                if (dis >= qdis) {
+                    break;
+                }
             }
         }
         return i;

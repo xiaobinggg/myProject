@@ -5,6 +5,7 @@ import com.hisense.himap.analyser.astar.ASearchNode;
 import com.hisense.himap.analyser.astar.ISearchNode;
 import com.hisense.himap.analyser.vo.RtArcVO;
 import com.hisense.himap.analyser.vo.RtNodeVO;
+import com.hisense.himap.utils.GISUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,13 +82,17 @@ public class RouteSearchNode extends ASearchNode {
         ArrayList<ISearchNode> successors = new ArrayList<ISearchNode>();
 
         RtNodeVO node = new RtNodeVO();
-        node.setNodeid(this.getX()+","+this.getY());
+        node.setNodeid(GISUtils.formatPos(Double.toString(this.getX()))+","+GISUtils.formatPos(Double.toString(this.getY())));
         List<RtArcVO> arclist = MemRouteData.getRtArcByStartNode(node);
 
         for(RtArcVO arc:arclist){
+            if(arc.getStartnode().equalsIgnoreCase(arc.getEndnode())){
+                continue;
+            }
             String [] nextnode = arc.getEndnode().split(",");
             Double x = Double.parseDouble(nextnode[0]);
             Double y = Double.parseDouble(nextnode[1]);
+
             RouteSearchNode searchNode = new RouteSearchNode(x,y,this,Double.parseDouble(arc.getArclength()),arc.getStrcoords(),this.goal);
             successors.add(searchNode);
         }

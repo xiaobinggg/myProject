@@ -12,7 +12,16 @@ public class RtArcVO {
     private String strcoords;
     private int direction;
     private String roadid;
+    private String linkid;
 
+
+    public String getLinkid() {
+        return linkid;
+    }
+
+    public void setLinkid(String linkid) {
+        this.linkid = linkid;
+    }
 
     public String getRoadid() {
         return roadid;

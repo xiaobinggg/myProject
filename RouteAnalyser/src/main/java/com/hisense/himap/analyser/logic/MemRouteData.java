@@ -14,12 +14,16 @@ public class MemRouteData {
     //弧段
     public static Map<String, RtArcVO> arcMap;
     public static List<RtArcVO> arcList;
+    public static Map<String,List<RtArcVO>> arcStartNodeMap;
+
     //路口
     public static Map<String, RtIntsVO> intsMap;
     public static List<RtIntsVO> intsList;
+
     //节点数据
     public static List<RtNodeVO> nodeList;
     public static Map<String,RtNodeVO> nodeMap;
+
     //动态节点数据
     public static List<RtNodeVO> dnodeList;
     public static Map<String,RtNodeVO> dnodemap;
@@ -27,7 +31,8 @@ public class MemRouteData {
     //路口车道
     public static List<RtLaneVO> laneList;
     public static Map<String,RtLaneVO> laneMap;
-    //路段基础信息
+
+    //路段信息
     public static List<RtRoad> roadList;
 
     /*方向
@@ -46,6 +51,9 @@ public class MemRouteData {
         List<RtArcVO> arclist = new ArrayList<RtArcVO>();
         if(MemRouteData.arcList == null){
             return null;
+        }
+        if(arcStartNodeMap.get(routeNodeVO.getNodeid())!=null){
+            return arcStartNodeMap.get(routeNodeVO.getNodeid());
         }
         for(RtArcVO arc: MemRouteData.arcList){
             if(arc.getStartnode().equalsIgnoreCase(routeNodeVO.getNodeid())){

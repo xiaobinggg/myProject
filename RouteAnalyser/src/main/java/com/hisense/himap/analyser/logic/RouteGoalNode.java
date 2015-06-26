@@ -22,7 +22,7 @@ public class RouteGoalNode implements IGoalNode {
     public boolean inGoal(ISearchNode other) {
         if(other instanceof RouteSearchNode){
             RouteSearchNode otherNode = (RouteSearchNode) other;
-            return (this.x == otherNode.getX()) && (this.y == otherNode.getY());
+            return (this.x - otherNode.getX() == 0d) && (this.y - otherNode.getY() == 0d);
         }
         return false;
     }

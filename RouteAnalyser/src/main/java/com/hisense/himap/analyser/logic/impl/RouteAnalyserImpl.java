@@ -73,9 +73,19 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                 System.out.println("init route_arc");
                 MemRouteData.arcList = this.routeAnalyserDAO.initRtArc();
                 MemRouteData.arcMap = new HashMap<String, RtArcVO>();
+                MemRouteData.arcStartNodeMap = new HashMap<String, List<RtArcVO>>();
                 for (RtArcVO arc : MemRouteData.arcList) {
                     if (MemRouteData.arcMap.get(arc.getArcid()) == null) {
                         MemRouteData.arcMap.put(arc.getArcid(), arc);
+                    }
+                    if(MemRouteData.arcStartNodeMap.get(arc.getStartnode()) == null){
+                        List<RtArcVO> templist = new ArrayList<RtArcVO>();
+                        templist.add(arc);
+                        MemRouteData.arcStartNodeMap.put(arc.getStartnode(),templist);
+                    }else{
+                        List templist = MemRouteData.arcStartNodeMap.get(arc.getStartnode());
+                        templist.add(arc);
+                        MemRouteData.arcStartNodeMap.put(arc.getStartnode(),templist);
                     }
                 }
 
@@ -198,9 +208,15 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
         } else { //如果安装点在路口，根据路口所属节点计算下一路口列表
             List<RtArcVO> arclist = MemRouteData.getRtArcByStartNode(nodeVO);
             for (RtArcVO arcVO : arclist) {
+                if(arcVO.getStartnode().equalsIgnoreCase(arcVO.getEndnode())){
+                    continue;
+                }
                 QueryNextIntsResultVO resultVO = new QueryNextIntsResultVO();
 
                 RtIntsVO intsVO = this.getRtIntsByNodeid(arcVO.getEndnode());
+                if(intsVO == null){
+                    continue;
+                }
                 try {
                     //BeanUtils.copyPropertiesInclude(query, resultVO, new String[]{"pointid", "direction", "laneno", "speed"});
                     BeanUtils.copyPropertiesInclude(intsVO, resultVO, new String[]{"intsid", "intsname", "latitude", "longitude"});
@@ -414,13 +430,18 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
 
         //@TODO 路径只返回了坐标,需要添加其他信息
         ArrayList<ISearchNode> path = new AStar().shortestPath(initialNode, goalNode);
-        path.remove(0);
-        for (ISearchNode iSearchNode : path) {
-            RouteSearchNode searchNode = (RouteSearchNode) iSearchNode;
-            QueryPathResultVO pathvo = new QueryPathResultVO();
-            pathvo.setStrcoords(searchNode.getStrcoords());
-            result.add(pathvo);
+        if(null == path || path.size()<=0){
+        }else{
+            path.remove(0);
+            for (ISearchNode iSearchNode : path) {
+                RouteSearchNode searchNode = (RouteSearchNode) iSearchNode;
+                QueryPathResultVO pathvo = new QueryPathResultVO();
+                pathvo.setStrcoords(searchNode.getStrcoords());
+                result.add(pathvo);
+            }
         }
+
+
         //如果从路网中没有算出结果，返回两点之间的直线
         if(result.size()<=0){
             QueryPathResultVO pathvo = new QueryPathResultVO();

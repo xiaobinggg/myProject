@@ -11,6 +11,15 @@ import java.util.List;
  */
 public interface IRouteDataHandler {
 
+    /**
+     * 预处理路网数据
+     */
     public void preOperRoad();
+
+    /**
+     * 反转roadlink
+     * @param linkid link编号
+     */
+    public void revertRoadLink(String linkid);
 
 }

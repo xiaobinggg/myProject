@@ -12,10 +12,10 @@ import java.util.Comparator;
  */
 public class AStar {
     // Amount of debug output 0,1,2
-    private int verbose = 1;
+    private int verbose = 0;
     // The maximum number of completed nodes. After that number the algorithm returns null.
     // If negative, the search will run until the goal node is found.
-    private int maxSteps = -1;
+    private int maxSteps = 1000;
     //number of search steps the AStar will perform before null is returned
     private int numSearchSteps;
     

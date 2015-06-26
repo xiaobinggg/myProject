@@ -164,7 +164,7 @@ public class GISUtils {
             fromx = tox;
             fromy = toy;
         }
-        return result;
+        return Double.parseDouble(GISUtils.formatPos(Double.toString(result)));
     }
 
     /**
