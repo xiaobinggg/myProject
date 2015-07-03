@@ -8,6 +8,7 @@ import java.sql.Array;
 public class RtRoadLinkVO {
     private String roadid;
     private String linkid;
+    private String linkname;
     private String strcoords;
     private String isformatted;
 
@@ -16,6 +17,15 @@ public class RtRoadLinkVO {
     private String startPoint; //首节点的位置信息
     private String endPoint;//尾节点的位置信息
     private Array joinpoint;
+
+
+    public String getLinkname() {
+        return linkname;
+    }
+
+    public void setLinkname(String linkname) {
+        this.linkname = linkname;
+    }
 
     public Array getJoinpoint() {
         return joinpoint;

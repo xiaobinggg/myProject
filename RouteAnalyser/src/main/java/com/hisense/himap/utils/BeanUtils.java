@@ -51,7 +51,7 @@ public class BeanUtils {
             toMethod = findMethodByName(toMethods, toMethodName);
             if (toMethod == null)
                 continue;
-            Object value = fromMethod.invoke(from, new Object[0]);
+            Object value = fromMethod.invoke(from);
             if (value == null)
                 continue;
             //集合类判空处理
@@ -60,7 +60,7 @@ public class BeanUtils {
                 if (newValue.size() <= 0)
                     continue;
             }
-            toMethod.invoke(to, new Object[]{value});
+            toMethod.invoke(to, value);
         }
     }
 
@@ -98,7 +98,7 @@ public class BeanUtils {
             toMethod = findMethodByName(toMethods, toMethodName);
             if (toMethod == null)
                 continue;
-            Object value = fromMethod.invoke(from, new Object[0]);
+            Object value = fromMethod.invoke(from);
             if (value == null)
                 continue;
             //集合类判空处理
@@ -107,7 +107,7 @@ public class BeanUtils {
                 if (newValue.size() <= 0)
                     continue;
             }
-            toMethod.invoke(to, new Object[]{value});
+            toMethod.invoke(to, value);
         }
     }
 

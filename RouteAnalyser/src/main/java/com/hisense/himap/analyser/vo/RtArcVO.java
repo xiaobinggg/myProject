@@ -13,7 +13,15 @@ public class RtArcVO {
     private int direction;
     private String roadid;
     private String linkid;
+    private String delflag;
 
+    public String getDelflag() {
+        return delflag;
+    }
+
+    public void setDelflag(String delflag) {
+        this.delflag = delflag;
+    }
 
     public String getLinkid() {
         return linkid;

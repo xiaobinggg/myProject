@@ -4,6 +4,7 @@ body {
     padding:0;
     height:100%;
     font-size:12px;
+    overflow:hidden
 }
 html {
     height: 100%
@@ -28,7 +29,6 @@ img{
     height: 100%;
     background-color: #F5F5F5;
     min-height:660px;
-    display:none;
 }
 #map {
     margin: 0 0 0 102px;

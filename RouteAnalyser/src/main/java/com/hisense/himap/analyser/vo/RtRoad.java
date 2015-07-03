@@ -12,6 +12,15 @@ public class RtRoad {
     private String xzqh;
     private String isdxcd;
     private String dldm;
+    private String editstatus;
+
+    public String getEditstatus() {
+        return editstatus;
+    }
+
+    public void setEditstatus(String editstatus) {
+        this.editstatus = editstatus;
+    }
 
     public String getDldm() {
         return dldm;

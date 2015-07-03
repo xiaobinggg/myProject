@@ -34,6 +34,16 @@ public class GISUtils {
         //return Math.sqrt(Math.pow(this.x - otherX, 2) + Math.pow(this.y - otherY, 2));
     }
 
+    public static double dist(String from,String to) {
+        double fromx = Double.parseDouble(from.split(",")[0]);
+        double fromy = Double.parseDouble(from.split(",")[1]);
+
+        double otherX = Double.parseDouble(to.split(",")[0]);
+        double otherY = Double.parseDouble(to.split(",")[1]);
+        return GISUtils.dist(fromx, fromy, otherX, otherY);
+
+    }
+
     /**
      * 计算两条路段的交叉点
      *
