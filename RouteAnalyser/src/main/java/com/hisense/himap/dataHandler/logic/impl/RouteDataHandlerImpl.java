@@ -172,8 +172,8 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                             newstrcoords+=prePointList.get(m)+"&"+prePointList.get(m)+",";
                         }else{
                             newstrcoords+=crosspints.get(m)+"&"+crosspints.get(m)+","+prePointList.get(m)+",";
-                        }
-                    }
+
+                    } }
                 }
 
                 newstrcoords = newstrcoords.substring(0,newstrcoords.length()-1);
@@ -280,6 +280,74 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      */
     @Override
     public void updateArc(RtArcVO arc) {
+        //处理开始节点和结束节点
+        String startnode = this.getVetrix(arc.getStrcoords(),0);
+        String endnode = this.getVetrix(arc.getStrcoords(),1);
+        List<RtNodeVO> tempNodeList = new ArrayList<RtNodeVO>();
+        RtNodeVO tempstartnode = null;
+        RtNodeVO tempendnode = null;
+        List<RtNodeVO> newNodeList = new ArrayList<RtNodeVO>();
+        List<RtIntsVO> newIntsList = new ArrayList<RtIntsVO>();
+        //原始的arc数据
+        RtArcVO prearc = this.routeDataHandlerDAO.getArcById(arc.getArcid());
+        if(prearc.getStrcoords().equalsIgnoreCase(arc.getStrcoords())){
+            return;
+        }
+
+        tempNodeList = this.routeDataHandlerDAO.getNearNode(startnode,"30");
+        if(tempNodeList.size()>0){ //如果周边存在节点
+            tempstartnode = tempNodeList.get(0);
+            startnode = tempstartnode.getNodeid();
+        }else{
+            RtNodeVO node = new RtNodeVO();
+            node.setNodeid(startnode);
+            node.setX(startnode.split(",")[0]);
+            node.setY(startnode.split(",")[1]);
+            newNodeList.add(node);
+        }
+        tempNodeList = this.routeDataHandlerDAO.getNearNode(endnode,"30");
+        if(tempNodeList.size()>0){
+            tempendnode = tempNodeList.get(0);
+            endnode = tempendnode.getNodeid();
+        }else{
+            RtNodeVO node = new RtNodeVO();
+            node.setNodeid(endnode);
+            node.setX(endnode.split(",")[0]);
+            node.setY(endnode.split(",")[1]);
+            newNodeList.add(node);
+        }
+
+        //插入新增的节点
+        if(newNodeList.size()>0){
+            this.routeDataHandlerDAO.insertNode(newNodeList);
+        }
+
+        //更新arc
+        //arc.setArcid(UUID.randomUUID().toString().replaceAll("-", ""));
+        arc.setStartnode(startnode);
+        arc.setEndnode(endnode);
+        arc.setArclength(Double.toString(GISUtils.getRoadLength(arc.getStrcoords())));
+        arc.setDirection(GISUtils.getDirection(arc.getStrcoords()));
+        List<RtArcVO> arclist = new ArrayList<RtArcVO>();
+        arclist.add(arc);
+        this.routeDataHandlerDAO.updateRouteArc(arclist);
+
+        //插入新增的路口
+        if(tempstartnode!=null && !tempstartnode.getNodeid().equalsIgnoreCase(prearc.getStartnode())&& (tempstartnode.getInstid()==null || tempstartnode.getInstid().equalsIgnoreCase(""))){
+            RtIntsVO ints = this.getNodeInts(tempstartnode);
+            if(ints!=null){
+                newIntsList.add(ints);
+            }
+        }
+        if(tempendnode!=null && !tempendnode.getNodeid().equalsIgnoreCase(prearc.getEndnode()) && (tempendnode.getInstid()==null || tempendnode.getInstid().equalsIgnoreCase(""))){
+            RtIntsVO ints = this.getNodeInts(tempendnode);
+            if(ints!=null){
+                newIntsList.add(ints);
+            }
+        }
+        if(newIntsList.size()>0){
+            this.routeDataHandlerDAO.insertInts(newIntsList);
+        }
 
     }
 
@@ -291,7 +359,120 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      */
     @Override
     public void insertArc(RtArcVO arc) {
+        //处理开始节点和结束节点
+        String startnode = this.getVetrix(arc.getStrcoords(),0);
+        String endnode = this.getVetrix(arc.getStrcoords(),1);
+        List<RtNodeVO> tempNodeList = new ArrayList<RtNodeVO>();
+        RtNodeVO tempstartnode = null;
+        RtNodeVO tempendnode = null;
+        List<RtNodeVO> newNodeList = new ArrayList<RtNodeVO>();
+        List<RtIntsVO> newIntsList = new ArrayList<RtIntsVO>();
 
+        tempNodeList = this.routeDataHandlerDAO.getNearNode(startnode,"30");
+        if(tempNodeList.size()>0){ //如果周边存在节点
+            tempstartnode = tempNodeList.get(0);
+            startnode = tempstartnode.getNodeid();
+        }else{
+            RtNodeVO node = new RtNodeVO();
+            node.setNodeid(startnode);
+            node.setX(startnode.split(",")[0]);
+            node.setY(startnode.split(",")[1]);
+            newNodeList.add(node);
+        }
+        tempNodeList = this.routeDataHandlerDAO.getNearNode(endnode,"30");
+        if(tempNodeList.size()>0){
+            tempendnode = tempNodeList.get(0);
+            endnode = tempendnode.getNodeid();
+        }else{
+            RtNodeVO node = new RtNodeVO();
+            node.setNodeid(endnode);
+            node.setX(endnode.split(",")[0]);
+            node.setY(endnode.split(",")[1]);
+            newNodeList.add(node);
+        }
+
+        //插入新增的节点
+        if(newNodeList.size()>0){
+            this.routeDataHandlerDAO.insertNode(newNodeList);
+        }
+
+        //插入arc
+        arc.setArcid(UUID.randomUUID().toString().replaceAll("-", ""));
+        arc.setStartnode(startnode);
+        arc.setEndnode(endnode);
+        arc.setArclength(Double.toString(GISUtils.getRoadLength(arc.getStrcoords())));
+        arc.setDirection(GISUtils.getDirection(arc.getStrcoords()));
+        List<RtArcVO> arclist = new ArrayList<RtArcVO>();
+        arclist.add(arc);
+        this.routeDataHandlerDAO.insertRouteArc(arclist);
+
+        //插入新增的路口
+        if(tempstartnode!=null && (tempstartnode.getInstid()==null || tempstartnode.getInstid().equalsIgnoreCase(""))){
+            RtIntsVO ints = this.getNodeInts(tempstartnode);
+            if(ints!=null){
+                newIntsList.add(ints);
+            }
+        }
+        if(tempendnode!=null && (tempendnode.getInstid()==null || tempendnode.getInstid().equalsIgnoreCase(""))){
+            RtIntsVO ints = this.getNodeInts(tempendnode);
+            if(ints!=null){
+                newIntsList.add(ints);
+            }
+        }
+        if(newIntsList.size()>0){
+            this.routeDataHandlerDAO.insertInts(newIntsList);
+        }
+
+    }
+
+    /**
+     * 计算节点所在的路口
+     * @param node
+     * @return
+     */
+    public RtIntsVO getNodeInts(RtNodeVO node){
+        List<RtArcVO> temparclist = this.routeDataHandlerDAO.getArcByNode(node.getNodeid());
+        Map<String,String> roadmap = new HashMap<String, String>();
+        for(RtArcVO temparc:temparclist){
+            roadmap.put(temparc.getRoadid(),temparc.getRoadname());
+        }
+        if(roadmap.size()>1){
+            Iterator iter = roadmap.keySet().iterator();
+            String intsname = "";
+            String roadids = "";
+            while(iter.hasNext()){
+                String roadid = iter.next().toString();
+                intsname +=roadmap.get(roadid);
+                roadids+=roadid+",";
+            }
+            RtIntsVO intsVO = new RtIntsVO();
+            intsVO.setIntsid(UUID.randomUUID().toString().replaceAll("-", ""));
+            intsVO.setLongitude(node.getNodeid().split(",")[0]);
+            intsVO.setLatitude(node.getNodeid().split(",")[1]);
+            intsVO.setIntsname(intsname);
+            intsVO.setRoadid1(roadids.split(",")[0]);
+            intsVO.setRoadid2(roadids.split(",")[1]);
+            return intsVO;
+        }else{
+            return  null;
+        }
+
+    }
+
+    /**
+     * 计算路线的顶点
+     * @param strcoords 路线坐标
+     * @param vtype 顶点类型，0:起点，1：终点
+     * @return
+     */
+    public String getVetrix(String strcoords,int vtype){
+        String[] strArr =strcoords.split(",");
+        if(strArr.length<=2){
+            return strcoords;
+        }
+        String startnode = strArr[0]+","+strArr[1];
+        String endnode = strArr[strArr.length-2]+","+strArr[strArr.length-1];
+        return (vtype == 0?startnode:endnode);
     }
 
     /**
@@ -301,7 +482,12 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      */
     @Override
     public void deleteArc(RtArcVO arc) {
+        this.routeDataHandlerDAO.deleteArcById(arc.getArcid());
+    }
 
+    @Override
+    public void updateRoadStatus(String roadid, String status) {
+        this.routeDataHandlerDAO.updateRoadStatus(roadid,status);
     }
 
     /**
@@ -332,6 +518,23 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
     @Override
     public List getRoadList(String roadname, String xzqh) {
         return this.routeDataHandlerDAO.getRtRoadByParam(roadname,xzqh);
+    }
+
+    /**
+     * 查询符合条件的路口列表
+     *
+     * @param intsname 路口名称
+     * @param xzqh     行政区划
+     * @return
+     */
+    @Override
+    public List getIntsList(String intsname, String xzqh) {
+        return this.routeDataHandlerDAO.getRtIntsByParam(intsname, xzqh);
+    }
+
+    @Override
+    public List getLaneList(String intsid) {
+        return null;
     }
 
     /**

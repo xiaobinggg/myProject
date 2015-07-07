@@ -54,7 +54,7 @@ public class RtDtHndlrController {
             e.printStackTrace();
         }
         List list = routeDataHandler.getRoadList(roadname,xzqh);
-        return routeDataHandler.getRoadList(roadname,xzqh);
+        return list;
     }
 
     @RequestMapping("/edit/getLink.do")
@@ -83,16 +83,21 @@ public class RtDtHndlrController {
      * 保存道路arc列表
      */
     public String saveArc(HttpServletRequest request){
+        String roadid = request.getParameter("roadid");
         String arcs = request.getParameter("arcarr");
         String[] arcArr = arcs.split("#");
         for(String arcstr:arcArr){
+            if(arcstr.equalsIgnoreCase("")||arcstr.split("@").length<3){
+                continue;
+            }
             RtArcVO arc = new RtArcVO();
-            arc.setArcid(arcstr.split(",")[0]);
-            arc.setStrcoords(arcstr.split(",")[1]);
-            arc.setDelflag(arcstr.split(",")[2]);
+            arc.setArcid(arcstr.split("@")[0]);
+            arc.setStrcoords(arcstr.split("@")[1]);
+            arc.setRoadid(roadid);
+            arc.setDelflag(arcstr.split("@")[2]);
 
-            if(arc.getArcid().equalsIgnoreCase("-")){ //新增arc
-                if(arc.getDelflag().equalsIgnoreCase("0")){
+            if(arc.getArcid().equalsIgnoreCase("--")){ //新增arc
+                if(arc.getDelflag().equalsIgnoreCase("1")){
                     continue;
                 }else{
                     this.routeDataHandler.insertArc(arc);
@@ -103,6 +108,35 @@ public class RtDtHndlrController {
                 this.routeDataHandler.deleteArc(arc);
             }
         }
+        this.routeDataHandler.updateRoadStatus(roadid,"1");
         return "success";
     }
+
+    @RequestMapping("/edit/getInts.do")
+    @ResponseBody
+    /**
+     * 获得路口列表
+     */
+    public List geIntsList(HttpServletRequest request){
+        String xzqh = request.getParameter("xzqh");
+        String intsname = null;
+        try {
+            intsname = java.net.URLDecoder.decode(request.getParameter("intsname"),"utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        List list = routeDataHandler.getIntsList(intsname, xzqh);
+        return list;
+    }
+
+    @RequestMapping("/edit/getLane.do")
+    @ResponseBody
+    /**
+     * 获得道路arc列表
+     */
+    public List getLaneList(HttpServletRequest request){
+        String roadid = request.getParameter("intsid");
+        return this.routeDataHandler.getLaneList(roadid);
+    }
+
 }

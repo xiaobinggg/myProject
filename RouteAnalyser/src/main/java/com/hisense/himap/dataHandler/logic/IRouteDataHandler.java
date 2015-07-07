@@ -49,6 +49,8 @@ public interface IRouteDataHandler {
      */
     void deleteArc(RtArcVO arc);
 
+    void updateRoadStatus(String roadid,String status);
+
     /**
      * 更新路口信息
      * @param ints 路口对象
@@ -68,6 +70,16 @@ public interface IRouteDataHandler {
      * @return
      */
     List getRoadList(String roadname,String xzqh);
+
+    /**
+     * 查询符合条件的路口列表
+     * @param intsname 路口名称
+     * @param xzqh  行政区划
+     * @return
+     */
+    List getIntsList(String intsname,String xzqh);
+
+    List getLaneList(String intsid);
 
     /**
      * 根据道路编号查询link列表

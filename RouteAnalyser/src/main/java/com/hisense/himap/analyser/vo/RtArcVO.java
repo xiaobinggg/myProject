@@ -12,8 +12,18 @@ public class RtArcVO {
     private String strcoords;
     private int direction;
     private String roadid;
+    private String roadname;
     private String linkid;
     private String delflag;
+
+
+    public String getRoadname() {
+        return roadname;
+    }
+
+    public void setRoadname(String roadname) {
+        this.roadname = roadname;
+    }
 
     public String getDelflag() {
         return delflag;
