@@ -295,7 +295,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                         }
 
                     }
-                    if (laneVO.getNturnaround() == 1) {
+                    if (laneVO.getNturnround() == 1) {
                         nextdirection = MemRouteData.directions[Integer.parseInt(direction)][3];
                         if (nextdirection.indexOf(ndirection) >= 0) {
                             nextIntsResultVO.setOrder(1);

@@ -11,10 +11,28 @@ public class RtLaneVO {
     private int nthrough;
     private int nturnleft;
     private int nturnright;
-    private int nturnaround;
+    private int nturnround;
+    private String editflag;//编辑标识 0：添加 1：修改 2：删除
+
+    public int getNturnround() {
+        return nturnround;
+    }
+
+    public void setNturnround(int nturnround) {
+        this.nturnround = nturnround;
+    }
 
     public String getLaneno() {
         return laneno;
+    }
+
+
+    public String getEditflag() {
+        return editflag;
+    }
+
+    public void setEditflag(String editflag) {
+        this.editflag = editflag;
     }
 
     public void setLaneno(String laneno) {
@@ -61,11 +79,5 @@ public class RtLaneVO {
         this.nturnright = nturnright;
     }
 
-    public int getNturnaround() {
-        return nturnaround;
-    }
 
-    public void setNturnaround(int nturnaround) {
-        this.nturnaround = nturnaround;
-    }
 }

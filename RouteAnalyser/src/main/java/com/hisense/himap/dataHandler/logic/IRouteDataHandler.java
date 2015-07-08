@@ -3,6 +3,7 @@ package com.hisense.himap.dataHandler.logic;
 
 import com.hisense.himap.analyser.vo.RtArcVO;
 import com.hisense.himap.analyser.vo.RtIntsVO;
+import com.hisense.himap.analyser.vo.RtLaneVO;
 import com.hisense.himap.analyser.vo.RtRoadLinkVO;
 
 import java.util.List;
@@ -79,7 +80,15 @@ public interface IRouteDataHandler {
      */
     List getIntsList(String intsname,String xzqh);
 
+    /**
+     * 查询车道信息
+     * @param intsid
+     * @return
+     */
     List getLaneList(String intsid);
+
+
+    void updateLane(String intsid,List<RtLaneVO> lanelist);
 
     /**
      * 根据道路编号查询link列表

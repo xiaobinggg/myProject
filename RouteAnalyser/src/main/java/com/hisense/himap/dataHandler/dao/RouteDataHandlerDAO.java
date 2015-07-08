@@ -54,8 +54,11 @@ public class RouteDataHandlerDAO {
     private static final String SQL_QUERY_ARC_BYARCID = "SELECT a.arcid,a.arcname,a.arclength,a.startnode,a.endnode,a.strcoords,a.direction,a.roadid,a.linkid from route_arc a where a.arcid=?";
     private static final String SQL_QUERY_ARC_BYNODE = "SELECT a.arcid,a.arcname,a.arclength,a.startnode,a.endnode,a.strcoords,a.direction,a.roadid,a.linkid,r.roadname from route_arc a left join route_road r on a.roadid = r.roadid where a.startnode=? or a.endnode=?";
 
-    private static final String SQL_INSERT_LANE = "insert into route_lane(laneno,intsid,direction,nthrough,nturnleft,nturnright,nturnaround) values(?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_LANE = "insert into route_lane(intsid,laneno,direction,nthrough,nturnleft,nturnright,nturnround) values(?,?,?,?,?,?,?)";
+    private static final String SQL_DELETE_LANE = "delete from route_lane l where l.intsid=? and l.laneno=? and l.direction=?";
     private static final String SQL_DELETE_LANE_BYINTSID = "delete from route_lane l where l.intsid=?";
+    private static final String SQL_UPDATE_LANE = "update route_lane l set l.nthrough=?,l.nturnleft=?,l.nturnright=?,l.nturnround=? where l.laneno=? and l.intsid=? and l.direction=?";
+    private static final String SQL_QUERY_LANE_BYINTSID = "select * from route_lane l where l.intsid=?";
 
     private static final String SQL_QUERY_XZQH = "SELECT e.enumvalue,e.enumname from enum_type e WHERE e.enumtypeid=180";
 
@@ -247,6 +250,25 @@ public class RouteDataHandlerDAO {
     public void deleteArcById(String arcid){
         this.jdbcTemplate.update(SQL_DELETE_ARC,arcid);
     }
+
+    public List<RtLaneVO> getLaneByIntsid(String intsid){
+        List<RtLaneVO> intslist = this.jdbcTemplate.query(SQL_QUERY_LANE_BYINTSID,new String[]{intsid},new BeanPropertyRowMapper<RtLaneVO>(RtLaneVO.class));
+        return intslist;
+    }
+
+    public void insertLane(RtLaneVO lane){
+        this.jdbcTemplate.update(SQL_INSERT_LANE,lane.getIntsid(),lane.getLaneno(),lane.getDirection(),lane.getNthrough(),lane.getNturnleft(),lane.getNturnright(),lane.getNturnround());
+    }
+    public void updateLane(RtLaneVO lane){
+        this.jdbcTemplate.update(SQL_UPDATE_LANE,lane.getNthrough(),lane.getNturnleft(),lane.getNturnright(),lane.getNturnround(),lane.getIntsid(),lane.getLaneno(),lane.getDirection());
+    }
+    public void deleteLane(RtLaneVO lane){
+        this.jdbcTemplate.update(SQL_DELETE_LANE,lane.getIntsid(),lane.getLaneno(),lane.getDirection());
+    }
+    public void deleteLaneByIntsid(String intsid){
+        this.jdbcTemplate.update(SQL_DELETE_LANE_BYINTSID,intsid);
+    }
+
 
     /**
      * 根据节点查询arc

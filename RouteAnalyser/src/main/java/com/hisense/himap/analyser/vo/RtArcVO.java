@@ -16,7 +16,6 @@ public class RtArcVO {
     private String linkid;
     private String delflag;
 
-
     public String getRoadname() {
         return roadname;
     }

@@ -534,7 +534,14 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
 
     @Override
     public List getLaneList(String intsid) {
-        return null;
+        return this.routeDataHandlerDAO.getLaneByIntsid(intsid);
+    }
+
+    public void updateLane(String intsid,List<RtLaneVO> lanelist) {
+        this.routeDataHandlerDAO.deleteLaneByIntsid(intsid);
+        for(RtLaneVO lane:lanelist){
+            this.routeDataHandlerDAO.insertLane(lane);
+        }
     }
 
     /**

@@ -2,6 +2,7 @@ package com.hisense.himap.dataHandler.web;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.hisense.himap.analyser.vo.RtArcVO;
+import com.hisense.himap.analyser.vo.RtLaneVO;
 import com.hisense.himap.dataHandler.logic.IRouteDataHandler;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -132,11 +134,45 @@ public class RtDtHndlrController {
     @RequestMapping("/edit/getLane.do")
     @ResponseBody
     /**
-     * 获得道路arc列表
+     * 获得车道列表
      */
     public List getLaneList(HttpServletRequest request){
-        String roadid = request.getParameter("intsid");
-        return this.routeDataHandler.getLaneList(roadid);
+        String intsid = request.getParameter("intsid");
+        return this.routeDataHandler.getLaneList(intsid);
+    }
+
+
+    @RequestMapping("/edit/saveLane.do")
+    @ResponseBody
+    /**
+     * 保存道路arc列表
+     */
+    public String saveLane(HttpServletRequest request){
+        String intsid = request.getParameter("intsid");
+        String arcs = request.getParameter("lanearr");
+        String[] laneArr = arcs.split("#");
+        List<RtLaneVO> lanelist = new ArrayList<RtLaneVO>();
+        for(String lanestr:laneArr){
+            if(lanestr.equalsIgnoreCase("")||lanestr.split("@").length<3){
+                continue;
+            }
+            String [] strarr = lanestr.split("@");
+            RtLaneVO lane = new RtLaneVO();
+            lane.setIntsid(intsid);
+            lane.setLaneno(strarr[0]);
+            lane.setDirection(strarr[1]);
+            lane.setNthrough(Integer.parseInt(strarr[2]));
+            lane.setNturnleft(Integer.parseInt(strarr[3]));
+            lane.setNturnright(Integer.parseInt(strarr[4]));
+            lane.setNturnround(Integer.parseInt(strarr[5]));
+            lanelist.add(lane);
+        }
+        try {
+            this.routeDataHandler.updateLane(intsid, lanelist);
+        }catch(Exception e){
+            return "false";
+        }
+        return "success";
     }
 
 }
