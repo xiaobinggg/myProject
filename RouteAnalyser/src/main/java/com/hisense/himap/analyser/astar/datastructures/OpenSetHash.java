@@ -13,27 +13,22 @@ public class OpenSetHash implements IOpenSet {
 		this.comp = comp;
 	}
 
-	@Override
 	public void add(ISearchNode node) {
 		this.hashQ.add(node.keyCode(), node);
 	}
 
-	@Override
 	public void remove(ISearchNode node) {
 		this.hashQ.remove(node.keyCode(), node);
 	}
 
-	@Override
 	public ISearchNode poll() {
 		return this.hashQ.poll();
 	}
 
-	@Override
 	public ISearchNode getNode(ISearchNode node) {
 		return this.hashQ.get(node.keyCode());
 	}
 
-	@Override
 	public int size() {
 		return this.hashQ.size();
 	}

@@ -237,9 +237,31 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             }
             System.out.println(i + ":" +allIntsList.size());
         }
+    }
+
+    /**
+     * 根据安装点预处理动态节点数据
+     */
+    public void preDnode(){
+        Map<String,String> crossPoints = new HashMap<String, String>();//在路口上的安装点
+        List<RtIntsVO> intslist = this.routeDataHandlerDAO.getALlInts();
+        for(RtIntsVO ints:intslist){
+            if(null == ints.getPointids() || ints.getPointids().equalsIgnoreCase("")){
+                continue;
+            }
+            String[] points = ints.getPointids().split(",");
+            for(String pointid:points){
+                crossPoints.put(pointid,pointid);
+            }
+        }
+        List<RtNodeVO> monitorList = this.routeDataHandlerDAO.getMonitorList();
+        for(RtNodeVO monitor:monitorList){
+            if(crossPoints.get(monitor.getPointcode())!=null){
+                continue;
+            }
 
 
-
+        }
     }
 
     /**
@@ -278,7 +300,6 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      *
      * @param arc arc对象
      */
-    @Override
     public void updateArc(RtArcVO arc) {
         //处理开始节点和结束节点
         String startnode = this.getVetrix(arc.getStrcoords(),0);
@@ -357,7 +378,6 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      *
      * @param arc arc对象
      */
-    @Override
     public void insertArc(RtArcVO arc) {
         //处理开始节点和结束节点
         String startnode = this.getVetrix(arc.getStrcoords(),0);
@@ -480,12 +500,12 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      *
      * @param arc arc对象
      */
-    @Override
+    
     public void deleteArc(RtArcVO arc) {
         this.routeDataHandlerDAO.deleteArcById(arc.getArcid());
     }
 
-    @Override
+    
     public void updateRoadStatus(String roadid, String status) {
         this.routeDataHandlerDAO.updateRoadStatus(roadid,status);
     }
@@ -515,7 +535,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * @param xzqh
      * @return
      */
-    @Override
+    
     public List getRoadList(String roadname, String xzqh) {
         return this.routeDataHandlerDAO.getRtRoadByParam(roadname,xzqh);
     }
@@ -527,12 +547,12 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * @param xzqh     行政区划
      * @return
      */
-    @Override
+    
     public List getIntsList(String intsname, String xzqh) {
         return this.routeDataHandlerDAO.getRtIntsByParam(intsname, xzqh);
     }
 
-    @Override
+    
     public List getLaneList(String intsid) {
         return this.routeDataHandlerDAO.getLaneByIntsid(intsid);
     }
@@ -550,7 +570,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * @param roadid
      * @return
      */
-    @Override
+    
     public List getLinkList(String roadid) {
         return this.routeDataHandlerDAO.getLinkByRoadID(roadid);
     }
@@ -561,12 +581,12 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * @param roadid 道路编号
      * @return arc列表
      */
-    @Override
+    
     public List getArcList(String roadid) {
         return this.routeDataHandlerDAO.getArcByRoadId(roadid);
     }
 
-    @Override
+    
     public List getXZQH() {
         return  this.routeDataHandlerDAO.getXZQH();
     }
@@ -750,5 +770,10 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         newstrcrd = newstrcrd.substring(0, newstrcrd.length() - 1);
         return newstrcrd;
     }
+
+	public void deleteInts(String intsid) {
+		this.routeDataHandlerDAO.delInts(intsid);
+		
+	}
 
 }

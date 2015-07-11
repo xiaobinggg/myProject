@@ -45,7 +45,6 @@ public class RouteSearchNode extends ASearchNode {
         this.strcoords = strcoords;
     }
 
-    @Override
     public double h() {
         return this.dist(goal.getX(), goal.getY());
     }
@@ -67,7 +66,7 @@ public class RouteSearchNode extends ASearchNode {
         //return Math.sqrt(Math.pow(this.x - otherX, 2) + Math.pow(this.y - otherY, 2));
     }
 
-    @Override
+    
     public double c(ISearchNode successor) {
         if(successor instanceof RouteSearchNode){
             RouteSearchNode searchNode = (RouteSearchNode) successor;
@@ -76,7 +75,7 @@ public class RouteSearchNode extends ASearchNode {
         return 0;
     }
 
-    @Override
+    
     public ArrayList<ISearchNode> getSuccessors() {
 
         ArrayList<ISearchNode> successors = new ArrayList<ISearchNode>();
@@ -99,19 +98,19 @@ public class RouteSearchNode extends ASearchNode {
         return successors;
     }
 
-    @Override
+    
     public ISearchNode getParent() {
         return this.parent;
     }
 
-    @Override
+    
     public void setParent(ISearchNode parent) {
         this.parent = (RouteSearchNode) parent;
     }
 
 
 
-    @Override
+    
     public Integer keyCode() {
         return null;
     }

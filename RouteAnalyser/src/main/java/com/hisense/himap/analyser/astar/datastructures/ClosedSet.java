@@ -16,18 +16,15 @@ public class ClosedSet implements IClosedSet {
 		this.comp = comp;
 	}
 
-	@Override
 	public boolean contains(ISearchNode node) {
 		return this.list.contains(node);
 	}
 
-	@Override
 	public void add(ISearchNode node) {
 		this.list.add(node);
 
 	}
 
-	@Override
 	public ISearchNode min() {
 		return Collections.min(this.list, this.comp);
 	}

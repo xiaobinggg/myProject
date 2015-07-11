@@ -486,13 +486,13 @@ function addIntsRow(data){
         if(i%2 == 0){
             newrow = "<tr style='background: #ffffff;'><td nowrap>"+data[i].intsname+"</td>" +
             "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editInts("+totalintscount+",\""+data[i].intsid+"\",\""+data[i].longitude+","+data[i].latitude+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
-            "<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delIntsRow("+totalintscount+")' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;"+
+            "<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delIntsRow(this,\""+data[i].intsid+"\")' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;"+
             "</td></tr>";
         }else{
             newrow = "<tr style='background:#E3EaF4'><td nowrap>"+data[i].intsname+"</td>" +
             "<td nowrap align='center'>" +
             "<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editInts("+totalintscount+",\""+data[i].intsid+"\",\""+data[i].longitude+","+data[i].latitude+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
-            "<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delIntsRow("+totalintscount+")' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;"+
+            "<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delIntsRow(this,\""+data[i].intsid+"\")' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;"+
                 //"<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad(this,\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='路口调整' style='margin:3px 0 0 0;'/>" +
             "</td></tr>";
         }
@@ -627,8 +627,38 @@ function modifyLane(obj){
 
 }
 
-function delIntsRow(num){
-    alert($("#lanelist").find("tr").eq(num).remove());
+function delIntsRow(obj,intsid){
+
+    if(window.confirm("确定要删除吗？")){
+        $(obj).parent().parent().remove();
+        for(var i=0;i<intsArr.length;i++){
+            if(intsArr[i].intsid == intsid){
+                intsArr.splice(i,1);
+                break;
+            }
+        }
+
+        var url = rooturl+"/edit/deleteInts.do";
+        $.ajax({
+            url:url,
+            type: 'POST',
+            dataType: 'json',
+            data:"intsid="+intsid,
+            cache: false,
+            success: function (data) {
+                if(data == "success"){
+
+                }else{
+                    //alert("保存失败，请检查是否有重复数据!")
+                }
+
+
+            }
+        });
+
+    }
+
+
 }
 
 function delLaneRow(obj){

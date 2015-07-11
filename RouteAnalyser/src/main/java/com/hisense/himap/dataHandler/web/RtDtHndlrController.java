@@ -130,6 +130,21 @@ public class RtDtHndlrController {
         List list = routeDataHandler.getIntsList(intsname, xzqh);
         return list;
     }
+    
+    @RequestMapping("/edit/deleteInts.do")
+    @ResponseBody
+    /**
+     * 删除路口
+     */
+    public String deleteInts(HttpServletRequest request){
+    	String intsid = request.getParameter("intsid");
+    	try{
+    		this.routeDataHandler.deleteInts(intsid);
+    	}catch(Exception e){
+    		
+    	}
+    	return "success";
+    }
 
     @RequestMapping("/edit/getLane.do")
     @ResponseBody
@@ -159,8 +174,8 @@ public class RtDtHndlrController {
             String [] strarr = lanestr.split("@");
             RtLaneVO lane = new RtLaneVO();
             lane.setIntsid(intsid);
-            lane.setLaneno(strarr[0]);
-            lane.setDirection(strarr[1]);
+            lane.setDirection(strarr[0]);
+            lane.setLaneno(strarr[1]);
             lane.setNthrough(Integer.parseInt(strarr[2]));
             lane.setNturnleft(Integer.parseInt(strarr[3]));
             lane.setNturnright(Integer.parseInt(strarr[4]));

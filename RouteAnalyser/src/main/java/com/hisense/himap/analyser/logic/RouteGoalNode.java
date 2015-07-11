@@ -18,7 +18,6 @@ public class RouteGoalNode implements IGoalNode {
     }
 
 
-    @Override
     public boolean inGoal(ISearchNode other) {
         if(other instanceof RouteSearchNode){
             RouteSearchNode otherNode = (RouteSearchNode) other;

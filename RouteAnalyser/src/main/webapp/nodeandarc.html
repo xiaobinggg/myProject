@@ -3,8 +3,11 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>交通地图服务</title>
     <SCRIPT language="javascript" src="http://10.16.1.109:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
+    <!-- <SCRIPT language="javascript" src="http://10.49.129.220:9080/PGIS_S_TileMap/js/EzMapAPI.js"></SCRIPT>-->
+    
     <script>
         var geoserverURL="http://10.16.1.109:8088/geoserver"; //geoserver 服务器地址
+        //geoserverURL = "http://10.231.32.35:8088/geoserver";
         function createHttpRequest() {
             if (window.ActiveXObject) {
                 request = new ActiveXObject("Microsoft.XMLHTTP");
@@ -25,12 +28,12 @@
             _MapApp.hideCopyright();
             //_MapApp.map.hideMapControl();//隐藏比例尺
             _MapApp.map.hideMapServer();//隐藏图层切换按钮
-            //_MapApp.centerAndZoom(new Point(120.38013,36.08662), 4);
-            _MapApp.centerAndZoom(new Point(120.35729,36.08672), 4);
+            _MapApp.centerAndZoom(new Point(120.38013,36.08662), 4);
+            //_MapApp.centerAndZoom(new Point(120.35729,36.08672), 14);
 
 
             showRoad();
-            showints();
+            //showints();
             //showgroad("120.35729,36.08672,120.36729,36.08672");
             //var polyline = new Polyline("120.35729,36.08672，120.39013,36.08662");
             //polyline.addListener("dblclick",function(evt){alert(evt)});
@@ -129,7 +132,7 @@
             var listlen = _MapApp.map.stateListeners.length;
             legendfunc=new LegendFunc();
 
-            legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:route_road&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
+            legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:ROUTE_ARC&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
             legendfunc.open(_MapApp);
         }
         function showints(){

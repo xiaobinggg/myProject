@@ -15,6 +15,52 @@ public class RtNodeVO {
     private String arcids;//从动态节点出发的弧段
     private String edistances;//从动态节点出发到达下一结点的距离
     private String pos;//动态节点在弧段中的位置
+    private String pointcode;
+    private String pointname;
+    private String dldm;
+    private String lkdm;
+    private String ddms;
+
+
+    public String getPointcode() {
+        return pointcode;
+    }
+
+    public void setPointcode(String pointcode) {
+        this.pointcode = pointcode;
+    }
+
+    public String getPointname() {
+        return pointname;
+    }
+
+    public void setPointname(String pointname) {
+        this.pointname = pointname;
+    }
+
+    public String getDldm() {
+        return dldm;
+    }
+
+    public void setDldm(String dldm) {
+        this.dldm = dldm;
+    }
+
+    public String getLkdm() {
+        return lkdm;
+    }
+
+    public void setLkdm(String lkdm) {
+        this.lkdm = lkdm;
+    }
+
+    public String getDdms() {
+        return ddms;
+    }
+
+    public void setDdms(String ddms) {
+        this.ddms = ddms;
+    }
 
     public String getPos() {
         return pos;

@@ -61,10 +61,20 @@ public class RouteDataHandlerDAO {
     private static final String SQL_QUERY_LANE_BYINTSID = "select * from route_lane l where l.intsid=?";
 
     private static final String SQL_QUERY_XZQH = "SELECT e.enumvalue,e.enumname from enum_type e WHERE e.enumtypeid=180";
+    private static final String SQL_QUERY_MONITOR= "SELECT p.pointcode,p.pointname,p.dldm,p.lkdm,p.ddms from monitor_point p";
 
     @Inject
     @Named("jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
+
+    /**
+     * 查询安装点列表
+     *
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    public List<RtNodeVO> getMonitorList(){
+        return this.jdbcTemplate.query(SQL_QUERY_MONITOR, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+    }
 
     /**
      * 保存合并后的link

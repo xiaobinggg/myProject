@@ -16,17 +16,14 @@ public class ClosedSetHash implements IClosedSet {
 		
 	}
 
-	@Override
 	public boolean contains(ISearchNode node) {
 		return this.hashMap.containsKey(node.keyCode());
 	}
 
-	@Override
 	public void add(ISearchNode node) {
 		this.hashMap.put(node.keyCode(), node);
 	}
 
-	@Override
 	public ISearchNode min() {
 		return Collections.min(hashMap.values(), comp);
 	}

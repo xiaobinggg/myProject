@@ -79,6 +79,12 @@ public interface IRouteDataHandler {
      * @return
      */
     List getIntsList(String intsname,String xzqh);
+    
+    /**
+     * 删除路口
+     * @param intsid
+     */
+    void deleteInts(String intsid);
 
     /**
      * 查询车道信息
