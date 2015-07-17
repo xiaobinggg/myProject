@@ -20,6 +20,11 @@ public interface IRouteDataHandler {
     void preOperRoad();
 
     /**
+     * 预处理动态节点数据
+     */
+    void preDnode();
+
+    /**
      * 反转roadlink
      * @param linkid link编号
      */

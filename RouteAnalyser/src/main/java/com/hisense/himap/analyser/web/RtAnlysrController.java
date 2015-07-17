@@ -29,11 +29,11 @@ public class RtAnlysrController {
     @RequestMapping("/getNextInts.do")
     @ResponseBody
     public List<QueryNextIntsResultVO> getNextInts(HttpServletRequest request){
-        //System.out.println(request.getParameter("pointid"));
         QueryNextIntsVO query = new QueryNextIntsVO();
         query.setPointid(request.getParameter("pointid"));
         query.setDirection(request.getParameter("direction"));
         query.setLaneno(request.getParameter("laneno"));
+        System.out.println(query.getPointid()+"--"+query.getDirection()+"--"+query.getLaneno());
         //List list = jdbcTemplate.queryForList("select * from route_road r");
         //System.out.println(list.size());
         return routeAnalyser.getNextInts(query);

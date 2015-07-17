@@ -9,6 +9,7 @@ import com.hisense.himap.analyser.logic.RouteGoalNode;
 import com.hisense.himap.analyser.logic.RouteSearchNode;
 import com.hisense.himap.analyser.vo.*;
 import com.hisense.himap.utils.BeanUtils;
+import com.hisense.himap.utils.GISUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -60,11 +61,11 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                 MemRouteData.dnodeList = dnodeList;
                 MemRouteData.dnodemap = new HashMap<String, RtNodeVO>();
                 for (RtNodeVO node : dnodeList) {
-                    if (null == node.getPointids() || node.getPointids().equalsIgnoreCase("")) {
+                    if (null == node.getPointid() || node.getPointid().equalsIgnoreCase("")) {
                         continue;
                     }
-                    if (MemRouteData.dnodemap.get(node.getPointids()) == null) {
-                        MemRouteData.dnodemap.put(node.getPointids(), node);
+                    if (MemRouteData.dnodemap.get(node.getPointid()) == null) {
+                        MemRouteData.dnodemap.put(node.getPointid(), node);
                     }
                 }
 
@@ -132,7 +133,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
      */
     public RtIntsVO getRtIntsByNodeid(String nodeid) {
         for (RtIntsVO ints : MemRouteData.intsList) {
-            if (ints.getNodeid().equalsIgnoreCase(nodeid)) {
+            if (null!=ints.getNodeid() && ints.getNodeid().equalsIgnoreCase(nodeid)) {
                 return ints;
             }
         }
@@ -172,6 +173,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
 
                         RtArcVO arcVO = MemRouteData.arcMap.get(arcid); //路线VO
 
+
                         String[] strcoords = arcVO.getStrcoords().split(",");
                         if (strcoords.length / 2 < spos) {
                             continue;
@@ -194,7 +196,14 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                         resultVO.setArclength(Double.toString(elength));
                         resultVO.setStrcoords(strfromNodeToInts);
                         resultVO.setNdirection(arcVO.getDirection());
-                        resultVO.setOrder(0);
+                        int arcdirection = arcVO.getDirection();
+                        if(null == query.getDirection() || query.getDirection().equalsIgnoreCase("")){
+                            resultVO.setOrder(0);
+                        }else if(query.getDirection().equalsIgnoreCase(Integer.toString(arcdirection))){
+                            resultVO.setOrder(1);
+                        }else{
+                            resultVO.setOrder(-1);
+                        }
 
                         nextInts.add(resultVO);
                     } catch (NumberFormatException ignored) {
@@ -218,7 +227,7 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                     continue;
                 }
                 try {
-                    //BeanUtils.copyPropertiesInclude(query, resultVO, new String[]{"pointid", "direction", "laneno", "speed"});
+                    //BeanUtils.copyPropertiesIncludecopyPropertiesInclude(query, resultVO, new String[]{"pointid", "direction", "laneno", "speed"});
                     BeanUtils.copyPropertiesInclude(intsVO, resultVO, new String[]{"intsid", "intsname", "latitude", "longitude"});
                     BeanUtils.copyPropertiesInclude(arcVO, resultVO, new String[]{"arcid", "arclength", "strcoords", "roadid"});
                 } catch (Exception e) {
@@ -367,7 +376,13 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
             if (point.indexOf(",") > 0) {//如果是具体的坐标，查询坐标点所在的节点
                 node = this.getNodeByPos(point);
             } else { //如果是安装点，查询安装点所在的节点
+                //如果是路口节点
                 node = MemRouteData.nodeMap.get(point);
+                //如果是动态节点，将动态节点添加到路网结构中
+                if(null == node){
+                    node = MemRouteData.dnodemap.get(point);
+                    addDNodeToRoute(node);
+                }
             }
             if (null != node) {
                 nodelist.add(node);
@@ -387,6 +402,101 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
             result.addAll(list);
         }
         return result;
+    }
+
+    /**
+     * 向路网中添加动态节点
+     * @param dnode
+     */
+    private void addDNodeToRoute(RtNodeVO dnode){
+        if(null == dnode.getArcids() || dnode.getArcids().equalsIgnoreCase("")){
+            return;
+        }
+        dnode.setNodeid(dnode.getDnodeid());
+        String[] arcids = dnode.getArcids().split(",");
+        String[] edistances = dnode.getEdistances().split(",");
+        String[] poss = dnode.getPos().split(",");
+        for(int i=0;i<arcids.length;i++){
+            String arcid = arcids[i];
+            String edistance = edistances[i];
+            int pos = Integer.parseInt(poss[i]);
+            RtArcVO arc = MemRouteData.arcMap.get(arcid);
+            if(null==arc){
+                continue;
+            }
+            //添加节点
+            MemRouteData.nodeList.add(dnode);
+            MemRouteData.nodeMap.put(dnode.getPointcode(),dnode);
+            //添加arc
+            RtArcVO startarc = new RtArcVO();
+            RtArcVO endarc = new RtArcVO();
+            try {
+                BeanUtils.copyPropertiesInclude(arc, startarc, new String[]{"arcid", "arcname", "direction", "roadid","roadname","linkid","delflag","startnode"});
+                BeanUtils.copyPropertiesInclude(arc, endarc, new String[]{"arcid", "arcname", "direction", "roadid", "roadname", "linkid", "delflag","endnode"});
+                Double arclength = Double.parseDouble(arc.getArclength());
+                startarc.setArclength(Double.toString(arclength-Double.parseDouble(edistance)));
+                endarc.setArclength(edistance);
+                String[] strcoords = arc.getStrcoords().split(",");
+                List<RtArcVO> arclist = new ArrayList<RtArcVO>();
+                if(pos==0){
+                    startarc.setStrcoords(arc.getStrcoords());
+                    startarc.setEndnode(dnode.getDnodeid());
+                    MemRouteData.arcList.add(startarc);
+                    arclist = MemRouteData.arcStartNodeMap.get(startarc.getStartnode());
+                    if(arclist!=null){
+                        arclist.add(startarc);
+                    }else{
+                        arclist = new ArrayList<RtArcVO>();
+                        arclist.add(startarc);
+                    }
+                    MemRouteData.arcStartNodeMap.put(startarc.getStartnode(),arclist);
+                }else if(pos >=strcoords.length/2){
+                    endarc.setStrcoords(arc.getStrcoords());
+                    endarc.setStartnode(dnode.getDnodeid());
+                    MemRouteData.arcList.add(endarc);
+                    arclist.add(endarc);
+                    MemRouteData.arcStartNodeMap.put(dnode.getDnodeid(),arclist);
+                }else{
+                    String earcstr = "";
+                    for(int m=pos;m<strcoords.length/2;m++){
+                        earcstr+=strcoords[m*2]+","+strcoords[m*2+1]+",";
+                    }
+                    earcstr = earcstr.substring(0, earcstr.length() - 1);
+                    endarc.setStrcoords(earcstr);
+                    endarc.setStartnode(dnode.getDnodeid());
+                    MemRouteData.arcList.add(endarc);
+                    arclist.add(endarc);
+                    MemRouteData.arcStartNodeMap.put(dnode.getDnodeid(),arclist);
+
+                    earcstr = "";
+                    for(int m=0;m<pos;m++){
+                        earcstr+=strcoords[m*2]+","+strcoords[m*2+1]+",";
+                    }
+                    earcstr = earcstr.substring(0, earcstr.length() - 1);
+                    startarc.setStrcoords(earcstr);
+                    startarc.setEndnode(dnode.getDnodeid());
+                    MemRouteData.arcList.add(startarc);
+
+                    arclist = MemRouteData.arcStartNodeMap.get(startarc.getStartnode());
+                    if(arclist!=null){
+                        arclist.add(startarc);
+                    }else{
+                        arclist = new ArrayList<RtArcVO>();
+                        arclist.add(startarc);
+                    }
+                    MemRouteData.arcStartNodeMap.put(startarc.getStartnode(),arclist);
+
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
+    }
+
+    private void removeDNodeFromRoute(RtNodeVO dnode){
+
     }
 
     /**
@@ -422,9 +532,9 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
      * @param to   结束节点
      * @return 经过的路径列表
      */
-    public List<QueryPathResultVO> getShortestPath(RtNodeVO from, RtNodeVO to) {
+        public List<QueryPathResultVO> getShortestPath(RtNodeVO from, RtNodeVO to) {
         List<QueryPathResultVO> result = new ArrayList<QueryPathResultVO>();
-
+        //System.out.println("距离"+GISUtils.getRoadLength(from.getNodeid()+","+to.getNodeid()));
         RouteGoalNode goalNode = new RouteGoalNode(Double.parseDouble(to.getX()), Double.parseDouble(to.getY()));
         RouteSearchNode initialNode = new RouteSearchNode(Double.parseDouble(from.getX()), Double.parseDouble(from.getY()), null, 0d, null, goalNode);
 

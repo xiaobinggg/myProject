@@ -37,9 +37,10 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         allLinkMap = new HashMap<String, RtRoadLinkVO>();
         allIntsList = new ArrayList<RtIntsVO>();
         int i = 0;
-        /*for (RtRoad road : roadList) {
+
+        //1.将邻接的路段边合并
+        for (RtRoad road : roadList) {
             i++;
-            //1.将邻接的路段边合并
             List<RtRoadLinkVO> newLinkList = new ArrayList<RtRoadLinkVO>();//合并后的link
             List<RtRoadLinkVO> linkList = routeDataHandlerDAO.getPreLinkByRoadID(road.getRoadid());//原始link
             for (RtRoadLinkVO link : linkList) {
@@ -53,16 +54,16 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 allLinkMap.put(link.getLinkid(), link);
                 newLinkList.add(link);
             }
-            //routeDataHandlerDAO.insertFormattedLink(newLinkList);
+            routeDataHandlerDAO.insertFormattedLink(newLinkList);
             System.out.println(i + ":" + road.getRoadname() + " link---" + newLinkList.size());
-        }*/
+        }
 
         i = 0;
+        //2.路口处理
         for (RtRoad road : roadList) {
             i++;
             handledRoad.put(road.getRoadid(), road);
             List<RtRoadLinkVO> newLinkList = routeDataHandlerDAO.getFormattedLinkByRoadID(road.getRoadid());//合并后的link
-            //2.路口处理
             Map<String, String> crossMap = new HashMap<String, String>();
             //2.1 弧段数据处理,计算路段与其他路段的交叉点
             for (RtRoadLinkVO link : newLinkList) {
@@ -74,7 +75,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                         if (crosspoint == null || crosspoint.split(",").length != 2) {
                             continue;
                         }
-                        int pos = this.getNodePosInLink(crosspoint, link);
+                        int pos = this.getNodePos(crosspoint, link.getStrcoords());
                         if (link.getCrosspoints() == null) {
                             link.setCrosspoints(crosspoint + "," + pos);
                         } else {
@@ -86,16 +87,16 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                             continue;
                         }
                         if (crossMap.get(roadid) == null) {
-                            crossMap.put(roadid, crosspoint.split(",")[0] + "," + crosspoint.split(",")[1]);
+                            crossMap.put(roadid, crosspoint);
                         } else {
-                            crossMap.put(roadid, crossMap.get(roadid) + "," + crosspoint.split(",")[0] + "," + crosspoint.split(",")[1]);
+                            crossMap.put(roadid, crossMap.get(roadid) + "," + crosspoint);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
-            //this.routeDataHandlerDAO.updateCrossPoint(newLinkList);
+            this.routeDataHandlerDAO.updateCrossPoint(newLinkList);
 
             //2.2 路口数据处理，根据交叉点生成路口数据和节点数据
             List<RtIntsVO> intslist = new ArrayList<RtIntsVO>();
@@ -144,7 +145,6 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 String[] temparr = link.getStrcoords().split(",");
                 int pointnum = temparr.length / 2;
                 List<String> prePointList = new ArrayList<String>();
-                String newstrcoords = "";
                 if(link.getCrosspoints() == null || link.getCrosspoints().equalsIgnoreCase("")){
                     continue;
                 }
@@ -163,8 +163,10 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 for (m = 0; m < pointnum; m++) {
                     prePointList.add(temparr[m * 2] + "," + temparr[m * 2 + 1]);
                 }
-                for (m = 0; m < pointnum; m++) {
-                    if(crosspints.get(m)==null || m==0 || m==pointnum-1){
+
+                String newstrcoords = prePointList.get(0)+",";
+                for (m = 1; m < pointnum; m++) {
+                    if(crosspints.get(m)==null){
                         newstrcoords+=prePointList.get(m)+",";
                     }else{
                         String pointstr = GISUtils.formatPos(prePointList.get(m).split(",")[0])+","+GISUtils.formatPos(prePointList.get(m).split(",")[1]);
@@ -172,8 +174,8 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                             newstrcoords+=prePointList.get(m)+"&"+prePointList.get(m)+",";
                         }else{
                             newstrcoords+=crosspints.get(m)+"&"+crosspints.get(m)+","+prePointList.get(m)+",";
-
-                    } }
+                        }
+                    }
                 }
 
                 newstrcoords = newstrcoords.substring(0,newstrcoords.length()-1);
@@ -255,13 +257,60 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             }
         }
         List<RtNodeVO> monitorList = this.routeDataHandlerDAO.getMonitorList();
+        List<RtNodeVO> dnodeList = new ArrayList<RtNodeVO>();
+        Map<String,RtNodeVO> dnodeMap = new HashMap<String, RtNodeVO>();
+        int num = 0;
         for(RtNodeVO monitor:monitorList){
+            System.out.println(Integer.toString(num++)+"----"+monitor.getPointcode());
             if(crossPoints.get(monitor.getPointcode())!=null){
                 continue;
             }
+            RtNodeVO dnode = new RtNodeVO();
+            dnode.setDnodeid(monitor.getX() + "," + monitor.getY());
+            dnode.setDnodename(monitor.getPointname());
+            dnode.setPointid(monitor.getPointcode());
+            dnode.setX(monitor.getX());
+            dnode.setY(monitor.getY());
+            List<RtArcVO> arcList = this.routeDataHandlerDAO.getMonitorArcList(dnode.getDnodeid(),20);
+            if(null == arcList || arcList.size()<=0){
+                continue;
+            }
+            String arcids = "";
+            String edistances = "";
+            String poss = "";
+            for(RtArcVO arc:arcList){
+                arcids+=arc.getArcid()+",";
+                String[] arcarr = arc.getStrcoords().split(",");
+                int pos = this.getNodePos(dnode.getDnodeid(), arc.getStrcoords());
+                Double edistance = 0d;
+                if(pos==0 ){
+                    edistance =  GISUtils.getRoadLength(arc.getStrcoords());
+                }else if(pos == arcarr.length/2){
+                    edistance = 0d;
+                }else{
+                    String earcstr = "";
+                    for(int i=pos;i<arcarr.length/2;i++){
+                        earcstr+=arcarr[i*2]+","+arcarr[i*2+1]+",";
+                    }
+                    earcstr = earcstr.substring(0, earcstr.length() - 1);
+                    edistance = GISUtils.getRoadLength(earcstr);
+                }
+                poss+=Integer.toString(pos)+",";
 
-
+                edistances+=Double.toString(edistance)+",";
+            }
+            dnode.setArcids(arcids.substring(0, arcids.length() - 1));
+            dnode.setEdistances(edistances.substring(0, edistances.length() - 1));
+            dnode.setPos(poss.substring(0, poss.length() - 1));
+            if(dnodeMap.get(dnode.getDnodeid())!=null){
+                continue;
+            }else{
+                dnodeMap.put(dnode.getDnodeid(),dnode);
+                dnodeList.add(dnode);
+            }
         }
+        this.routeDataHandlerDAO.insertDNode(dnodeList);
+
     }
 
     /**
@@ -595,11 +644,11 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * 查询节点在边中的位置次序
      *
      * @param nodeCoord 节点坐标
-     * @param roadLink  link对象
+     * @param strcoords  线坐标
      * @return 位置
      */
-    public int getNodePosInLink(String nodeCoord, RtRoadLinkVO roadLink) {
-        String[] linkNodes = roadLink.getStrcoords().split(",");
+    public int getNodePos(String nodeCoord, String strcoords) {
+        String[] linkNodes = strcoords.split(",");
 
         String startNode = linkNodes[0] + "," + linkNodes[1]; //边的起始节点
         int linknodecount = linkNodes.length / 2; //边的顶点数

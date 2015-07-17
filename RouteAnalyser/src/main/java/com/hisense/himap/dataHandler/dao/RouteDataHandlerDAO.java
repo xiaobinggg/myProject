@@ -44,7 +44,8 @@ public class RouteDataHandlerDAO {
     private static final String SQL_UPDATE_ARCSTARTNODE = "UPDATE route_arc r SET r.startnode=? WHERE r.startnode=? ";
     private static final String SQL_UPDATE_ARCENDNODE = "UPDATE route_arc r SET r.endnode=? WHERE r.endnode=? ";
     private static final String SQL_QUERY_NEARNODE_WITHNULLINTS = "SELECT * from route_node r WHERE r.intsid IS NULL AND SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(?,0),null,null),'distance=20 querytype=WINDOW') = 'TRUE'";
-    private static final String SQL_QUERY_NEARNODE = "SELECT * from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(?,0),null,null),'distance=? querytype=WINDOW') = 'TRUE'";
+    private static final String SQL_QUERY_NEARNODE = "SELECT * from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE'";
+    private static final String SQL_INSERT_DNODE = "insert into route_dnode(dnodeid,dnodename,pointid,x,y,arcids,edistances,pos) values(?,?,?,?,?,?,?,?)";
 
     private static final String SQL_INSERT_ARC= "insert into route_arc(arcid,arclength,strcoords,startnode,endnode,direction,roadid,linkid) values(?,?,?,?,?,?,?,?)";
     private static final String SQL_DELETE_ARC="delete from route_arc a where a.arcid=?";
@@ -60,8 +61,9 @@ public class RouteDataHandlerDAO {
     private static final String SQL_UPDATE_LANE = "update route_lane l set l.nthrough=?,l.nturnleft=?,l.nturnright=?,l.nturnround=? where l.laneno=? and l.intsid=? and l.direction=?";
     private static final String SQL_QUERY_LANE_BYINTSID = "select * from route_lane l where l.intsid=?";
 
-    private static final String SQL_QUERY_XZQH = "SELECT e.enumvalue,e.enumname from enum_type e WHERE e.enumtypeid=180";
-    private static final String SQL_QUERY_MONITOR= "SELECT p.pointcode,p.pointname,p.dldm,p.lkdm,p.ddms from monitor_point p";
+    private static final String SQL_QUERY_XZQH = "SELECT e.enumvalue,e.enumname from enum_type e WHERE e.enumtypeid=180 order by e.enumvalue";
+    private static final String SQL_QUERY_MONITOR= "SELECT p.pointcode,p.pointname,p.dldm,p.lkdm,p.ddms,p.longitude AS x,p.latitude AS y from monitor_point p where p.longitude>0 and p.latitude>0";
+    private static final String SQL_QUERY_MONITORARC = "SELECT a.roadname,a.dldm,r.* from route_arc r  LEFT JOIN route_road a ON a.roadid=r.roadid WHERE SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE'";
 
     @Inject
     @Named("jdbcTemplate")
@@ -74,6 +76,16 @@ public class RouteDataHandlerDAO {
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     public List<RtNodeVO> getMonitorList(){
         return this.jdbcTemplate.query(SQL_QUERY_MONITOR, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+    }
+
+    /**
+     * 查询安装点相邻的arc列表
+     *
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    public List<RtArcVO> getMonitorArcList(String pos,int distance){
+        System.out.println((SQL_QUERY_MONITORARC.replaceFirst("#",pos)).replace("#",Integer.toString(distance)));
+        return this.jdbcTemplate.query((SQL_QUERY_MONITORARC.replaceFirst("#",pos)).replace("#", Integer.toString(distance)), new BeanPropertyRowMapper<RtArcVO>(RtArcVO.class));
     }
 
     /**
@@ -144,7 +156,7 @@ public class RouteDataHandlerDAO {
      */
     public List<RtNodeVO> getNearNode(String pos,String distance){
         try {
-            List<RtNodeVO> list = this.jdbcTemplate.query(SQL_QUERY_NEARNODE.replace("?",pos).replace("?",distance), new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+            List<RtNodeVO> list = this.jdbcTemplate.query(SQL_QUERY_NEARNODE.replaceFirst("#", pos).replace("#",distance), new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
             return list;
         } catch (Exception e) {
             e.printStackTrace();
@@ -475,6 +487,17 @@ public class RouteDataHandlerDAO {
                     .append(" EXECUTE IMMEDIATE 'UPDATE route_node r SET r.geometry=:geom where r.nodeid=:nodeid'  USING geom,nodeid;")
                     .append(" END;");
             this.jdbcTemplate.execute(updategoem.toString());
+        }
+    }
+
+    /**
+     * 保存合并后的node
+     *
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void insertDNode(List<RtNodeVO> nodelist) {
+        for (RtNodeVO node: nodelist) {
+            this.jdbcTemplate.update(SQL_INSERT_DNODE, node.getDnodeid(),node.getDnodename(),node.getPointid(),node.getX(),node.getY(),node.getArcids(),node.getEdistances(),node.getPos());
         }
     }
 

@@ -12,6 +12,9 @@ public class RtNodeVO {
     private String pointids;//安装点编
 
     //动态节点专有属性
+    private String dnodeid;
+    private String dnodename;
+    private String pointid;
     private String arcids;//从动态节点出发的弧段
     private String edistances;//从动态节点出发到达下一结点的距离
     private String pos;//动态节点在弧段中的位置
@@ -21,6 +24,29 @@ public class RtNodeVO {
     private String lkdm;
     private String ddms;
 
+    public String getDnodeid() {
+        return dnodeid;
+    }
+
+    public void setDnodeid(String dnodeid) {
+        this.dnodeid = dnodeid;
+    }
+
+    public String getDnodename() {
+        return dnodename;
+    }
+
+    public void setDnodename(String dnodename) {
+        this.dnodename = dnodename;
+    }
+
+    public String getPointid() {
+        return pointid;
+    }
+
+    public void setPointid(String pointid) {
+        this.pointid = pointid;
+    }
 
     public String getPointcode() {
         return pointcode;

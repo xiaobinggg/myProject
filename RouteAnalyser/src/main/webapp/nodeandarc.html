@@ -33,13 +33,41 @@
 
 
             showRoad();
-            //showints();
+            showints();
             //showgroad("120.35729,36.08672,120.36729,36.08672");
             //var polyline = new Polyline("120.35729,36.08672，120.39013,36.08662");
             //polyline.addListener("dblclick",function(evt){alert(evt)});
             //_MapApp.addOverlay(polyline);
             //showArcByStartNode("120.38013,36.08662");
 
+        }
+
+        function showArcByStartNode(nodepos){
+
+            _MapApp.clear();
+            createHttpRequest();
+            var url =  "/HiMapLabs/himap/getarclist.do?pos="+nodepos;
+            try {
+                request.onreadystatechange = function(){
+                    if (request.readyState == 4) {
+                        var data = "";
+                        if (request.status == 200 || request.status == 0) {
+                            if (typeof(JSON) == 'undefined'){
+                                data = eval("("+request.responseText+")");
+                            }else{
+                                data = JSON.parse(request.responseText);
+                            }
+                            for(var i=0;i<data.length;i++){
+                                showgroad(data[i].strcoords);
+                            }
+                        }
+                    }
+                };
+                request.open("POST", url, false);
+                request.send("");
+            } catch (exception) {
+                alert("false");
+            }
         }
 
         function showArcByStartNode(pointid){
@@ -132,7 +160,9 @@
             var listlen = _MapApp.map.stateListeners.length;
             legendfunc=new LegendFunc();
 
-            legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:ROUTE_ARC&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
+            //legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:ROUTE_ARC&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
+            legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:route_roadlink&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
+
             legendfunc.open(_MapApp);
         }
         function showints(){
