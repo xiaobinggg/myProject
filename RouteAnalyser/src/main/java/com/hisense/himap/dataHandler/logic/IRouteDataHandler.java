@@ -22,7 +22,7 @@ public interface IRouteDataHandler {
     /**
      * 预处理动态节点数据
      */
-    void preDnode();
+    void preMonitor();
 
     /**
      * 反转roadlink
@@ -75,15 +75,16 @@ public interface IRouteDataHandler {
      * @param xzqh
      * @return
      */
-    List getRoadList(String roadname,String xzqh);
+    List getRoadList(String roadname,String xzqh,String editstatus);
 
     /**
      * 查询符合条件的路口列表
      * @param intsname 路口名称
      * @param xzqh  行政区划
+     * @param editstatus 修改状态
      * @return
      */
-    List getIntsList(String intsname,String xzqh);
+    List getIntsList(String intsname,String xzqh,String editstatus);
     
     /**
      * 删除路口

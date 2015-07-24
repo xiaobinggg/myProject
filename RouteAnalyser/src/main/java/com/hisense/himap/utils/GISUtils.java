@@ -63,14 +63,14 @@ public class GISUtils {
         Double x1 = Double.parseDouble(segment1[0]);
         Double y1 = Double.parseDouble(segment1[1]);
         if (segm2.indexOf(segment1[0] + "," + segment1[1]) >= 0) {
-            return GISUtils.formatPos(segment1[0]) + "," + GISUtils.formatPos(segment1[1]);
+            return GISUtils.formatPos(segment1[0],4) + "," + GISUtils.formatPos(segment1[1],5);
         }
         Double a, ma, b, mb;
         for (int i = 1; i < segment1.length / 2; i++) {
             Double x2 = Double.parseDouble(segment1[i * 2]);
             Double y2 = Double.parseDouble(segment1[i * 2 + 1]);
             if (segm2.indexOf(segment1[i * 2] + "," + segment1[i * 2 + 1]) >= 0) {
-                return GISUtils.formatPos(segment1[i * 2]) + "," + GISUtils.formatPos(segment1[i * 2 + 1]);
+                return GISUtils.formatPos(segment1[i * 2],4) + "," + GISUtils.formatPos(segment1[i * 2 + 1],5);
             }
 
             Double mx1 = Double.parseDouble(segment2[0]);
@@ -97,7 +97,7 @@ public class GISUtils {
                         Double x = x1;
                         Double y = ma * x1 + mb;
                         if (x <= maxx && x >= minx && x <= maxmx && x >= minmx && y <= maxy && y >= miny && y <= maxmy && y >= minmy) {
-                            intersection = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
+                            intersection = GISUtils.formatPos(Double.toString(x),4) + "," + GISUtils.formatPos(Double.toString(y),5);
                             return intersection;
                         }
                     }
@@ -110,7 +110,7 @@ public class GISUtils {
                         Double x = x1;
                         Double y = a * x1 + b;
                         if (x <= maxx && x >= minx && x <= maxmx && x >= minmx && y <= maxy && y >= miny && y <= maxmy && y >= minmy) {
-                            intersection = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
+                            intersection = GISUtils.formatPos(Double.toString(x),4) + "," + GISUtils.formatPos(Double.toString(y),5);
                             return intersection;
                         }
                     }
@@ -125,7 +125,7 @@ public class GISUtils {
                     Double x = (mb - b) / (a - ma);
                     Double y = a * x + b;
                     if (x <= maxx && x >= minx && x <= maxmx && x >= minmx && y <= maxy && y >= miny && y <= maxmy && y >= minmy) {
-                        intersection = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
+                        intersection = GISUtils.formatPos(Double.toString(x),4) + "," + GISUtils.formatPos(Double.toString(y),5);
                         return intersection;
                     }
                 }
@@ -146,8 +146,12 @@ public class GISUtils {
      * @param pos
      * @return
      */
-    public static String formatPos(String pos) {
-        DecimalFormat decimalFormat = new DecimalFormat(".0000");
+    public static String formatPos(String pos,int num) {
+        String format = ".";
+        for(int i=0;i<num;i++){
+            format+="0";
+        }
+        DecimalFormat decimalFormat = new DecimalFormat(format);
 
         return decimalFormat.format(Double.parseDouble(pos));
 
@@ -174,7 +178,7 @@ public class GISUtils {
             fromx = tox;
             fromy = toy;
         }
-        return Double.parseDouble(GISUtils.formatPos(Double.toString(result)));
+        return Double.parseDouble(GISUtils.formatPos(Double.toString(result),4));
     }
 
     /**

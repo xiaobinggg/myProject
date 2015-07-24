@@ -18,8 +18,34 @@ public class RtIntsVO {
     private String crosspoints;
     private String roadid1;
     private String roadid2;
+    private String editstatus;
+    private String utcintsid;
+    private String viointsid;
     private List<RtLaneVO> laneList;
 
+    public String getEditstatus() {
+        return editstatus;
+    }
+
+    public void setEditstatus(String editstatus) {
+        this.editstatus = editstatus;
+    }
+
+    public String getUtcintsid() {
+        return utcintsid;
+    }
+
+    public void setUtcintsid(String utcintsid) {
+        this.utcintsid = utcintsid;
+    }
+
+    public String getViointsid() {
+        return viointsid;
+    }
+
+    public void setViointsid(String viointsid) {
+        this.viointsid = viointsid;
+    }
 
     public String getRoadid1() {
         return roadid1;

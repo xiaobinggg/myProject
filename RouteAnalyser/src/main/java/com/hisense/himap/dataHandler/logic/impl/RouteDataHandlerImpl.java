@@ -22,6 +22,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
     private List<RtRoad> roadList;
     private Map<String, RtRoad> roadMap;
     private Map<String,String> allIntsMap;
+    private Map<String,String> allNodeMap;
     private List<RtIntsVO> allIntsList;
     private Map<String,RtRoadLinkVO> allLinkMap;
 
@@ -34,12 +35,17 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             roadMap.put(road.getRoadid(), road);
         }
         allIntsMap = new HashMap<String, String>();
+        allNodeMap = new HashMap<String, String>();
         allLinkMap = new HashMap<String, RtRoadLinkVO>();
         allIntsList = new ArrayList<RtIntsVO>();
         int i = 0;
 
+        List<RtIntsVO> allUTCIntsList = this.routeDataHandlerDAO.getALlUTCInts();
+        List<RtIntsVO> allVIOIntsList = this.routeDataHandlerDAO.getALlVIOInts();
+
+
         //1.将邻接的路段边合并
-        for (RtRoad road : roadList) {
+        /*for (RtRoad road : roadList) {
             i++;
             List<RtRoadLinkVO> newLinkList = new ArrayList<RtRoadLinkVO>();//合并后的link
             List<RtRoadLinkVO> linkList = routeDataHandlerDAO.getPreLinkByRoadID(road.getRoadid());//原始link
@@ -56,7 +62,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
             }
             routeDataHandlerDAO.insertFormattedLink(newLinkList);
             System.out.println(i + ":" + road.getRoadname() + " link---" + newLinkList.size());
-        }
+        }*/
 
         i = 0;
         //2.路口处理
@@ -113,13 +119,28 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 }
 
                 intsVO.setIntsid(UUID.randomUUID().toString().replaceAll("-", ""));
-                intsVO.setLongitude(GISUtils.formatPos(centroid.split(",")[0]));
-                intsVO.setLatitude(GISUtils.formatPos(centroid.split(",")[1]));
+                intsVO.setLongitude(GISUtils.formatPos(centroid.split(",")[0],4));
+                intsVO.setLatitude(GISUtils.formatPos(centroid.split(",")[1],5));
                 intsVO.setXzqh(road.getXzqh());
                 intsVO.setIntsname(road.getRoadname() + roadMap.get(crossroadid).getRoadname());
                 intsVO.setCrosspoints(crossMap.get(crossroadid));
                 intsVO.setRoadid1(road.getRoadid());
                 intsVO.setRoadid2(crossroadid);
+                for(RtIntsVO utcints:allUTCIntsList){
+                    String intsname = utcints.getIntsname();
+                    if(intsname.indexOf(road.getRoadname())>=0 && intsname.indexOf(roadMap.get(crossroadid).getRoadname())>=0){
+                        intsVO.setUtcintsid(utcints.getIntsid());
+                        break;
+                    }
+                }
+                for(RtIntsVO vioints:allVIOIntsList){
+                    String intsname = vioints.getIntsname();
+                    if(intsname.indexOf(road.getRoadname())>=0 && intsname.indexOf(roadMap.get(crossroadid).getRoadname())>=0){
+                        intsVO.setViointsid(vioints.getIntsid());
+                        break;
+                    }
+                }
+
                 intslist.add(intsVO);
                 allIntsList.add(intsVO);
 
@@ -133,9 +154,12 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 nodeVO.setX(intsVO.getLongitude());
                 nodeVO.setY(intsVO.getLatitude());
                 nodeVO.setInstid(intsVO.getIntsid());
-                nodelist.add(nodeVO);
+                if(allNodeMap.get(centroid)==null){
+                    nodelist.add(nodeVO);
+                    allNodeMap.put(centroid,centroid);
+                }
             }
-
+            //this.routeDataHandlerDAO.insertIntsAndNode(intslist, nodelist);
 
 
             //3 弧段数据处理
@@ -169,7 +193,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                     if(crosspints.get(m)==null){
                         newstrcoords+=prePointList.get(m)+",";
                     }else{
-                        String pointstr = GISUtils.formatPos(prePointList.get(m).split(",")[0])+","+GISUtils.formatPos(prePointList.get(m).split(",")[1]);
+                        String pointstr = GISUtils.formatPos(prePointList.get(m).split(",")[0],4)+","+GISUtils.formatPos(prePointList.get(m).split(",")[1],5);
                         if(pointstr.equalsIgnoreCase(crosspints.get(m))){
                             newstrcoords+=prePointList.get(m)+"&"+prePointList.get(m)+",";
                         }else{
@@ -196,8 +220,8 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
 
 
                     String[] tempstr = arcstr.split(",");
-                    String startpoint = GISUtils.formatPos(tempstr[0])+","+GISUtils.formatPos(tempstr[1]);
-                    String endpoint = GISUtils.formatPos(tempstr[tempstr.length-2])+","+GISUtils.formatPos(tempstr[tempstr.length-1]);
+                    String startpoint = GISUtils.formatPos(tempstr[0],4)+","+GISUtils.formatPos(tempstr[1],5);
+                    String endpoint = GISUtils.formatPos(tempstr[tempstr.length-2],4)+","+GISUtils.formatPos(tempstr[tempstr.length-1],5);
                     if(allIntsMap.get(startpoint)!=null){
                         arc.setStartnode(allIntsMap.get(startpoint));
                     }else{
@@ -206,7 +230,10 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                         nodeVO.setNodeid(startpoint);
                         nodeVO.setX(startpoint.split(",")[0]);
                         nodeVO.setY(startpoint.split(",")[1]);
-                        nodelist.add(nodeVO);
+                        if(allNodeMap.get(startpoint)==null){
+                            nodelist.add(nodeVO);
+                            allNodeMap.put(startpoint,startpoint);
+                        }
 
                     }
                     if(allIntsMap.get(endpoint)!=null){
@@ -217,18 +244,22 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                         nodeVO.setNodeid(endpoint);
                         nodeVO.setX(endpoint.split(",")[0]);
                         nodeVO.setY(endpoint.split(",")[1]);
-                        nodelist.add(nodeVO);
+                        if(allNodeMap.get(endpoint)==null){
+                            nodelist.add(nodeVO);
+                            allNodeMap.put(endpoint,endpoint);
+                        }
+
                     }
                     arcList.add(arc);
                 }
             }
-            //this.routeDataHandlerDAO.insertRouteArc(arcList);
-            //this.routeDataHandlerDAO.insertIntsAndNode(intslist, nodelist);
+            this.routeDataHandlerDAO.insertRouteArc(arcList);
+            this.routeDataHandlerDAO.insertIntsAndNode(intslist, nodelist);
             System.out.println(i + ":" + road.getRoadname() + " link---" + newLinkList.size()+" ints----"+intslist.size()+" arc----"+arcList.size());
 
             //break;
         }
-        i = 0;
+        /*i = 0;
         for(RtIntsVO ints:allIntsList){
             i++;
             String pos = ints.getLongitude()+","+ints.getLatitude();
@@ -238,76 +269,79 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
                 this.routeDataHandlerDAO.updateArcNode(node.getNodeid(),pos);
             }
             System.out.println(i + ":" +allIntsList.size());
-        }
+        }*/
+
+        this.routeDataHandlerDAO.initLane();
     }
 
     /**
      * 根据安装点预处理动态节点数据
      */
-    public void preDnode(){
-        Map<String,String> crossPoints = new HashMap<String, String>();//在路口上的安装点
-        List<RtIntsVO> intslist = this.routeDataHandlerDAO.getALlInts();
-        for(RtIntsVO ints:intslist){
-            if(null == ints.getPointids() || ints.getPointids().equalsIgnoreCase("")){
-                continue;
-            }
-            String[] points = ints.getPointids().split(",");
-            for(String pointid:points){
-                crossPoints.put(pointid,pointid);
-            }
-        }
+    public void preMonitor(){
+
         List<RtNodeVO> monitorList = this.routeDataHandlerDAO.getMonitorList();
         List<RtNodeVO> dnodeList = new ArrayList<RtNodeVO>();
         Map<String,RtNodeVO> dnodeMap = new HashMap<String, RtNodeVO>();
         int num = 0;
         for(RtNodeVO monitor:monitorList){
             System.out.println(Integer.toString(num++)+"----"+monitor.getPointcode());
-            if(crossPoints.get(monitor.getPointcode())!=null){
-                continue;
-            }
-            RtNodeVO dnode = new RtNodeVO();
-            dnode.setDnodeid(monitor.getX() + "," + monitor.getY());
-            dnode.setDnodename(monitor.getPointname());
-            dnode.setPointid(monitor.getPointcode());
-            dnode.setX(monitor.getX());
-            dnode.setY(monitor.getY());
-            List<RtArcVO> arcList = this.routeDataHandlerDAO.getMonitorArcList(dnode.getDnodeid(),20);
-            if(null == arcList || arcList.size()<=0){
-                continue;
-            }
-            String arcids = "";
-            String edistances = "";
-            String poss = "";
-            for(RtArcVO arc:arcList){
-                arcids+=arc.getArcid()+",";
-                String[] arcarr = arc.getStrcoords().split(",");
-                int pos = this.getNodePos(dnode.getDnodeid(), arc.getStrcoords());
-                Double edistance = 0d;
-                if(pos==0 ){
-                    edistance =  GISUtils.getRoadLength(arc.getStrcoords());
-                }else if(pos == arcarr.length/2){
-                    edistance = 0d;
-                }else{
-                    String earcstr = "";
-                    for(int i=pos;i<arcarr.length/2;i++){
-                        earcstr+=arcarr[i*2]+","+arcarr[i*2+1]+",";
-                    }
-                    earcstr = earcstr.substring(0, earcstr.length() - 1);
-                    edistance = GISUtils.getRoadLength(earcstr);
+            List<RtIntsVO> intsList = this.routeDataHandlerDAO.getMonitorIntsList(monitor.getX()+","+monitor.getY(),20);
+            if(intsList == null || intsList.size()<=0){
+                RtNodeVO dnode = new RtNodeVO();
+                dnode.setDnodeid(monitor.getX() + "," + monitor.getY());
+                dnode.setDnodename(monitor.getPointname());
+                dnode.setPointid(monitor.getPointcode());
+                dnode.setX(monitor.getX());
+                dnode.setY(monitor.getY());
+                List<RtArcVO> arcList = this.routeDataHandlerDAO.getMonitorArcList(dnode.getDnodeid(),20);
+                if(null == arcList || arcList.size()<=0){
+                    continue;
                 }
-                poss+=Integer.toString(pos)+",";
+                String arcids = "";
+                String edistances = "";
+                String poss = "";
+                for(RtArcVO arc:arcList){
+                    arcids+=arc.getArcid()+",";
+                    String[] arcarr = arc.getStrcoords().split(",");
+                    int pos = this.getNodePos(dnode.getDnodeid(), arc.getStrcoords());
+                    Double edistance = 0d;
+                    if(pos==0 ){
+                        edistance =  GISUtils.getRoadLength(arc.getStrcoords());
+                    }else if(pos == arcarr.length/2){
+                        edistance = 0d;
+                    }else{
+                        String earcstr = "";
+                        for(int i=pos;i<arcarr.length/2;i++){
+                            earcstr+=arcarr[i*2]+","+arcarr[i*2+1]+",";
+                        }
+                        earcstr = earcstr.substring(0, earcstr.length() - 1);
+                        edistance = GISUtils.getRoadLength(earcstr);
+                    }
+                    poss+=Integer.toString(pos)+",";
 
-                edistances+=Double.toString(edistance)+",";
-            }
-            dnode.setArcids(arcids.substring(0, arcids.length() - 1));
-            dnode.setEdistances(edistances.substring(0, edistances.length() - 1));
-            dnode.setPos(poss.substring(0, poss.length() - 1));
-            if(dnodeMap.get(dnode.getDnodeid())!=null){
-                continue;
+                    edistances+=Double.toString(edistance)+",";
+                }
+                dnode.setArcids(arcids.substring(0, arcids.length() - 1));
+                dnode.setEdistances(edistances.substring(0, edistances.length() - 1));
+                dnode.setPos(poss.substring(0, poss.length() - 1));
+                if(dnodeMap.get(dnode.getDnodeid())!=null){
+                    continue;
+                }else{
+                    dnodeMap.put(dnode.getDnodeid(),dnode);
+                    dnodeList.add(dnode);
+                }
             }else{
-                dnodeMap.put(dnode.getDnodeid(),dnode);
-                dnodeList.add(dnode);
+                RtIntsVO ints = intsList.get(0);
+                String pointids = "";
+                if(null == ints.getPointids() || ints.getPointids().equalsIgnoreCase("")) {
+                    pointids = monitor.getPointcode();
+                }else{
+                    pointids=ints.getPointids()+","+monitor.getPointcode();
+                }
+                this.routeDataHandlerDAO.updateIntsPoints(ints.getIntsid(),pointids);
             }
+
+
         }
         this.routeDataHandlerDAO.insertDNode(dnodeList);
 
@@ -585,8 +619,8 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * @return
      */
     
-    public List getRoadList(String roadname, String xzqh) {
-        return this.routeDataHandlerDAO.getRtRoadByParam(roadname,xzqh);
+    public List getRoadList(String roadname, String xzqh,String editstatus) {
+        return this.routeDataHandlerDAO.getRtRoadByParam(roadname,xzqh,editstatus);
     }
 
     /**
@@ -597,8 +631,8 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * @return
      */
     
-    public List getIntsList(String intsname, String xzqh) {
-        return this.routeDataHandlerDAO.getRtIntsByParam(intsname, xzqh);
+    public List getIntsList(String intsname, String xzqh,String editstatus) {
+        return this.routeDataHandlerDAO.getRtIntsByParam(intsname, xzqh,editstatus);
     }
 
     
@@ -611,6 +645,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         for(RtLaneVO lane:lanelist){
             this.routeDataHandlerDAO.insertLane(lane);
         }
+        this.routeDataHandlerDAO.updateIntsStatus("1",intsid);
     }
 
     /**
@@ -654,11 +689,11 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         int linknodecount = linkNodes.length / 2; //边的顶点数
         String currLink = startNode;
         int i = 0;
-        if(nodeCoord.equalsIgnoreCase(GISUtils.formatPos(linkNodes[0])+","+GISUtils.formatPos(linkNodes[1]))){
+        if(nodeCoord.equalsIgnoreCase(GISUtils.formatPos(linkNodes[0],4)+","+GISUtils.formatPos(linkNodes[1],5))){
             return i;
         }
         for (i = 1; i < linknodecount; i++) {
-            if(nodeCoord.equalsIgnoreCase(GISUtils.formatPos(linkNodes[i * 2])+","+GISUtils.formatPos(linkNodes[i * 2+1]))){
+            if(nodeCoord.equalsIgnoreCase(GISUtils.formatPos(linkNodes[i * 2],4)+","+GISUtils.formatPos(linkNodes[i * 2+1],5))){
                 break;
             }else{
                 Double qdis = GISUtils.getRoadLength(currLink + "," + nodeCoord);
@@ -694,7 +729,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
         }
         x = x / (pointStrArr.length / 2);
         y = y / (pointStrArr.length / 2);
-        result = GISUtils.formatPos(Double.toString(x)) + "," + GISUtils.formatPos(Double.toString(y));
+        result = GISUtils.formatPos(Double.toString(x),4) + "," + GISUtils.formatPos(Double.toString(y),5);
 
         return result;
     }

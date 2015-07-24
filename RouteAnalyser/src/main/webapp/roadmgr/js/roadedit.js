@@ -49,7 +49,13 @@ $(document).ready(function () {
     $("#xzqh").change(function(){
         getRoadList($("#xzqh").val());
     });
+    $("#editstatus").change(function(){
+        getRoadList($("#xzqh").val());
+    });
     $("#intsxzqh").change(function(){
+        getIntsList($("#intsxzqh").val());
+    });
+    $("#intseditstatus").change(function(){
         getIntsList($("#intsxzqh").val());
     });
 
@@ -68,12 +74,15 @@ $(document).ready(function () {
 
 
 
-function getRoadList(xzqh,roadname){
+function getRoadList(xzqh,roadname,editstatus){
     if(null == xzqh){
         xzqh = $("#xzqh").val();
     }
     if(null == roadname){
         roadname = encodeURI(encodeURI($("#roadname").val()));
+    }
+    if(null == editstatus){
+        editstatus = $("#editstatus").val();
     }
     var param ="1=1";
     if(null!=xzqh){
@@ -81,6 +90,9 @@ function getRoadList(xzqh,roadname){
     }
     if(null!=roadname){
         param+="&roadname="+roadname;
+    }
+    if(null!=editstatus){
+        param+="&editstatus="+editstatus;
     }
     var url = rooturl+"/edit/getRoad.do";
     $.ajax({
@@ -91,13 +103,12 @@ function getRoadList(xzqh,roadname){
         cache: false,
         success: function (data) {
             $("#roadlist").html("");
+            if( typeof(arrPocessTimeout)!='undefined' && null!=arrPocessTimeout){
+                clearTimeout(arrPocessTimeout);
+            }
             if(data.length<=0){
                 $("#roadlist").html("没有数据");
             }else{
-
-                if( typeof(arrPocessTimeout)!='undefined' && null!=arrPocessTimeout){
-                    clearTimeout(arrPocessTimeout);
-                }
                 roadArr = data.concat();
                 totalcount = 0;
                 largeArrayProcess(data,addRoadRow,30);
@@ -119,13 +130,13 @@ function addRoadRow(data){
         }
         var newrow;
         if(i%2 == 0){
-            newrow = "<tr style='background: #ffffff;'><td nowrap>"+data[i].roadname+"</td>" +
+            newrow = "<tr style='background: #ffffff;' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")'><td nowrap>"+data[i].roadname+"</td>" +
             "<td nowrap align='center'>"+editstatus+"</td>" +
             "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
             //"<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad(this,\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='路口调整' style='margin:3px 0 0 0;'/>" +
             "</td></tr>";
         }else{
-            newrow = "<tr style='background:#E3EaF4'><td nowrap>"+data[i].roadname+"</td>" +
+            newrow = "<tr style='background:#E3EaF4' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")'><td nowrap>"+data[i].roadname+"</td>" +
             "<td nowrap align='center'>"+editstatus+"</td>" +
             "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
             //"<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad(this,\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='路口调整' style='margin:3px 0 0 0;'/>" +
@@ -441,12 +452,15 @@ function submitEdit(nextflag){
     });
 }
 
-function getIntsList(xzqh,intsname){
+function getIntsList(xzqh,intsname,editstatus){
     if(null == xzqh){
         xzqh = $("#intsxzqh").val();
     }
     if(null == intsname){
         intsname = encodeURI(encodeURI($("#intsname").val()));
+    }
+    if(null == editstatus){
+        editstatus = $("#intseditstatus").val();
     }
     var param ="1=1";
     if(null!=xzqh){
@@ -454,6 +468,9 @@ function getIntsList(xzqh,intsname){
     }
     if(null!=intsname){
         param+="&intsname="+intsname;
+    }
+    if(null != editstatus){
+        param+="&editstatus="+editstatus;
     }
     var url = rooturl+"/edit/getInts.do";
     $.ajax({
@@ -464,12 +481,12 @@ function getIntsList(xzqh,intsname){
         cache: false,
         success: function (data) {
             $("#intslist").html("");
+            if( typeof(arrPocessTimeout)!='undefined' && null!=arrPocessTimeout){
+                clearTimeout(arrPocessTimeout);
+            }
             if(data.length<=0){
                 $("#intslist").html("没有数据");
             }else{
-                if( typeof(arrPocessTimeout)!='undefined' && null!=arrPocessTimeout){
-                    clearTimeout(arrPocessTimeout);
-                }
                 intsArr = data.concat();
                 totalintscount = 0;
                 largeArrayProcess(data,addIntsRow,30);
@@ -481,15 +498,20 @@ function getIntsList(xzqh,intsname){
 
 function addIntsRow(data){
     for(var i=0;i<data.length;i++){
-
+        var editstatus = "";
+        if(data[i].editstatus == "0"){
+            editstatus = "未调整";
+        }else{
+            editstatus = "<font color='gray'>已调整</font>";
+        }
         var newrow;
         if(i%2 == 0){
-            newrow = "<tr style='background: #ffffff;'><td nowrap>"+data[i].intsname+"</td>" +
+            newrow = "<tr style='background: #ffffff;' onclick='editInts("+totalintscount+",\""+data[i].intsid+"\",\""+data[i].longitude+","+data[i].latitude+"\")'><td nowrap>"+data[i].intsname+"</td><td nowrap  align='center'>"+editstatus+"</td>" +
             "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editInts("+totalintscount+",\""+data[i].intsid+"\",\""+data[i].longitude+","+data[i].latitude+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
             "<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delIntsRow(this,\""+data[i].intsid+"\")' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;"+
             "</td></tr>";
         }else{
-            newrow = "<tr style='background:#E3EaF4'><td nowrap>"+data[i].intsname+"</td>" +
+            newrow = "<tr style='background:#E3EaF4' onclick='editInts("+totalintscount+",\""+data[i].intsid+"\",\""+data[i].longitude+","+data[i].latitude+"\")'><td nowrap>"+data[i].intsname+"</td><td nowrap  align='center'>"+editstatus+"</td>" +
             "<td nowrap align='center'>" +
             "<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editInts("+totalintscount+",\""+data[i].intsid+"\",\""+data[i].longitude+","+data[i].latitude+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
             "<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delIntsRow(this,\""+data[i].intsid+"\")' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;"+
@@ -586,14 +608,26 @@ directionArr.push("东南-西北");
 directionArr.push("西北-东南");
 
 var nArr = new Array();
-nArr.push("否");
-nArr.push("是");
+nArr.push("--");
+nArr.push("√");
 
 function modifyLane(obj){
     if(typeof(prelanerow)!='undefined' && prelanerow!=null){
-        for(var i=0;i<6;i++){
-            prelanerow.find("td").eq(i).html(prelanerow.find("td").eq(i).find("select").find("option:selected").text());
-            prelanerow.find("td").eq(i).val(prelanerow.find("td").eq(i).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(0).val(prelanerow.find("td").eq(0).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(0).html(prelanerow.find("td").eq(0).find("select").find("option:selected").text());
+        prelanerow.find("td").eq(1).val(prelanerow.find("td").eq(1).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(1).html(prelanerow.find("td").eq(1).find("select").find("option:selected").text());
+
+        for(var i=2;i<6;i++){
+            if(prelanerow.find("td").eq(i).find("input").prop("checked")){
+                prelanerow.find("td").eq(i).html("√");
+                prelanerow.find("td").eq(i).val("1");
+            }else{
+                prelanerow.find("td").eq(i).html("--");
+                prelanerow.find("td").eq(i).val("0");
+            }
+            //prelanerow.find("td").eq(i).html(prelanerow.find("td").eq(i).find("select").find("option:selected").text());
+            //prelanerow.find("td").eq(i).val(prelanerow.find("td").eq(i).find("select").find("option:selected").val());
         }
     }
 
@@ -608,7 +642,7 @@ function modifyLane(obj){
 
     var laneno = prelanerow.find("td").eq(1);
     var newstr = "<select class='form-control-static'>";
-    for(var i=1;i<=8;i++){
+    for(var i=0;i<=8;i++){
         newstr+= (laneno.text()==i+""?"<option value='"+i+"' selected>"+i+"</option>":"<option value='"+i+"'>"+i+"</option>");
     }
     newstr+="</select>";
@@ -617,11 +651,13 @@ function modifyLane(obj){
 
     for(var m=2;m<6;m++){
         var nobj = prelanerow.find("td").eq(m);
-        newstr = "<select class='form-control-static'>";
-        for(var i=0;i<nArr.length;i++){
-            newstr+= (i+""==nobj.val()?"<option value='"+i+"' selected>"+nArr[i]+"</option>":"<option value='"+i+"'>"+nArr[i]+"</option>");
+
+        if(nobj.val()=="1"){
+            newstr= "<input type='checkbox' checked/>";
+        }else{
+            newstr= "<input type='checkbox'/>";
         }
-        newstr+="</select>";
+
         nobj.html(newstr);
     }
 
@@ -666,10 +702,25 @@ function delLaneRow(obj){
 }
 
 function addLaneRow(){
+    //$("#lanetable").scrollTop($("#lanelist").find("tr").last().height()*$("#lanelist").find("tr").size());
+    //$("#lanetable").scrollTop($("#lanetable").height());
     if(typeof(prelanerow)!='undefined' && prelanerow!=null){
-        for(var i=0;i<6;i++){
-            prelanerow.find("td").eq(i).val(prelanerow.find("td").eq(i).find("select").val());
-            prelanerow.find("td").eq(i).html(prelanerow.find("td").eq(i).find("select").find("option:selected").text());
+
+        prelanerow.find("td").eq(0).val(prelanerow.find("td").eq(0).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(0).html(prelanerow.find("td").eq(0).find("select").find("option:selected").text());
+        prelanerow.find("td").eq(1).val(prelanerow.find("td").eq(1).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(1).html(prelanerow.find("td").eq(1).find("select").find("option:selected").text());
+
+        for(var i=2;i<6;i++){
+            if(prelanerow.find("td").eq(i).find("input").prop("checked")){
+                prelanerow.find("td").eq(i).html("√");
+                prelanerow.find("td").eq(i).val("1");
+            }else{
+                prelanerow.find("td").eq(i).html("--");
+                prelanerow.find("td").eq(i).val("0");
+            }
+            //prelanerow.find("td").eq(i).html(prelanerow.find("td").eq(i).find("select").find("option:selected").text());
+            //prelanerow.find("td").eq(i).val(prelanerow.find("td").eq(i).find("select").find("option:selected").val());
         }
     }
 
@@ -679,38 +730,38 @@ function addLaneRow(){
         newstr+= "<option value='"+i+"'>"+directionArr[i]+"</option>";
     }
     newstr+="</select></td><td nowrap style='text-align:left'><select class='form-control-static'>";
-    for(var i=1;i<=8;i++){
+    for(var i=0;i<=8;i++){
         newstr+= "<option value='"+i+"'>"+i+"</option>";
     }
-    newstr+="</select></td><td nowrap style='text-align:center'><select class='form-control-static'>";
-    for(var i=0;i<nArr.length;i++){
-        newstr+= "<option value='"+i+"'>"+nArr[i]+"</option>";
-    }
-    newstr+="</select></td><td nowrap style='text-align:center'><select class='form-control-static'>";
-    for(var i=0;i<nArr.length;i++){
-        newstr+= "<option value='"+i+"'>"+nArr[i]+"</option>";
-    }
-    newstr+="</select></td><td nowrap style='text-align:center'><select class='form-control-static'>";
-    for(var i=0;i<nArr.length;i++){
-        newstr+= "<option value='"+i+"'>"+nArr[i]+"</option>";
-    }
-    newstr+="</select></td><td nowrap style='text-align:center'><select class='form-control-static'>";
-    for(var i=0;i<nArr.length;i++){
-        newstr+= "<option value='"+i+"'>"+nArr[i]+"</option>";
-    }
-    newstr+="</select></td><td nowrap style='text-align:center'>";
+    newstr+="</select></td><td nowrap style='text-align:center'><input type='checkbox'/></td>";
+    newstr+="<td nowrap style='text-align:center'><input type='checkbox'/></td>";
+    newstr+="<td nowrap style='text-align:center'><input type='checkbox'/></td>";
+    newstr+="<td nowrap style='text-align:center'><input type='checkbox'/></td>";
+    newstr+="<td nowrap style='text-align:center'>";
     newstr+="<img src='img/modify.png' style='width: 16px;height: 16px'  onclick='modifyLane(this)' title='修改' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;";
     newstr+="<img src='img/remove.png' style='width: 16px;height: 16px'  onclick='delLaneRow(this)' title='删除' style='margin:3px 0 0 0;'/>&nbsp;&nbsp;";
     newstr+="</td></tr>";
-    $("#lanelist").append(newstr);
-    prelanerow = $("#lanelist").find("tr").last();
+    $("#lanelist").prepend(newstr);
+    prelanerow = $("#lanelist").find("tr").first();
 }
 
 function submitlane(nextflag){
     if(typeof(prelanerow)!='undefined' && prelanerow!=null){
-        for(var i=0;i<6;i++){
-            prelanerow.find("td").eq(i).val(prelanerow.find("td").eq(i).find("select").val());
-            prelanerow.find("td").eq(i).html(prelanerow.find("td").eq(i).find("select").find("option:selected").text());
+        prelanerow.find("td").eq(0).val(prelanerow.find("td").eq(0).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(0).html(prelanerow.find("td").eq(0).find("select").find("option:selected").text());
+        prelanerow.find("td").eq(1).val(prelanerow.find("td").eq(1).find("select").find("option:selected").val());
+        prelanerow.find("td").eq(1).html(prelanerow.find("td").eq(1).find("select").find("option:selected").text());
+
+        for(var i=2;i<6;i++){
+            if(prelanerow.find("td").eq(i).find("input").prop("checked")){
+                prelanerow.find("td").eq(i).html("√");
+                prelanerow.find("td").eq(i).val("1");
+            }else{
+                prelanerow.find("td").eq(i).html("--");
+                prelanerow.find("td").eq(i).val("0");
+            }
+            //prelanerow.find("td").eq(i).html(prelanerow.find("td").eq(i).find("select").find("option:selected").text());
+            //prelanerow.find("td").eq(i).val(prelanerow.find("td").eq(i).find("select").find("option:selected").val());
         }
     }
     var lanestr = "";

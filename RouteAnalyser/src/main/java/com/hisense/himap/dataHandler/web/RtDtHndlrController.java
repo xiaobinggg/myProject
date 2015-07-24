@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class RtDtHndlrController {
     @ResponseBody
     public String preOperRoad(HttpServletRequest request){
         //routeDataHandler.preOperRoad();
-        routeDataHandler.preDnode();
+        routeDataHandler.preMonitor();
         return "success";
     }
 
@@ -50,13 +51,14 @@ public class RtDtHndlrController {
      */
     public List getRoadList(HttpServletRequest request){
         String xzqh = request.getParameter("xzqh");
+        String editstatus = request.getParameter("editstatus");
         String roadname = null;
         try {
             roadname = java.net.URLDecoder.decode(request.getParameter("roadname"),"utf-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        List list = routeDataHandler.getRoadList(roadname,xzqh);
+        List list = routeDataHandler.getRoadList(roadname,xzqh,editstatus);
         return list;
     }
 
@@ -122,13 +124,14 @@ public class RtDtHndlrController {
      */
     public List geIntsList(HttpServletRequest request){
         String xzqh = request.getParameter("xzqh");
+        String editstatus = request.getParameter("editstatus");
         String intsname = null;
         try {
             intsname = java.net.URLDecoder.decode(request.getParameter("intsname"),"utf-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        List list = routeDataHandler.getIntsList(intsname, xzqh);
+        List list = routeDataHandler.getIntsList(intsname, xzqh,editstatus);
         return list;
     }
     
@@ -168,6 +171,7 @@ public class RtDtHndlrController {
         String arcs = request.getParameter("lanearr");
         String[] laneArr = arcs.split("#");
         List<RtLaneVO> lanelist = new ArrayList<RtLaneVO>();
+        Map<String,String> laneMap = new HashMap<String, String>();
         for(String lanestr:laneArr){
             if(lanestr.equalsIgnoreCase("")||lanestr.split("@").length<3){
                 continue;
@@ -181,11 +185,16 @@ public class RtDtHndlrController {
             lane.setNturnleft(Integer.parseInt(strarr[3]));
             lane.setNturnright(Integer.parseInt(strarr[4]));
             lane.setNturnround(Integer.parseInt(strarr[5]));
+            if(laneMap.get(lane.getDirection()+lane.getLaneno())!=null){
+                return "false";
+            }
             lanelist.add(lane);
+            laneMap.put(lane.getDirection()+lane.getLaneno(),"1");
         }
         try {
             this.routeDataHandler.updateLane(intsid, lanelist);
         }catch(Exception e){
+            e.printStackTrace();
             return "false";
         }
         return "success";

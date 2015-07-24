@@ -37,9 +37,15 @@
                                 <form class="form-inline">
                                     <div class="form-group" style="height: 100%;color:black;">
                                         <label for="xzqh" >行政区划</label>
-                                        <select class="form-control-static" id="xzqh" style="width: 80px;"></select>
-                                        <label for="roadname" style="color:black;">&nbsp;&nbsp;路段名称</label>
-                                        <input type="text" class="form-control-static" id="roadname" style="width: 100px;">
+                                        <select class="form-control-static" id="xzqh" style="width: 70px;"></select>
+                                        <label for="editstatus" >状态</label>
+                                        <select class="form-control-static" id="editstatus" style="width: 65px;">
+                                            <option value="-1">全部</option>
+                                            <option value="1">已调整</option>
+                                            <option value="0">未调整</option>
+                                        </select>
+                                        <label for="roadname" style="color:black;">&nbsp;&nbsp;名称</label>
+                                        <input type="text" class="form-control-static" id="roadname" style="width: 80px;">
 
                                         <button type="button" onclick="getRoadList()" style="height:25px;width: 50px;padding:2px"  class="btn btn-primary form-control-static">确定</button>
                                     </div>
@@ -96,10 +102,16 @@
                             <div style="background: #ffffff;width: 100%;height: 100%;padding-top: 2px;">
                                 <form class="form-inline">
                                     <div class="form-group" style="height: 100%;color:black;">
-                                        <label for="xzqh" >行政区划</label>
-                                        <select class="form-control-static" id="intsxzqh" style="width: 80px;"></select>
+                                        <label for="intsxzqh" >行政区划</label>
+                                        <select class="form-control-static" id="intsxzqh" style="width: 70px;"></select>
+                                        <label for="intseditstatus" >状态</label>
+                                        <select class="form-control-static" id="intseditstatus" style="width: 65px;">
+                                            <option value="-1">全部</option>
+                                            <option value="1">已调整</option>
+                                            <option value="0">未调整</option>
+                                        </select>
                                         <label for="roadname" style="color:black;">&nbsp;&nbsp;路口名称</label>
-                                        <input type="text" class="form-control-static" id="intsname" style="width: 100px;">
+                                        <input type="text" class="form-control-static" id="intsname" style="width: 80px;">
 
                                         <button type="button" onclick="getIntsList()" style="height:25px;width: 50px;padding:2px"  class="btn btn-primary form-control-static">确定</button>
                                     </div>
@@ -111,6 +123,7 @@
                                 <thead>
                                 <tr style="background:#919193;color:white;">
                                     <th nowrap width="75%" style="text-align:center">路口名称</th>
+                                    <th nowrap width="15%" style="text-align:center">状态</th>
                                     <th nowrap width="10%" style="text-align:center">操作</th>
                                 </tr>
                                 </thead>
