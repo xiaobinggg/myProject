@@ -150,7 +150,7 @@ public class RouteDataHandlerDAO {
         }
     }
     /**
-     * 更新路口状态
+     * 更新路口安装点信息
      * @param intsid
      * @param points
      */

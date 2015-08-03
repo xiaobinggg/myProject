@@ -148,15 +148,22 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
      * @return 下一路口列表
      */
     public List<QueryNextIntsResultVO> getNextInts(QueryNextIntsVO query) {
+        RtNodeVO nodeVO = null;
         if (null == query.getPointid() || query.getPointid().equalsIgnoreCase("")) {
             return null;
+        }else if(query.getPointid().split(",").length==2){
+            nodeVO = this.getNodeByPos(query.getPointid());
         }
         List<QueryNextIntsResultVO> nextInts = new ArrayList<QueryNextIntsResultVO>();
 
         //查询当前所在的路口
-        RtNodeVO nodeVO = MemRouteData.nodeMap.get(query.getPointid());
-        if (null == nodeVO) { //如果当前在路段上，根据动态节点表进行定位
-            nodeVO = MemRouteData.dnodemap.get(query.getPointid());//安装点所在的动态节点
+        if(null == nodeVO){
+            nodeVO = MemRouteData.nodeMap.get(query.getPointid());
+        }
+        if (null == nodeVO || nodeVO.getDnodeid()!=null) { //如果当前在路段上，根据动态节点表进行定位
+            if(null == nodeVO){
+                nodeVO = MemRouteData.dnodemap.get(query.getPointid());//安装点所在的动态节点
+            }
             if(nodeVO == null ||nodeVO.getArcids() == null){
                 return null;
             }
@@ -376,12 +383,13 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
             if (point.indexOf(",") > 0) {//如果是具体的坐标，查询坐标点所在的节点
                 node = this.getNodeByPos(point);
             } else { //如果是安装点，查询安装点所在的节点
-                //如果是路口节点
-                node = MemRouteData.nodeMap.get(point);
-                //如果是动态节点，将动态节点添加到路网结构中
-                if(null == node){
+                if(MemRouteData.nodeMap.get(point)!=null){
+                    node = MemRouteData.nodeMap.get(point);
+                }else if(MemRouteData.dnodemap.get(point)!=null){
                     node = MemRouteData.dnodemap.get(point);
                     addDNodeToRoute(node);
+                }else{
+
                 }
             }
             if (null != node) {
@@ -520,8 +528,11 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
                 return node;
             }
         }
-        //step3 @TODO 动态添加节点
-
+        //step3
+        List<RtNodeVO> nodelist = this.routeAnalyserDAO.getNearNode(pos,"50");
+        if(nodelist!=null && nodelist.size()>0){
+            return nodelist.get(0);
+        }
         return null;
     }
 

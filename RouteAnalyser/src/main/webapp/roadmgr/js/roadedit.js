@@ -132,13 +132,13 @@ function addRoadRow(data){
         if(i%2 == 0){
             newrow = "<tr style='background: #ffffff;' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")'><td nowrap>"+data[i].roadname+"</td>" +
             "<td nowrap align='center'>"+editstatus+"</td>" +
-            "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
+            "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px'  title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
             //"<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad(this,\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='路口调整' style='margin:3px 0 0 0;'/>" +
             "</td></tr>";
         }else{
             newrow = "<tr style='background:#E3EaF4' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")'><td nowrap>"+data[i].roadname+"</td>" +
             "<td nowrap align='center'>"+editstatus+"</td>" +
-            "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad("+totalcount+",\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
+            "<td nowrap align='center'><img src='img/edit.png'  style='width: 18px;height: 18px' title='调整' style='margin:3px 0 0 0;'/>&nbsp;" +
             //"<img src='img/edit.png'  style='width: 18px;height: 18px' onclick='editroad(this,\""+data[i].roadid+"\",\""+data[i].roadcenter+"\")' title='路口调整' style='margin:3px 0 0 0;'/>" +
             "</td></tr>";
 

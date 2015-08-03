@@ -1,0 +1,741 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>道路名称查询</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+        }
+
+        #mapContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        #tip {
+            height: 120px;
+            background-color: #fff;
+            padding-left: 10px;
+            padding-right: 10px;
+            position: absolute;
+            bottom: 20px;
+            font-size: 12px;
+            right: 10px;
+            border-radius: 3px;
+            width: 300px;
+            line-height: 20px;
+        }
+
+        #tip input[type="button"] {
+            margin-top: 10px;
+            background-color: #0D9BF2;
+            height: 25px;
+            text-align: center;
+            line-height: 25px;
+            color: #fff;
+            font-size: 12px;
+            border-radius: 3px;
+            outline: none;
+            border: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="mapContainer"></div>
+<div id="tip">
+    <div><input type="button" value="查询" onclick="roadSearch()"/></div>
+    <div id="r_title"><b>道路查询结果:</b></div>
+    <div id="result"></div>
+</div>
+
+<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=adc84cf44c6e88bf7916eaa8027c5833"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript">
+    var pathArr = [];
+    var pathArr1 = [];
+    var roadArr = {
+        "roads":[{"DLDM":"43639","DLMC":"三堡村路段","XZQH":"","results":""},
+            {"DLDM":"43640","DLMC":"良溪村路段","XZQH":"","results":""},
+            {"DLDM":"43641","DLMC":"横江村路段","XZQH":"","results":""},
+            {"DLDM":"43642","DLMC":"大林村路段","XZQH":"","results":""},
+            {"DLDM":"43643","DLMC":"周郡村路段","XZQH":"","results":""},
+            {"DLDM":"43644","DLMC":"仁厚村路段","XZQH":"","results":""},
+            {"DLDM":"43645","DLMC":"新昌村路段","XZQH":"","results":""},
+            {"DLDM":"43646","DLMC":"石滘村路段","XZQH":"","results":""},
+            {"DLDM":"43647","DLMC":"石头村路段","XZQH":"","results":""},
+            {"DLDM":"43648","DLMC":"罗江村路段","XZQH":"","results":""},
+            {"DLDM":"43649","DLMC":"乐溪村路段","XZQH":"","results":""},
+            {"DLDM":"43650","DLMC":"桐井村路段","XZQH":"","results":""},
+            {"DLDM":"43651","DLMC":"莲塘村路段","XZQH":"","results":""},
+            {"DLDM":"43652","DLMC":"迳口村路段","XZQH":"","results":""},
+            {"DLDM":"43701","DLMC":"白藤路","XZQH":"","results":""},
+            {"DLDM":"43702","DLMC":"同裕路","XZQH":"","results":""},
+            {"DLDM":"43703","DLMC":"大坦路","XZQH":"","results":""},
+            {"DLDM":"43704","DLMC":"瑞丰路","XZQH":"","results":""},
+            {"DLDM":"43705","DLMC":"民丰路","XZQH":"","results":""},
+            {"DLDM":"43706","DLMC":"霞阳路","XZQH":"","results":""},
+            {"DLDM":"43707","DLMC":"中兴一路","XZQH":"","results":""},
+            {"DLDM":"43708","DLMC":"中兴二路","XZQH":"","results":""},
+            {"DLDM":"43709","DLMC":"中兴三路","XZQH":"","results":""},
+            {"DLDM":"43710","DLMC":"西堤一路","XZQH":"","results":""},
+            {"DLDM":"43711","DLMC":"西堤二路","XZQH":"","results":""},
+            {"DLDM":"43712","DLMC":"西堤三路","XZQH":"","results":""},
+            {"DLDM":"43713","DLMC":"西堤四路","XZQH":"","results":""},
+            {"DLDM":"43714","DLMC":"东堤一路","XZQH":"","results":""},
+            {"DLDM":"43715","DLMC":"东堤二路","XZQH":"","results":""},
+            {"DLDM":"43716","DLMC":"东堤三路","XZQH":"","results":""},
+            {"DLDM":"43717","DLMC":"东堤四路","XZQH":"","results":""},
+            {"DLDM":"43718","DLMC":"北昌西路","XZQH":"","results":""},
+            {"DLDM":"43719","DLMC":"北昌东路","XZQH":"","results":""},
+            {"DLDM":"43720","DLMC":"中泰东路","XZQH":"","results":""},
+            {"DLDM":"43721","DLMC":"中泰西路","XZQH":"","results":""},
+            {"DLDM":"43722","DLMC":"南华东路","XZQH":"","results":""},
+            {"DLDM":"43723","DLMC":"南华西路","XZQH":"","results":""},
+            {"DLDM":"43724","DLMC":"马窖大桥","XZQH":"","results":""},
+            {"DLDM":"43725","DLMC":"白藤大桥","XZQH":"","results":""},
+            {"DLDM":"43726","DLMC":"西江围堤","XZQH":"","results":""},
+            {"DLDM":"63001","DLMC":"迎宾大道西","XZQH":"","results":""},
+            {"DLDM":"63005","DLMC":"滨江大道","XZQH":"","results":""},
+            {"DLDM":"63006","DLMC":"建设二路","XZQH":"","results":""},
+            {"DLDM":"63007","DLMC":"迎宾大道中","XZQH":"","results":""},
+            {"DLDM":"63008","DLMC":"迎宾大道东","XZQH":"","results":""},
+            {"DLDM":"63009","DLMC":"潮莲收费站","XZQH":"","results":""},
+            {"DLDM":"63010","DLMC":"潮莲公路","XZQH":"","results":""},
+            {"DLDM":"63102","DLMC":"胜利北路","XZQH":"","results":""},
+            {"DLDM":"63103","DLMC":"白沙大道东","XZQH":"","results":""},
+            {"DLDM":"63106","DLMC":"蓬莱路","XZQH":"","results":""},
+            {"DLDM":"63107","DLMC":"环市一路","XZQH":"","results":""},
+            {"DLDM":"63108","DLMC":"环市二路","XZQH":"","results":""},
+            {"DLDM":"63109","DLMC":"环市三路","XZQH":"","results":""},
+            {"DLDM":"63110","DLMC":"农林东路","XZQH":"","results":""},
+            {"DLDM":"63111","DLMC":"农林西路","XZQH":"","results":""},
+            {"DLDM":"63112","DLMC":"农林横路","XZQH":"","results":""},
+            {"DLDM":"63113","DLMC":"华园东路","XZQH":"","results":""},
+            {"DLDM":"63114","DLMC":"华园中路","XZQH":"","results":""},
+            {"DLDM":"63115","DLMC":"华园路","XZQH":"","results":""},
+            {"DLDM":"63117","DLMC":"堤中路","XZQH":"","results":""},
+            {"DLDM":"63118","DLMC":"堤西路","XZQH":"","results":""},
+            {"DLDM":"63119","DLMC":"龙湾路","XZQH":"","results":""},
+            {"DLDM":"63120","DLMC":"西区工业路","XZQH":"","results":""},
+            {"DLDM":"63123","DLMC":"里村大道","XZQH":"","results":""},
+            {"DLDM":"63124","DLMC":"胜利大桥","XZQH":"","results":""},
+            {"DLDM":"63125","DLMC":"华园横路","XZQH":"","results":""},
+            {"DLDM":"63201","DLMC":"蓬江大桥","XZQH":"","results":""},
+            {"DLDM":"63202","DLMC":"跃进路","XZQH":"","results":""},
+            {"DLDM":"63203","DLMC":"港口一路","XZQH":"","results":""},
+            {"DLDM":"63205","DLMC":"东华一路","XZQH":"","results":""},
+            {"DLDM":"63206","DLMC":"东华二路","XZQH":"","results":""},
+            {"DLDM":"63207","DLMC":"迎宾大道耙冲桥","XZQH":"","results":""},
+            {"DLDM":"63208","DLMC":"东华大桥","XZQH":"","results":""},
+            {"DLDM":"63209","DLMC":"迎宾路","XZQH":"","results":""},
+            {"DLDM":"83202","DLMC":"东成街","XZQH":"","results":""},
+            {"DLDM":"83203","DLMC":"高成街","XZQH":"","results":""},
+            {"DLDM":"83204","DLMC":"祈安街","XZQH":"","results":""},
+            {"DLDM":"83205","DLMC":"潮江路","XZQH":"","results":""},
+            {"DLDM":"83206","DLMC":"美景街","XZQH":"","results":""},
+            {"DLDM":"83208","DLMC":"天河东路","XZQH":"","results":""},
+            {"DLDM":"83209","DLMC":"五福一街","XZQH":"","results":""},
+            {"DLDM":"83210","DLMC":"五福二街","XZQH":"","results":""},
+            {"DLDM":"83211","DLMC":"五福三街","XZQH":"","results":""},
+            {"DLDM":"83212","DLMC":"五福四街","XZQH":"","results":""},
+            {"DLDM":"83213","DLMC":"五福五街","XZQH":"","results":""},
+            {"DLDM":"83214","DLMC":"天沙一路","XZQH":"","results":""},
+            {"DLDM":"83215","DLMC":"天沙二路","XZQH":"","results":""},
+            {"DLDM":"83216","DLMC":"天沙三路","XZQH":"","results":""},
+            {"DLDM":"83217","DLMC":"东港街","XZQH":"","results":""},
+            {"DLDM":"83218","DLMC":"天沙四路","XZQH":"","results":""},
+            {"DLDM":"83219","DLMC":"汴溪路","XZQH":"","results":""},
+            {"DLDM":"83220","DLMC":"天河中路","XZQH":"","results":""},
+            {"DLDM":"83221","DLMC":"树梓街","XZQH":"","results":""},
+            {"DLDM":"83222","DLMC":"竹排街","XZQH":"","results":""},
+            {"DLDM":"83223","DLMC":"凤阳街","XZQH":"","results":""},
+            {"DLDM":"83224","DLMC":"丹井里","XZQH":"","results":""},
+            {"DLDM":"83225","DLMC":"蓬江交警大队二中队其他路","XZQH":"","results":""},
+            {"DLDM":"83226","DLMC":"天龙一街","XZQH":"","results":""},
+            {"DLDM":"83227","DLMC":"天龙二街","XZQH":"","results":""},
+            {"DLDM":"83228","DLMC":"天龙三街","XZQH":"","results":""},
+            {"DLDM":"83229","DLMC":"祈东街","XZQH":"","results":""},
+            {"DLDM":"83230","DLMC":"江边里","XZQH":"","results":""},
+            {"DLDM":"83231","DLMC":"浮石路","XZQH":"","results":""},
+            {"DLDM":"83233","DLMC":"丰康路","XZQH":"","results":""},
+            {"DLDM":"87240","DLMC":"东江路","XZQH":"","results":""},
+            {"DLDM":"87241","DLMC":"潮江横路","XZQH":"","results":""},
+            {"DLDM":"87242","DLMC":"炮台南路","XZQH":"","results":""},
+            {"DLDM":"93501","DLMC":"杜阮镇其它道路","XZQH":"","results":""},
+            {"DLDM":"93605","DLMC":"圩镇篁竹路","XZQH":"","results":""},
+            {"DLDM":"93606","DLMC":"圩镇人民路","XZQH":"","results":""},
+            {"DLDM":"93607","DLMC":"圩镇豪畔路","XZQH":"","results":""},
+            {"DLDM":"93608","DLMC":"圩镇路段","XZQH":"","results":""},
+            {"DLDM":"93609","DLMC":"新棠路","XZQH":"","results":""},
+            {"DLDM":"93610","DLMC":"建棠路","XZQH":"","results":""},
+            {"DLDM":"93611","DLMC":"兴棠路","XZQH":"","results":""},
+            {"DLDM":"93612","DLMC":"富怡路","XZQH":"","results":""},
+            {"DLDM":"93613","DLMC":"路段","XZQH":"","results":""},
+            {"DLDM":"93614","DLMC":"中心商业区路段","XZQH":"","results":""},
+            {"DLDM":"93615","DLMC":"江盛路","XZQH":"","results":""},
+            {"DLDM":"93616","DLMC":"江盛二路","XZQH":"","results":""},
+            {"DLDM":"93617","DLMC":"金盛二路","XZQH":"","results":""},
+            {"DLDM":"93618","DLMC":"金盛三路","XZQH":"","results":""},
+            {"DLDM":"93619","DLMC":"丰盛工业园东区路段","XZQH":"","results":""},
+            {"DLDM":"93620","DLMC":"金桐路","XZQH":"","results":""},
+            {"DLDM":"93621","DLMC":"堡棠路","XZQH":"","results":""},
+            {"DLDM":"93622","DLMC":"丰盛工业园西区路段","XZQH":"","results":""},
+            {"DLDM":"93623","DLMC":"台商工业园路段","XZQH":"","results":""},
+            {"DLDM":"93624","DLMC":"金岭工业区路段","XZQH":"","results":""},
+            {"DLDM":"93625","DLMC":"三堡工业园路段","XZQH":"","results":""},
+            {"DLDM":"93626","DLMC":"中心步岭村路段","XZQH":"","results":""},
+            {"DLDM":"93627","DLMC":"丰盛大道","XZQH":"","results":""},
+            {"DLDM":"93628","DLMC":"天后大道","XZQH":"","results":""},
+            {"DLDM":"93653","DLMC":"其他路路段","XZQH":"","results":""},
+            {"DLDM":"A3201","DLMC":"五邑大学校内路","XZQH":"","results":""},
+            {"DLDM":"B3202","DLMC":"益华停车场","XZQH":"","results":""},
+            {"DLDM":"C3201","DLMC":"东湖广场","XZQH":"","results":""},
+            {"DLDM":"99997","DLMC":"其它路","XZQH":"","results":""},
+            {"DLDM":"62001","DLMC":"新民大桥","XZQH":"","results":""},
+            {"DLDM":"62002","DLMC":"南冲公路","XZQH":"","results":""},
+            {"DLDM":"62003","DLMC":"礼义一路","XZQH":"","results":""},
+            {"DLDM":"62004","DLMC":"礼义二路","XZQH":"","results":""},
+            {"DLDM":"62005","DLMC":"礼义三路","XZQH":"","results":""},
+            {"DLDM":"62006","DLMC":"礼睦路","XZQH":"","results":""},
+            {"DLDM":"62007","DLMC":"礼乐一路","XZQH":"","results":""},
+            {"DLDM":"62008","DLMC":"礼乐二路","XZQH":"","results":""},
+            {"DLDM":"62009","DLMC":"礼乐三路","XZQH":"","results":""},
+            {"DLDM":"62010","DLMC":"南环路礼乐路段","XZQH":"","results":""},
+            {"DLDM":"64001","DLMC":"江海一路","XZQH":"","results":""},
+            {"DLDM":"64002","DLMC":"江海二路","XZQH":"","results":""},
+            {"DLDM":"63401","DLMC":"港口一路","XZQH":"","results":""},
+            {"DLDM":"63402","DLMC":"港口二路","XZQH":"","results":""},
+            {"DLDM":"63403","DLMC":"建设三路","XZQH":"","results":""},
+            {"DLDM":"63404","DLMC":"双龙大道","XZQH":"","results":""},
+            {"DLDM":"63405","DLMC":"白石大道","XZQH":"","results":""},
+            {"DLDM":"63406","DLMC":"良化大道","XZQH":"","results":""},
+            {"DLDM":"63407","DLMC":"北环路","XZQH":"","results":""},
+            {"DLDM":"63408","DLMC":"篁庄大道","XZQH":"","results":""},
+            {"DLDM":"63409","DLMC":"江北路","XZQH":"","results":""},
+            {"DLDM":"63410","DLMC":"海傍街","XZQH":"","results":""},
+            {"DLDM":"63411","DLMC":"丰乐路","XZQH":"","results":""},
+            {"DLDM":"63412","DLMC":"潮连大桥","XZQH":"","results":""},
+            {"DLDM":"63413","DLMC":"炮台桥","XZQH":"","results":""},
+            {"DLDM":"63414","DLMC":"白石桥","XZQH":"","results":""},
+            {"DLDM":"63415","DLMC":"发展大道","XZQH":"","results":""},
+            {"DLDM":"63416","DLMC":"育德街","XZQH":"","results":""},
+            {"DLDM":"63417","DLMC":"潮连大道","XZQH":"","results":""},
+            {"DLDM":"63418","DLMC":"江门桥花圃","XZQH":"","results":""},
+            {"DLDM":"63419","DLMC":"迎宾路与丰乐路交汇路口","XZQH":"","results":""},
+            {"DLDM":"63420","DLMC":"发展大道","XZQH":"","results":""},
+            {"DLDM":"63421","DLMC":"潮连桥北花圃","XZQH":"","results":""},
+            {"DLDM":"63422","DLMC":"城市花园红绿灯","XZQH":"","results":""},
+            {"DLDM":"63423","DLMC":"篁庄大道路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"63424","DLMC":"北环路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"63425","DLMC":"潮莲桥收费站","XZQH":"","results":""},
+            {"DLDM":"63426","DLMC":"白石大道与院士路交汇路口","XZQH":"","results":""},
+            {"DLDM":"63427","DLMC":"潮连桥南花圃","XZQH":"","results":""},
+            {"DLDM":"63428","DLMC":"育德街","XZQH":"","results":""},
+            {"DLDM":"63429","DLMC":"潮连大道","XZQH":"","results":""},
+            {"DLDM":"63430","DLMC":"江沙收费站","XZQH":"","results":""},
+            {"DLDM":"63431","DLMC":"西环路公安局路口","XZQH":"","results":""},
+            {"DLDM":"63432","DLMC":"潮莲大道","XZQH":"","results":""},
+            {"DLDM":"63440","DLMC":"潮莲桥北花圃","XZQH":"","results":""},
+            {"DLDM":"63442","DLMC":"城市花园红绿灯","XZQH":"","results":""},
+            {"DLDM":"63443","DLMC":"篁庄大道路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"63444","DLMC":"北环路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"63445","DLMC":"潮莲桥收费站","XZQH":"","results":""},
+            {"DLDM":"63446","DLMC":"华侨广场南岗","XZQH":"","results":""},
+            {"DLDM":"63448","DLMC":"潮莲桥南花圃","XZQH":"","results":""},
+            {"DLDM":"63449","DLMC":"育德街","XZQH":"","results":""},
+            {"DLDM":"63451","DLMC":"五邑大学岗","XZQH":"","results":""},
+            {"DLDM":"63452","DLMC":"逸豪岗","XZQH":"","results":""},
+            {"DLDM":"63455","DLMC":"滨江大道","XZQH":"","results":""},
+            {"DLDM":"63456","DLMC":"滨江大林岗","XZQH":"","results":""},
+            {"DLDM":"63474","DLMC":"联通大楼岗","XZQH":"","results":""},
+            {"DLDM":"63500","DLMC":"杜阮镇其他路段","XZQH":"","results":""},
+            {"DLDM":"63502","DLMC":"西环路","XZQH":"","results":""},
+            {"DLDM":"63503","DLMC":"杜阮镇松丹线","XZQH":"","results":""},
+            {"DLDM":"63504","DLMC":"杜阮镇环镇公路","XZQH":"","results":""},
+            {"DLDM":"63601","DLMC":"江沙路棠下段","XZQH":"","results":""},
+            {"DLDM":"63701","DLMC":"其他路段","XZQH":"","results":""},
+            {"DLDM":"63702","DLMC":"西江大桥","XZQH":"","results":""},
+            {"DLDM":"63703","DLMC":"西桥路","XZQH":"","results":""},
+            {"DLDM":"63704","DLMC":"新荷路","XZQH":"","results":""},
+            {"DLDM":"63705","DLMC":"民兴路","XZQH":"","results":""},
+            {"DLDM":"63706","DLMC":"中兴四路","XZQH":"","results":""},
+            {"DLDM":"63707","DLMC":"荷塘大桥","XZQH":"","results":""},
+            {"DLDM":"63708","DLMC":"中兴三路","XZQH":"","results":""},
+            {"DLDM":"73002","DLMC":"中心路","XZQH":"","results":""},
+            {"DLDM":"73101","DLMC":"兴宁路","XZQH":"","results":""},
+            {"DLDM":"73102","DLMC":"太平路","XZQH":"","results":""},
+            {"DLDM":"73103","DLMC":"常安路","XZQH":"","results":""},
+            {"DLDM":"73104","DLMC":"象溪横路","XZQH":"","results":""},
+            {"DLDM":"73105","DLMC":"广新路","XZQH":"","results":""},
+            {"DLDM":"73106","DLMC":"紫茶路","XZQH":"","results":""},
+            {"DLDM":"73107","DLMC":"上步路","XZQH":"","results":""},
+            {"DLDM":"73108","DLMC":"葵尾路","XZQH":"","results":""},
+            {"DLDM":"73109","DLMC":"塘步路","XZQH":"","results":""},
+            {"DLDM":"73110","DLMC":"仓后路","XZQH":"","results":""},
+            {"DLDM":"73111","DLMC":"更兴路","XZQH":"","results":""},
+            {"DLDM":"73112","DLMC":"新市路","XZQH":"","results":""},
+            {"DLDM":"73113","DLMC":"二中横","XZQH":"","results":""},
+            {"DLDM":"73114","DLMC":"镇东路","XZQH":"","results":""},
+            {"DLDM":"73115","DLMC":"书院路","XZQH":"","results":""},
+            {"DLDM":"73116","DLMC":"众兴路","XZQH":"","results":""},
+            {"DLDM":"73117","DLMC":"羊桥路","XZQH":"","results":""},
+            {"DLDM":"73118","DLMC":"钓台路","XZQH":"","results":""},
+            {"DLDM":"73119","DLMC":"紫沙路","XZQH":"","results":""},
+            {"DLDM":"73120","DLMC":"岭梅大道","XZQH":"","results":""},
+            {"DLDM":"73121","DLMC":"天河西路","XZQH":"","results":""},
+            {"DLDM":"73122","DLMC":"永盛一街","XZQH":"","results":""},
+            {"DLDM":"73123","DLMC":"永盛二街","XZQH":"","results":""},
+            {"DLDM":"73124","DLMC":"汴溪路","XZQH":"","results":""},
+            {"DLDM":"73125","DLMC":"紫泥路","XZQH":"","results":""},
+            {"DLDM":"73126","DLMC":"莲平路","XZQH":"","results":""},
+            {"DLDM":"73127","DLMC":"幸福新村","XZQH":"","results":""},
+            {"DLDM":"73128","DLMC":"鹅溪大街","XZQH":"","results":""},
+            {"DLDM":"73129","DLMC":"竹椅路","XZQH":"","results":""},
+            {"DLDM":"73130","DLMC":"永利街","XZQH":"","results":""},
+            {"DLDM":"73131","DLMC":"东观大路","XZQH":"","results":""},
+            {"DLDM":"73132","DLMC":"第发里","XZQH":"","results":""},
+            {"DLDM":"73133","DLMC":"阜康里","XZQH":"","results":""},
+            {"DLDM":"73134","DLMC":"龙头里","XZQH":"","results":""},
+            {"DLDM":"73135","DLMC":"迦南里","XZQH":"","results":""},
+            {"DLDM":"73136","DLMC":"龙湾路","XZQH":"","results":""},
+            {"DLDM":"73137","DLMC":"永盛路","XZQH":"","results":""},
+            {"DLDM":"73138","DLMC":"高第里","XZQH":"","results":""},
+            {"DLDM":"73139","DLMC":"白沙路","XZQH":"","results":""},
+            {"DLDM":"73140","DLMC":"建安街","XZQH":"","results":""},
+            {"DLDM":"73141","DLMC":"聚源路","XZQH":"","results":""},
+            {"DLDM":"73142","DLMC":"紫坭路","XZQH":"","results":""},
+            {"DLDM":"73143","DLMC":"宝善路","XZQH":"","results":""},
+            {"DLDM":"73148","DLMC":"象溪路","XZQH":"","results":""},
+            {"DLDM":"73149","DLMC":"范罗岗路段","XZQH":"","results":""},
+            {"DLDM":"73150","DLMC":"中心市场路段","XZQH":"","results":""},
+            {"DLDM":"73151","DLMC":"东仓里","XZQH":"","results":""},
+            {"DLDM":"73152","DLMC":"接龙里","XZQH":"","results":""},
+            {"DLDM":"73153","DLMC":"幸福路","XZQH":"","results":""},
+            {"DLDM":"73201","DLMC":"江华一路","XZQH":"","results":""},
+            {"DLDM":"73202","DLMC":"江华二路","XZQH":"","results":""},
+            {"DLDM":"73203","DLMC":"水南路","XZQH":"","results":""},
+            {"DLDM":"73401","DLMC":"青年公路","XZQH":"","results":""},
+            {"DLDM":"73402","DLMC":"宏达路","XZQH":"","results":""},
+            {"DLDM":"73403","DLMC":"宏江路","XZQH":"","results":""},
+            {"DLDM":"73404","DLMC":"甘化路","XZQH":"","results":""},
+            {"DLDM":"73405","DLMC":"炮台北路","XZQH":"","results":""},
+            {"DLDM":"73406","DLMC":"甘棠路","XZQH":"","results":""},
+            {"DLDM":"73407","DLMC":"建德街","XZQH":"","results":""},
+            {"DLDM":"73408","DLMC":"聚德街","XZQH":"","results":""},
+            {"DLDM":"73409","DLMC":"潮莲桥北匝道","XZQH":"","results":""},
+            {"DLDM":"73410","DLMC":"广场环路","XZQH":"","results":""},
+            {"DLDM":"73411","DLMC":"天福路","XZQH":"","results":""},
+            {"DLDM":"73412","DLMC":"建达南路","XZQH":"","results":""},
+            {"DLDM":"73413","DLMC":"建达北路","XZQH":"","results":""},
+            {"DLDM":"73414","DLMC":"宏兴路","XZQH":"","results":""},
+            {"DLDM":"73415","DLMC":"院士路","XZQH":"","results":""},
+            {"DLDM":"73416","DLMC":"丰雅路","XZQH":"","results":""},
+            {"DLDM":"73417","DLMC":"丰乐一街","XZQH":"","results":""},
+            {"DLDM":"73418","DLMC":"丰乐二街","XZQH":"","results":""},
+            {"DLDM":"73419","DLMC":"丰乐三街","XZQH":"","results":""},
+            {"DLDM":"73420","DLMC":"北新街","XZQH":"","results":""},
+            {"DLDM":"73421","DLMC":"丰裕路","XZQH":"","results":""},
+            {"DLDM":"73422","DLMC":"丰华路","XZQH":"","results":""},
+            {"DLDM":"73423","DLMC":"丰盛路","XZQH":"","results":""},
+            {"DLDM":"73424","DLMC":"乐怡路","XZQH":"","results":""},
+            {"DLDM":"73425","DLMC":"乐福路","XZQH":"","results":""},
+            {"DLDM":"73426","DLMC":"乐美路","XZQH":"","results":""},
+            {"DLDM":"73427","DLMC":"聚德街","XZQH":"","results":""},
+            {"DLDM":"73428","DLMC":"高沙中路","XZQH":"","results":""},
+            {"DLDM":"73429","DLMC":"高沙东路","XZQH":"","results":""},
+            {"DLDM":"73430","DLMC":"高沙一路","XZQH":"","results":""},
+            {"DLDM":"73431","DLMC":"高沙二街","XZQH":"","results":""},
+            {"DLDM":"73432","DLMC":"高沙三街","XZQH":"","results":""},
+            {"DLDM":"73433","DLMC":"蓬江交警大队四中队其他路段","XZQH":"","results":""},
+            {"DLDM":"73434","DLMC":"羊边里","XZQH":"","results":""},
+            {"DLDM":"73435","DLMC":"联合村路","XZQH":"","results":""},
+            {"DLDM":"73436","DLMC":"群星大道","XZQH":"","results":""},
+            {"DLDM":"73437","DLMC":"丰康路","XZQH":"","results":""},
+            {"DLDM":"73438","DLMC":"丰泰路","XZQH":"","results":""},
+            {"DLDM":"73439","DLMC":"篁庄乡路","XZQH":"","results":""},
+            {"DLDM":"73440","DLMC":"连荷路","XZQH":"","results":""},
+            {"DLDM":"73441","DLMC":"潮莲桥北匝道","XZQH":"","results":""},
+            {"DLDM":"73447","DLMC":"广场环路","XZQH":"","results":""},
+            {"DLDM":"73450","DLMC":"天福路","XZQH":"","results":""},
+            {"DLDM":"73453","DLMC":"建达南路","XZQH":"","results":""},
+            {"DLDM":"73454","DLMC":"建达北路","XZQH":"","results":""},
+            {"DLDM":"73603","DLMC":"桐乐路","XZQH":"","results":""},
+            {"DLDM":"73604","DLMC":"圩镇棠下大道","XZQH":"","results":""},
+            {"DLDM":"83001","DLMC":"其他路段","XZQH":"","results":""},
+            {"DLDM":"83201","DLMC":"建业街","XZQH":"","results":""},
+            {"DLDM":"43502","DLMC":"杜阮镇平大线","XZQH":"","results":""},
+            {"DLDM":"43509","DLMC":"杜阮镇北延路","XZQH":"","results":""},
+            {"DLDM":"63002","DLMC":"西环路","XZQH":"","results":""},
+            {"DLDM":"63003","DLMC":"建设路","XZQH":"","results":""},
+            {"DLDM":"63101","DLMC":"胜利路","XZQH":"","results":""},
+            {"DLDM":"63104","DLMC":"白沙大道西","XZQH":"","results":""},
+            {"DLDM":"63105","DLMC":"江会路","XZQH":"","results":""},
+            {"DLDM":"63122","DLMC":"天宁路","XZQH":"","results":""},
+            {"DLDM":"63204","DLMC":"堤东路","XZQH":"","results":""},
+            {"DLDM":"63501","DLMC":"杜阮镇江杜公路","XZQH":"","results":""},
+            {"DLDM":"83207","DLMC":"沂水街","XZQH":"","results":""},
+            {"DLDM":"20270","DLMC":"270省道","XZQH":"","results":""},
+            {"DLDM":"20272","DLMC":"272省道","XZQH":"","results":""},
+            {"DLDM":"64014","DLMC":"高新西路","XZQH":"","results":""},
+            {"DLDM":"20364","DLMC":"364省道","XZQH":"","results":""},
+            {"DLDM":"20271","DLMC":"271省道","XZQH":"","results":""},
+            {"DLDM":"20365","DLMC":"365省道","XZQH":"","results":""},
+            {"DLDM":"30548","DLMC":"X548县道大井线","XZQH":"","results":""},
+            {"DLDM":"20274","DLMC":"274省道","XZQH":"","results":""},
+            {"DLDM":"20275","DLMC":"275省道","XZQH":"","results":""},
+            {"DLDM":"20273","DLMC":"273省道","XZQH":"","results":""},
+            {"DLDM":"20276","DLMC":"276省道","XZQH":"","results":""},
+            {"DLDM":"20367","DLMC":"367省道","XZQH":"","results":""},
+            {"DLDM":"10325","DLMC":"325国道","XZQH":"","results":""},
+            {"DLDM":"20369","DLMC":"369省道","XZQH":"","results":""},
+            {"DLDM":"00094","DLMC":"珠三角环线高速","XZQH":"","results":""},
+            {"DLDM":"22600","DLMC":"深罗高速","XZQH":"","results":""},
+            {"DLDM":"24700","DLMC":"江珠高速","XZQH":"","results":""},
+            {"DLDM":"00015","DLMC":"沈海高速","XZQH":"","results":""},
+            {"DLDM":"23200","DLMC":"西部沿海高速","XZQH":"","results":""},
+            {"DLDM":"24900","DLMC":"新台高速","XZQH":"","results":""},
+            {"DLDM":"33701","DLMC":"西江大桥","XZQH":"","results":""},
+            {"DLDM":"33702","DLMC":"西桥路","XZQH":"","results":""},
+            {"DLDM":"33703","DLMC":"新荷路","XZQH":"","results":""},
+            {"DLDM":"33704","DLMC":"民兴路","XZQH":"","results":""},
+            {"DLDM":"33705","DLMC":"中兴四路","XZQH":"","results":""},
+            {"DLDM":"33706","DLMC":"荷塘大桥","XZQH":"","results":""},
+            {"DLDM":"43501","DLMC":"杜阮镇南环路","XZQH":"","results":""},
+            {"DLDM":"43503","DLMC":"杜阮镇桐井线","XZQH":"","results":""},
+            {"DLDM":"43504","DLMC":"杜阮镇会木线","XZQH":"","results":""},
+            {"DLDM":"43505","DLMC":"杜阮镇龙溪村内道路","XZQH":"","results":""},
+            {"DLDM":"43506","DLMC":"杜阮镇龙榜村内道路","XZQH":"","results":""},
+            {"DLDM":"43507","DLMC":"杜阮镇双楼村内道路","XZQH":"","results":""},
+            {"DLDM":"43508","DLMC":"杜阮镇叱石风景区村内道路","XZQH":"","results":""},
+            {"DLDM":"43510","DLMC":"杜阮镇贯溪村村道","XZQH":"","results":""},
+            {"DLDM":"43511","DLMC":"杜阮镇木朗村村道","XZQH":"","results":""},
+            {"DLDM":"43512","DLMC":"杜阮镇长乔村村道","XZQH":"","results":""},
+            {"DLDM":"43513","DLMC":"杜阮镇南芦村村道","XZQH":"","results":""},
+            {"DLDM":"43514","DLMC":"杜阮镇北芦村村道","XZQH":"","results":""},
+            {"DLDM":"43515","DLMC":"杜阮镇瑶村村道","XZQH":"","results":""},
+            {"DLDM":"43516","DLMC":"杜阮镇松园村村道","XZQH":"","results":""},
+            {"DLDM":"43517","DLMC":"杜阮镇上巷村村道","XZQH":"","results":""},
+            {"DLDM":"43518","DLMC":"杜阮镇杜臂村村道","XZQH":"","results":""},
+            {"DLDM":"43519","DLMC":"杜阮镇杜阮村村道","XZQH":"","results":""},
+            {"DLDM":"43520","DLMC":"杜阮镇龙榜村村道","XZQH":"","results":""},
+            {"DLDM":"43521","DLMC":"杜阮镇龙安村村道","XZQH":"","results":""},
+            {"DLDM":"43522","DLMC":"杜阮镇龙眠村村道","XZQH":"","results":""},
+            {"DLDM":"43523","DLMC":"杜阮镇松岭村村道","XZQH":"","results":""},
+            {"DLDM":"43524","DLMC":"杜阮镇子绵村村道","XZQH":"","results":""},
+            {"DLDM":"43525","DLMC":"杜阮镇井根村村道","XZQH":"","results":""},
+            {"DLDM":"43526","DLMC":"杜阮镇双楼村村道","XZQH":"","results":""},
+            {"DLDM":"43527","DLMC":"杜阮镇亭园村村道","XZQH":"","results":""},
+            {"DLDM":"43528","DLMC":"杜阮镇龙溪村村道","XZQH":"","results":""},
+            {"DLDM":"43529","DLMC":"杜阮镇中和村村道","XZQH":"","results":""},
+            {"DLDM":"43530","DLMC":"杜阮镇金朗社区街道","XZQH":"","results":""},
+            {"DLDM":"43531","DLMC":"杜阮镇中心社区街道","XZQH":"","results":""},
+            {"DLDM":"43629","DLMC":"中心村路段","XZQH":"","results":""},
+            {"DLDM":"43630","DLMC":"河山村路段","XZQH":"","results":""},
+            {"DLDM":"43631","DLMC":"天乡村路段","XZQH":"","results":""},
+            {"DLDM":"43632","DLMC":"北达村路段","XZQH":"","results":""},
+            {"DLDM":"43633","DLMC":"五洞村路段","XZQH":"","results":""},
+            {"DLDM":"43634","DLMC":"三和村路段","XZQH":"","results":""},
+            {"DLDM":"43635","DLMC":"虎岭村路段","XZQH":"","results":""},
+            {"DLDM":"43636","DLMC":"弓田村路段","XZQH":"","results":""},
+            {"DLDM":"43637","DLMC":"沙富松园村路段","XZQH":"","results":""},
+            {"DLDM":"43638","DLMC":"沙富海口村路段","XZQH":"","results":""},
+            {"DLDM":"64003","DLMC":"江海三路","XZQH":"","results":""},
+            {"DLDM":"64004","DLMC":"江海四路","XZQH":"","results":""},
+            {"DLDM":"64005","DLMC":"江海五路","XZQH":"","results":""},
+            {"DLDM":"64006","DLMC":"金瓯路","XZQH":"","results":""},
+            {"DLDM":"64007","DLMC":"金瓯西路","XZQH":"","results":""},
+            {"DLDM":"64008","DLMC":"桥南大道","XZQH":"","results":""},
+            {"DLDM":"64009","DLMC":"东海路","XZQH":"","results":""},
+            {"DLDM":"64010","DLMC":"江门大桥","XZQH":"","results":""},
+            {"DLDM":"64011","DLMC":"北街大桥","XZQH":"","results":""},
+            {"DLDM":"64012","DLMC":"外海大桥","XZQH":"","results":""},
+            {"DLDM":"64013","DLMC":"胜利南路","XZQH":"","results":""},
+            {"DLDM":"64015","DLMC":"高新东路","XZQH":"","results":""},
+            {"DLDM":"64016","DLMC":"连海路","XZQH":"","results":""},
+            {"DLDM":"64017","DLMC":"新江睦路（兴宁路）","XZQH":"","results":""},
+            {"DLDM":"64018","DLMC":"旧江睦路","XZQH":"","results":""},
+            {"DLDM":"64019","DLMC":"五邑路","XZQH":"","results":""},
+            {"DLDM":"64301","DLMC":"新民大桥","XZQH":"","results":""},
+            {"DLDM":"64302","DLMC":"南冲公路","XZQH":"","results":""},
+            {"DLDM":"64303","DLMC":"礼义一路","XZQH":"","results":""},
+            {"DLDM":"64304","DLMC":"礼义二路","XZQH":"","results":""},
+            {"DLDM":"64305","DLMC":"礼义三路","XZQH":"","results":""},
+            {"DLDM":"64306","DLMC":"礼睦路","XZQH":"","results":""},
+            {"DLDM":"64307","DLMC":"礼乐一路","XZQH":"","results":""},
+            {"DLDM":"64308","DLMC":"礼乐二路","XZQH":"","results":""},
+            {"DLDM":"64309","DLMC":"礼乐三路","XZQH":"","results":""},
+            {"DLDM":"64310","DLMC":"南环路（礼乐路段）","XZQH":"","results":""},
+            {"DLDM":"64311","DLMC":"礼东大桥","XZQH":"","results":""},
+            {"DLDM":"64312","DLMC":"会乐大桥","XZQH":"","results":""},
+            {"DLDM":"64313","DLMC":"五邑路礼乐路段","XZQH":"","results":""},
+            {"DLDM":"64314","DLMC":"解放路","XZQH":"","results":""},
+            {"DLDM":"64315","DLMC":"礼乐公路","XZQH":"","results":""},
+            {"DLDM":"72001","DLMC":"银帆路","XZQH":"","results":""},
+            {"DLDM":"72002","DLMC":"乐祥东路","XZQH":"","results":""},
+            {"DLDM":"72003","DLMC":"乐祥西路","XZQH":"","results":""},
+            {"DLDM":"72004","DLMC":"新民大道","XZQH":"","results":""},
+            {"DLDM":"72005","DLMC":"南冲公路","XZQH":"","results":""},
+            {"DLDM":"72006","DLMC":"南冲路","XZQH":"","results":""},
+            {"DLDM":"72007","DLMC":"礼昌街","XZQH":"","results":""},
+            {"DLDM":"72008","DLMC":"礼昌一街","XZQH":"","results":""},
+            {"DLDM":"72009","DLMC":"礼昌二街","XZQH":"","results":""},
+            {"DLDM":"72010","DLMC":"文昌路","XZQH":"","results":""},
+            {"DLDM":"72011","DLMC":"文昌一街","XZQH":"","results":""},
+            {"DLDM":"72012","DLMC":"文昌二路","XZQH":"","results":""},
+            {"DLDM":"72013","DLMC":"文昌三路","XZQH":"","results":""},
+            {"DLDM":"72014","DLMC":"文昌四路","XZQH":"","results":""},
+            {"DLDM":"72015","DLMC":"文昌五路","XZQH":"","results":""},
+            {"DLDM":"72016","DLMC":"文昌六路","XZQH":"","results":""},
+            {"DLDM":"72017","DLMC":"乐民街","XZQH":"","results":""},
+            {"DLDM":"72018","DLMC":"乌纱路","XZQH":"","results":""},
+            {"DLDM":"72019","DLMC":"江礼大桥","XZQH":"","results":""},
+            {"DLDM":"72020","DLMC":"环镇路","XZQH":"","results":""},
+            {"DLDM":"72021","DLMC":"解放路","XZQH":"","results":""},
+            {"DLDM":"74001","DLMC":"江翠路","XZQH":"","results":""},
+            {"DLDM":"74002","DLMC":"江南路","XZQH":"","results":""},
+            {"DLDM":"74003","DLMC":"江南二路","XZQH":"","results":""},
+            {"DLDM":"74004","DLMC":"中沙路","XZQH":"","results":""},
+            {"DLDM":"74005","DLMC":"新中大道","XZQH":"","results":""},
+            {"DLDM":"74006","DLMC":"中华大道","XZQH":"","results":""},
+            {"DLDM":"74007","DLMC":"活力路","XZQH":"","results":""},
+            {"DLDM":"74008","DLMC":"富华路","XZQH":"","results":""},
+            {"DLDM":"74009","DLMC":"麻园路","XZQH":"","results":""},
+            {"DLDM":"74010","DLMC":"麻一路段","XZQH":"","results":""},
+            {"DLDM":"74011","DLMC":"麻二路段","XZQH":"","results":""},
+            {"DLDM":"74012","DLMC":"麻三路段","XZQH":"","results":""},
+            {"DLDM":"74013","DLMC":"南苑一街","XZQH":"","results":""},
+            {"DLDM":"74014","DLMC":"新光路","XZQH":"","results":""},
+            {"DLDM":"74015","DLMC":"外海镇中路","XZQH":"","results":""},
+            {"DLDM":"74016","DLMC":"龙泉路","XZQH":"","results":""},
+            {"DLDM":"74017","DLMC":"清澜路","XZQH":"","results":""},
+            {"DLDM":"74018","DLMC":"滘头路段","XZQH":"","results":""},
+            {"DLDM":"74019","DLMC":"滘头工业区路段","XZQH":"","results":""},
+            {"DLDM":"74020","DLMC":"东南环山路","XZQH":"","results":""},
+            {"DLDM":"74021","DLMC":"新港路","XZQH":"","results":""},
+            {"DLDM":"74022","DLMC":"东升路","XZQH":"","results":""},
+            {"DLDM":"74023","DLMC":"清澜大道","XZQH":"","results":""},
+            {"DLDM":"74024","DLMC":"云沁路","XZQH":"","results":""},
+            {"DLDM":"74025","DLMC":"一行路","XZQH":"","results":""},
+            {"DLDM":"74026","DLMC":"白水带路","XZQH":"","results":""},
+            {"DLDM":"74027","DLMC":"河畔一街","XZQH":"","results":""},
+            {"DLDM":"74028","DLMC":"河畔二街","XZQH":"","results":""},
+            {"DLDM":"74029","DLMC":"彩虹路","XZQH":"","results":""},
+            {"DLDM":"74030","DLMC":"前进路","XZQH":"","results":""},
+            {"DLDM":"74031","DLMC":"临江路","XZQH":"","results":""},
+            {"DLDM":"74032","DLMC":"龙溪路","XZQH":"","results":""},
+            {"DLDM":"74033","DLMC":"兴业路","XZQH":"","results":""},
+            {"DLDM":"74034","DLMC":"南山路","XZQH":"","results":""},
+            {"DLDM":"74035","DLMC":"新兴路","XZQH":"","results":""},
+            {"DLDM":"74036","DLMC":"东宁路","XZQH":"","results":""},
+            {"DLDM":"74037","DLMC":"得发路","XZQH":"","results":""},
+            {"DLDM":"74038","DLMC":"金星路","XZQH":"","results":""},
+            {"DLDM":"74039","DLMC":"永康路","XZQH":"","results":""},
+            {"DLDM":"74040","DLMC":"富民路","XZQH":"","results":""},
+            {"DLDM":"74041","DLMC":"勤政路","XZQH":"","results":""},
+            {"DLDM":"74042","DLMC":"中华路","XZQH":"","results":""},
+            {"DLDM":"74043","DLMC":"杏林路","XZQH":"","results":""},
+            {"DLDM":"74044","DLMC":"东升大街","XZQH":"","results":""},
+            {"DLDM":"74045","DLMC":"大康路段","XZQH":"","results":""},
+            {"DLDM":"74046","DLMC":"邦民路","XZQH":"","results":""},
+            {"DLDM":"74047","DLMC":"东升村路口（外海东升岗）","XZQH":"","results":""},
+            {"DLDM":"74048","DLMC":"五邑路东南村路口（外海东南岗）","XZQH":"","results":""},
+            {"DLDM":"74049","DLMC":"五邑路与东海路交汇路口（轻轨东海岗）","XZQH":"","results":""},
+            {"DLDM":"74050","DLMC":"东海路与江翠路交汇路口（南泉岗）","XZQH":"","results":""},
+            {"DLDM":"74051","DLMC":"江海四路与五邑路交汇路口（外海海邑","XZQH":"","results":""},
+            {"DLDM":"74052","DLMC":"滘北红绿灯","XZQH":"","results":""},
+            {"DLDM":"74053","DLMC":"江海路油湾里路口（滘北油湾岗）","XZQH":"","results":""},
+            {"DLDM":"74054","DLMC":"江海四路农业银行外海支行路段","XZQH":"","results":""},
+            {"DLDM":"74055","DLMC":"五邑路城轨江门站(364省道 54Km+200处)","XZQH":"","results":""},
+            {"DLDM":"74056","DLMC":"五邑路与得发路交叉路口（五邑路麻三路口）","XZQH":"","results":""},
+            {"DLDM":"74057","DLMC":"连港路","XZQH":"","results":""},
+            {"DLDM":"74058","DLMC":"江海一路与东海路交汇路口（蓬江桥南岗）","XZQH":"","results":""},
+            {"DLDM":"74059","DLMC":"江海路与江门大桥交汇路口（江门桥南岗）","XZQH":"","results":""},
+            {"DLDM":"74060","DLMC":"蓬江大桥南卡口","XZQH":"","results":""},
+            {"DLDM":"74061","DLMC":"外海大桥卡口","XZQH":"","results":""},
+            {"DLDM":"74301","DLMC":"银帆路","XZQH":"","results":""},
+            {"DLDM":"74302","DLMC":"乐祥东路","XZQH":"","results":""},
+            {"DLDM":"74303","DLMC":"乐祥西路","XZQH":"","results":""},
+            {"DLDM":"74304","DLMC":"新民大道","XZQH":"","results":""},
+            {"DLDM":"74305","DLMC":"南冲路","XZQH":"","results":""},
+            {"DLDM":"74306","DLMC":"礼昌街","XZQH":"","results":""},
+            {"DLDM":"74307","DLMC":"礼昌一街","XZQH":"","results":""},
+            {"DLDM":"74308","DLMC":"礼昌二街","XZQH":"","results":""},
+            {"DLDM":"74309","DLMC":"文昌路","XZQH":"","results":""},
+            {"DLDM":"74310","DLMC":"文昌一街","XZQH":"","results":""},
+            {"DLDM":"74311","DLMC":"文昌二路","XZQH":"","results":""},
+            {"DLDM":"74312","DLMC":"文昌三路","XZQH":"","results":""},
+            {"DLDM":"74313","DLMC":"文昌四路","XZQH":"","results":""},
+            {"DLDM":"74314","DLMC":"文昌五路","XZQH":"","results":""},
+            {"DLDM":"74315","DLMC":"文昌六路","XZQH":"","results":""},
+            {"DLDM":"74316","DLMC":"乐民街","XZQH":"","results":""},
+            {"DLDM":"74317","DLMC":"乌纱路","XZQH":"","results":""},
+            {"DLDM":"74318","DLMC":"江礼大桥","XZQH":"","results":""},
+            {"DLDM":"74319","DLMC":"环镇路","XZQH":"","results":""},
+            {"DLDM":"74320","DLMC":"解放路","XZQH":"","results":""},
+            {"DLDM":"74321","DLMC":"礼东公路","XZQH":"","results":""},
+            {"DLDM":"74322","DLMC":"工业路","XZQH":"","results":""},
+            {"DLDM":"74323","DLMC":"礼华街","XZQH":"","results":""},
+            {"DLDM":"74324","DLMC":"礼新街","XZQH":"","results":""},
+            {"DLDM":"74325","DLMC":"礼新一街","XZQH":"","results":""},
+            {"DLDM":"74326","DLMC":"礼尚街","XZQH":"","results":""},
+            {"DLDM":"74327","DLMC":"礼尚一街","XZQH":"","results":""},
+            {"DLDM":"74328","DLMC":"礼贸街","XZQH":"","results":""},
+            {"DLDM":"74329","DLMC":"礼恩街","XZQH":"","results":""},
+            {"DLDM":"74330","DLMC":"礼荣街","XZQH":"","results":""},
+            {"DLDM":"74331","DLMC":"礼明街","XZQH":"","results":""},
+            {"DLDM":"74332","DLMC":"礼宾街","XZQH":"","results":""},
+            {"DLDM":"74333","DLMC":"礼德街","XZQH":"","results":""},
+            {"DLDM":"74334","DLMC":"礼德二街","XZQH":"","results":""},
+            {"DLDM":"74335","DLMC":"礼成街","XZQH":"","results":""},
+            {"DLDM":"74336","DLMC":"乐中街","XZQH":"","results":""},
+            {"DLDM":"74337","DLMC":"乐园街","XZQH":"","results":""},
+            {"DLDM":"74338","DLMC":"乐盛街","XZQH":"","results":""},
+            {"DLDM":"74339","DLMC":"乐同街","XZQH":"","results":""},
+            {"DLDM":"74340","DLMC":"乐谊街","XZQH":"","results":""},
+            {"DLDM":"74341","DLMC":"乐成街","XZQH":"","results":""},
+            {"DLDM":"74342","DLMC":"乐和街","XZQH":"","results":""},
+            {"DLDM":"74343","DLMC":"乐兴街","XZQH":"","results":""},
+            {"DLDM":"74344","DLMC":"乐民街","XZQH":"","results":""},
+            {"DLDM":"74345","DLMC":"乐融街","XZQH":"","results":""},
+            {"DLDM":"74346","DLMC":"永雄街","XZQH":"","results":""},
+            {"DLDM":"74347","DLMC":"永兴街","XZQH":"","results":""},
+            {"DLDM":"74348","DLMC":"永成街","XZQH":"","results":""},
+            {"DLDM":"74349","DLMC":"永宁街","XZQH":"","results":""},
+            {"DLDM":"74350","DLMC":"永英一街","XZQH":"","results":""},
+            {"DLDM":"74351","DLMC":"永英二街","XZQH":"","results":""},
+            {"DLDM":"74352","DLMC":"文盛二街","XZQH":"","results":""},
+            {"DLDM":"74353","DLMC":"文盛三街","XZQH":"","results":""},
+            {"DLDM":"74354","DLMC":"文盛四街","XZQH":"","results":""},
+            {"DLDM":"74355","DLMC":"和平街","XZQH":"","results":""},
+            {"DLDM":"74356","DLMC":"逢兴里路","XZQH":"","results":""},
+            {"DLDM":"74357","DLMC":"吉田路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"74358","DLMC":"南环路江珠高速礼乐出入口红绿灯","XZQH":"","results":""},
+            {"DLDM":"74359","DLMC":"南环路礼乐镇政府路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"74360","DLMC":"南环路南冲公路口红绿灯","XZQH":"","results":""},
+            {"DLDM":"74361","DLMC":"礼乐礼银岗","XZQH":"","results":""},
+            {"DLDM":"74362","DLMC":"五六冲路路段","XZQH":"","results":""},
+            {"DLDM":"94001","DLMC":"一中队其他路段","XZQH":"","results":""},
+            {"DLDM":"94002","DLMC":"其他路段","XZQH":"","results":""},
+            {"DLDM":"94003","DLMC":"路段","XZQH":"","results":""},
+            {"DLDM":"94004","DLMC":"江海交警大队路段","XZQH":"","results":""},
+            {"DLDM":"94301","DLMC":"江海二中队其他路段","XZQH":"","results":""},
+            {"DLDM":"B4001","DLMC":"中环广场停车场","XZQH":"","results":""},
+            {"DLDM":"C4001","DLMC":"江南文化厂场","XZQH":"","results":""},
+            {"DLDM":"30538","DLMC":"X538县道江三线","XZQH":"","results":""},
+            {"DLDM":"30532","DLMC":"X532县道松丹线","XZQH":"","results":""}]
+
+    }
+    var queryresult = new Array();
+
+
+
+    //基本地图加载
+    var map = new AMap.Map("mapContainer", {
+        resizeEnable: true,
+        view: new AMap.View2D({
+            center: new AMap.LngLat(120.405889, 36.103101),
+            zoom: 15
+        })
+    });
+    
+    var fso, tf;
+    fso = new ActiveXObject("Scripting.FileSystemObject");//获取对象
+    tf = fso.CreateTextFile("d:\\testfile.txt", true);//创建一个文件夹
+    
+    largeArrayProcess(roadArr.roads,roadSearch,1);
+
+    var MSearch;
+    function roadSearch(roadarr) {
+
+        AMap.service(["AMap.RoadInfoSearch"], function () {
+            MSearch = new AMap.RoadInfoSearch({ //构造地点查询类
+                pageSize: 10,
+                pageIndex: 1,
+                city: "0532" //城市
+            });
+            //关键字查询
+            var roadCount = roadarr.length;
+            for (var i = 0; i < roadCount; i++) {
+                var roadinfo = roadarr[i];
+                MSearch.roadInfoSearchByRoadName(roadinfo.DLMC, function (status, result) {
+                    if (status === 'complete' && result.info === 'OK') {
+                        //roadSearch_CallBack(result,roadinfo.DLDM,roadinfo.DLMC,roadinfo.XZQH);
+                        var resultStr = "";
+                        var roadArr = result.roadInfo;
+                        var resultCount = roadArr.length;
+                        for (var i = 0; i < resultCount; i++) {
+                            pathArr = roadArr[i].path;
+                            var pros = "";
+                            for (var pr in roadArr[i]) {
+                                pros += pr + ","
+                            }
+                            resultStr += "<span style=\"font-size: 12px;padding:0px 0 4px 2px; border-bottom:1px solid #C1FFC1;\">" + "<b>名称</b>：" + roadArr[i].name + "" + "<b> 道路描述</b>：" + roadArr[i].type + "" + "<b> 道路宽度</b>：" + roadArr[i].width + "</span>";
+                        }
+                        roadinfo.info = roadArr;
+                        queryresult.push(roadinfo);
+                        console.log(roadinfo.DLDM+roadinfo.DLMC +"--"+resultCount);
+						tf.WriteLine(JSON.stringify(roadinfo));
+						
+                        map.setFitView();
+                        document.getElementById("result").innerHTML = resultStr;
+                        
+                        
+                    }
+                });
+            }
+
+        });
+    }
+
+
+    //大数据量循环的优化方法
+    function largeArrayProcess(array,process,onceNum,context){
+        arrPocessTimeout = setTimeout(function(){
+            if(array == null || array.length<=0){
+                return;
+            }
+            var count=0;
+            var showarray = new Array();
+            while(count<onceNum){
+                if(array.length==0){
+                    break;
+                }
+                var item = array.shift();
+                showarray.push(item);
+                count++;
+            }
+            process.call(context,showarray);
+            if (array.length > 0){
+               	arrPocessTimeout = setTimeout(arguments.callee, 0);
+            }else{
+                //addLayerListener(devicetype);
+            }
+        }, 200);
+    }
+    
+    
+    function CreateFile()
+    {
+       var fso, tf;
+       fso = new ActiveXObject("Scripting.FileSystemObject");//获取对象
+       tf = fso.CreateTextFile("d:\\testfile.txt", true);//创建一个文件夹
+       // 写一行，并且带有新行字符。
+       tf.WriteLine("Testing 1, 2, 3.") ;
+       // 向文件写三个新行字符。  
+       tf.WriteBlankLines(3) ;
+       // 写一行。
+       tf.Write ("This is a test.");
+       tf.Close();//关闭
+    }
+    
+</script>
+</body>
+</html>

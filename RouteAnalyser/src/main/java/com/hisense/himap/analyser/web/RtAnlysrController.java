@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class RtAnlysrController {
         query.setPointid(request.getParameter("pointid"));
         query.setDirection(request.getParameter("direction"));
         query.setLaneno(request.getParameter("laneno"));
-        System.out.println(query.getPointid()+"--"+query.getDirection()+"--"+query.getLaneno());
+        //System.out.println(query.getPointid()+"--"+query.getDirection()+"--"+query.getLaneno());
         //List list = jdbcTemplate.queryForList("select * from route_road r");
         //System.out.println(list.size());
         return routeAnalyser.getNextInts(query);
@@ -47,6 +48,14 @@ public class RtAnlysrController {
             return null;
         }
         String[] points = paths.split(",");
-        return routeAnalyser.getShortestPath(Arrays.asList(points));
+        List<String> pointArr = new ArrayList<String>();
+        for(int i=0;i<points.length;i++){
+            String point = points[i];
+            if(point.indexOf(".")!=-1){
+                point = point +","+points[++i];
+            }
+            pointArr.add(point);
+        }
+        return routeAnalyser.getShortestPath(pointArr);
     }
 }

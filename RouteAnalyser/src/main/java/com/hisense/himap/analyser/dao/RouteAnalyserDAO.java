@@ -1,6 +1,7 @@
 package com.hisense.himap.analyser.dao;
 
 import com.hisense.himap.analyser.vo.*;
+import com.hisense.himap.dao.BaseDAO;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.util.List;
  * Created by Administrator on 2015-6-17.
  */
 @Repository("RouteAnalyserDAO")
-public class RouteAnalyserDAO {
+public class RouteAnalyserDAO extends BaseDAO {
 
     private static final String SQL_SEL_ROAD = "select * from route_road";
     private static final String SQL_SEL_NODE = "select n.nodeid,n.x,n.y,n.intsid, i.pointids from route_node n left join route_intersection i on i.intsid = n.intsid";
