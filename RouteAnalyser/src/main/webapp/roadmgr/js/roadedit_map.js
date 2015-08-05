@@ -9,7 +9,7 @@ function showWmsRoad(){
     var listlen = _MapApp.map.stateListeners.length;
     legendfunc=new LegendFunc();
 
-    legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:route_road&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
+    legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:ROUTE_ARC&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
     //legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS=sde:sectionstatus&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true";
 
     legendfunc.open(_MapApp);

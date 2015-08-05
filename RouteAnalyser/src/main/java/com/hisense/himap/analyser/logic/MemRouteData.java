@@ -34,6 +34,7 @@ public class MemRouteData {
 
     //路段信息
     public static List<RtRoad> roadList;
+    public static Map<String,RtRoad> roadMap;
 
     /*方向
      * 第一维表示方向

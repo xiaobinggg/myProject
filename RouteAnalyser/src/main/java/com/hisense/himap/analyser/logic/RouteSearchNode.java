@@ -83,7 +83,6 @@ public class RouteSearchNode extends ASearchNode {
         RtNodeVO node = new RtNodeVO();
         node.setNodeid(GISUtils.formatPos(Double.toString(this.getX()),4)+","+GISUtils.formatPos(Double.toString(this.getY()),5));
         List<RtArcVO> arclist = MemRouteData.getRtArcByStartNode(node);
-
         for(RtArcVO arc:arclist){
             if(arc.getStartnode().equalsIgnoreCase(arc.getEndnode())){
                 continue;

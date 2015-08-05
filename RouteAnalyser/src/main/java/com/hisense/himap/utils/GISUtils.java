@@ -240,4 +240,19 @@ public class GISUtils {
         return direction;
     }
 
+    /**
+     * 反转坐标串
+     * @param strcoords
+     * @return
+     */
+    public static final String resetDirection(String strcoords) {
+        String[] strArr = strcoords.split(",");
+        int pointnum = strArr.length / 2;
+        String newstrcrd = "";
+        for (int i = pointnum - 1; i >= 0; i--) {
+            newstrcrd += strArr[i * 2] + "," + strArr[i * 2 + 1] + ",";
+        }
+        newstrcrd = newstrcrd.substring(0, newstrcrd.length() - 1);
+        return newstrcrd;
+    }
 }

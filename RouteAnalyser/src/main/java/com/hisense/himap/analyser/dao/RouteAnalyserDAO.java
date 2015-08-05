@@ -22,6 +22,7 @@ public class RouteAnalyserDAO extends BaseDAO {
     private static final String SQL_SEL_ARC = "SELECT r.arcid,r.arcname,r.arclength,r.startnode,r.endnode,r.strcoords,r.direction,r.roadid from route_arc r";
     private static final String SQL_SEL_INTS = "SELECT r.*,n.nodeid from route_intersection r LEFT JOIN route_node n ON n.intsid = r.intsid";
     private static final String SQL_SEL_LANE = "SELECT l.intsid,l.laneno,l.direction,NVL(l.nthrough,0) as nthrough,NVL(l.nturnleft,0) as nturnleft,NVL(l.nturnright,0) as nturnright,NVL(l.nturnround,0) as nturnround from route_lane l";
+    private static final String SQL_SEL_MONITOR = "SELECT p.pointcode,p.pointname,p.longitude AS x,p.latitude AS y from monitor_point  p where p.pointcode = ?";
 
     @Inject
     @Named("jdbcTemplate")
@@ -49,6 +50,15 @@ public class RouteAnalyserDAO extends BaseDAO {
 
     public List<RtLaneVO> initRtLane() {
         return this.jdbcTemplate.query(SQL_SEL_LANE, new BeanPropertyRowMapper<RtLaneVO>(RtLaneVO.class));
+    }
+
+    public RtNodeVO getMonitor(String pointcode){
+        List<RtNodeVO> list = this.jdbcTemplate.query(SQL_SEL_MONITOR,new String[]{pointcode}, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+        if(null!=list && list.size()>0){
+            return list.get(0);
+        }else{
+            return null;
+        }
     }
 
 

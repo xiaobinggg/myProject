@@ -15,7 +15,7 @@ import java.util.List;
 @Repository("baseDAO")
 public class BaseDAO {
 
-    private static final String SQL_QUERY_NEARNODE = "SELECT * from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE'";
+    private static final String SQL_QUERY_NEARNODE = "SELECT * from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE' ORDER BY sdo_geom.sdo_distance(R.GEOMETRY,MDSYS.SDO_GEOMETRY(2001,8307,MDSYS.SDO_POINT_TYPE(#, 0),NULL,NULL),1)";
 
     @Inject
     @Named("jdbcTemplate")
@@ -29,7 +29,7 @@ public class BaseDAO {
      */
     public List<RtNodeVO> getNearNode(String pos,String distance){
         try {
-            List<RtNodeVO> list = this.jdbcTemplate.query(SQL_QUERY_NEARNODE.replaceFirst("#", pos).replace("#",distance), new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+            List<RtNodeVO> list = this.jdbcTemplate.query(SQL_QUERY_NEARNODE.replaceFirst("#", pos).replaceFirst("#",distance).replaceFirst("#",pos), new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
             return list;
         } catch (Exception e) {
             e.printStackTrace();

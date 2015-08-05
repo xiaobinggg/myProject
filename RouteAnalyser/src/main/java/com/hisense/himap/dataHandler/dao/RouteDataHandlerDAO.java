@@ -1,5 +1,6 @@
 package com.hisense.himap.dataHandler.dao;
 
+import com.hisense.himap.analyser.logic.MemRouteData;
 import com.hisense.himap.analyser.vo.*;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,6 +11,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +46,8 @@ public class RouteDataHandlerDAO {
 
     private static final String SQL_INSERT_NODE = "insert into route_node(nodeid,x,y,intsid) values(?,?,?,?)";
     private static final String SQL_DELETE_NODE = "delete from route_node r where r.nodeid=?";
-    private static final String SQL_UPDATE_NODEINTS = "update route_node r set r.intsid = ? where r.intsid=?";
+    private static final String SQL_DELETE_NODEINTS = "update route_node r set r.intsid = ? where r.intsid=?";
+    private static final String SQL_UPDATEE_NODEINTS = "update route_node r set r.intsid = ? where r.nodeid=?";
     private static final String SQL_UPDATE_ARCSTARTNODE = "UPDATE route_arc r SET r.startnode=? WHERE r.startnode=? ";
     private static final String SQL_UPDATE_ARCENDNODE = "UPDATE route_arc r SET r.endnode=? WHERE r.endnode=? ";
     private static final String SQL_QUERY_NEARNODE_WITHNULLINTS = "SELECT * from route_node r WHERE r.intsid IS NULL AND SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(?,0),null,null),'distance=20 querytype=WINDOW') = 'TRUE'";
@@ -229,7 +232,7 @@ public class RouteDataHandlerDAO {
     public void delInts(String intsid){
         this.jdbcTemplate.update(SQL_DELETE_INTS,intsid);
         this.jdbcTemplate.update(SQL_DELETE_LANE_BYINTSID,intsid);
-        this.jdbcTemplate.update(SQL_UPDATE_NODEINTS,"",intsid);
+        this.jdbcTemplate.update(SQL_DELETE_NODEINTS,"",intsid);
     }
 
     public void updateArcNode(String newnode,String prenode){
@@ -262,6 +265,17 @@ public class RouteDataHandlerDAO {
                     .append(" EXECUTE IMMEDIATE 'UPDATE route_arc r SET r.geometry=:geom where r.arcid=:arcid'  USING geom,arcid;")
                     .append(" END;");
             this.jdbcTemplate.execute(updategoem.toString());
+            //更新内存中的对象
+            MemRouteData.arcList.add(arc);
+            MemRouteData.arcMap.put(arc.getArcid(),arc);
+            List<RtArcVO> snodelist = MemRouteData.arcStartNodeMap.get(arc.getStartnode());
+            if(snodelist!=null && snodelist.size()>0){
+                snodelist.add(arc);
+            }else{
+                snodelist = new ArrayList<RtArcVO>();
+                snodelist.add(arc);
+            }
+            MemRouteData.arcStartNodeMap.put(arc.getStartnode(),snodelist);
         }
     }
     /**
@@ -294,6 +308,42 @@ public class RouteDataHandlerDAO {
     public void updateRouteArc(List<RtArcVO> arclist) {
         for(RtArcVO arc:arclist){
             this.jdbcTemplate.update(SQL_UPDATE_ARC,arc.getStrcoords(),arc.getStartnode(),arc.getEndnode(),arc.getArclength(),arc.getDirection(),arc.getArcid());
+            StringBuffer updategoem = new StringBuffer("DECLARE geom Sdo_Geometry;")
+                    .append(" arcid VARCHAR2(200);")
+                    .append(" BEGIN ")
+                    .append(" arcid:='").append(arc.getArcid()).append("';")
+                    .append(" geom:=MDSYS.SDO_GEOMETRY(2002,8307,NULL,MDSYS.SDO_ELEM_INFO_ARRAY(1, 2, 1),")
+                    .append(" MDSYS.SDO_ORDINATE_ARRAY(").append(arc.getStrcoords()).append("));")
+                    .append(" EXECUTE IMMEDIATE 'UPDATE route_arc r SET r.geometry=:geom where r.arcid=:arcid'  USING geom,arcid;")
+                    .append(" END;");
+            this.jdbcTemplate.execute(updategoem.toString());
+            //更新内存中的对象
+            int i=0;
+            for(RtArcVO memarc:MemRouteData.arcList){
+                if(memarc.getArcid().equalsIgnoreCase(arc.getArcid())){
+                    MemRouteData.arcList.set(i,arc);
+                    break;
+                }
+                i++;
+            }
+            MemRouteData.arcMap.put(arc.getArcid(),arc);
+            List<RtArcVO> snodelist = MemRouteData.arcStartNodeMap.get(arc.getStartnode());
+            if(snodelist!=null && snodelist.size()>0){
+                Boolean isnewstartnode = true;
+                for(RtArcVO temparc:snodelist){
+                    if(temparc.getArcid().equalsIgnoreCase(arc.getArcid())){
+                        isnewstartnode = false;
+                        break;
+                    }
+                }
+                if(isnewstartnode){
+                    snodelist.add(arc);
+                }
+            }else{
+                snodelist = new ArrayList<RtArcVO>();
+                snodelist.add(arc);
+            }
+            MemRouteData.arcStartNodeMap.put(arc.getStartnode(),snodelist);
         }
 
     }
@@ -526,20 +576,11 @@ public class RouteDataHandlerDAO {
      */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void insertInts(List<RtIntsVO> intslist) {
-
         for (RtIntsVO ints: intslist) {
-            /*String sql = "SELECT g.pointcode as pointids from monitor_point_geometry g WHERE  SDO_WITHIN_DISTANCE(g.GEOMETRY,MDSYS.SDO_GEOMETRY(2001, 8307,MDSYS.SDO_POINT_TYPE("+ints.getLongitude()+","+ints.getLatitude()+",0), NULL,NULL),'distance=50') = 'TRUE'";
-            List<RtIntsVO> pointlist = this.jdbcTemplate.query(sql,new BeanPropertyRowMapper<RtIntsVO>(RtIntsVO.class));
-            String pointids = "";
-            for(RtIntsVO tempints:pointlist){
-                pointids+=tempints.getPointids()+",";
-            }
-            if(pointids.length()>=1){
-                pointids = pointids.substring(0,pointids.length()-1);
-            }
-
-            ints.setPointids(pointids);*/
             this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(),ints.getIntsname(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh(),ints.getCrosspoints(),ints.getPointids(),ints.getRoadid1(),ints.getRoadid2(),ints.getUtcintsid(),ints.getViointsid());
+            this.jdbcTemplate.update(SQL_UPDATEE_NODEINTS,ints.getIntsid(),ints.getLongitude()+","+ints.getLatitude());
+            //更新内存中的对象
+
         }
     }
 
@@ -559,6 +600,8 @@ public class RouteDataHandlerDAO {
                     .append(" EXECUTE IMMEDIATE 'UPDATE route_node r SET r.geometry=:geom where r.nodeid=:nodeid'  USING geom,nodeid;")
                     .append(" END;");
             this.jdbcTemplate.execute(updategoem.toString());
+            //更新内存中的node数据
+            MemRouteData.nodeList.add(node);
         }
     }
 

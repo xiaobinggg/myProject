@@ -78,7 +78,9 @@
         }
 
         function showShortestPath(pointids){
-
+            if(pointids == null){
+                pointids = document.getElementById("pointids").value;
+            }
 
             _MapApp.clear();
             createHttpRequest();
