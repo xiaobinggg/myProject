@@ -13,6 +13,15 @@ public class RtRoad {
     private String isdxcd;
     private String dldm;
     private String editstatus;
+    private String vioroadname;
+
+    public String getVioroadname() {
+        return vioroadname;
+    }
+
+    public void setVioroadname(String vioroadname) {
+        this.vioroadname = vioroadname;
+    }
 
     public String getEditstatus() {
         return editstatus;

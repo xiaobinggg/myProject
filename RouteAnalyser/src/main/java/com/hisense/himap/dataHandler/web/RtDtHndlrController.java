@@ -33,8 +33,9 @@ public class RtDtHndlrController {
     @RequestMapping("/edit/preoper.do")
     @ResponseBody
     public String preOperRoad(HttpServletRequest request){
-        routeDataHandler.preOperRoad();
-        routeDataHandler.preMonitor();
+        //routeDataHandler.preOperRoad();
+        //routeDataHandler.preMonitor();
+        routeDataHandler.genAllNodeInts();
         return "success";
     }
 

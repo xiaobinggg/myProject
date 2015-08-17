@@ -16,7 +16,7 @@ import java.util.List;
 @Repository("RouteAnalyserDAO")
 public class RouteAnalyserDAO extends BaseDAO {
 
-    private static final String SQL_SEL_ROAD = "select * from route_road";
+    private static final String SQL_SEL_ROAD = "SELECT r.*,a.dlmc AS vioroadname from route_road r LEFT JOIN vio_coderoad a ON a.dldm=r.dldm ";
     private static final String SQL_SEL_NODE = "select n.nodeid,n.x,n.y,n.intsid, i.pointids from route_node n left join route_intersection i on i.intsid = n.intsid";
     private static final String SQL_SEL_DNODE = "select d.*,d.dnodeid as nodeid from route_dnode d";
     private static final String SQL_SEL_ARC = "SELECT r.arcid,r.arcname,r.arclength,r.startnode,r.endnode,r.strcoords,r.direction,r.roadid from route_arc r";

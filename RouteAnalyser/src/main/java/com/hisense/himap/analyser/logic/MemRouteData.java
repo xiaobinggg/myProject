@@ -3,6 +3,7 @@ package com.hisense.himap.analyser.logic;
 import com.hisense.himap.analyser.vo.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,10 @@ public class MemRouteData {
     //路段信息
     public static List<RtRoad> roadList;
     public static Map<String,RtRoad> roadMap;
+
+    //查询缓存数据，缓存最近查询的1000条数据
+    public static Map<String,List<QueryPathResultVO>> queryMap = new HashMap<String, List<QueryPathResultVO>>();
+
 
     /*方向
      * 第一维表示方向

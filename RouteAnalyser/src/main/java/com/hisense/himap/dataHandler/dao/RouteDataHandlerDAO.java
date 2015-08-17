@@ -23,7 +23,7 @@ import java.util.Map;
 public class RouteDataHandlerDAO {
 
     private static final String SQL_UPDATE_ROADSTATUS="update route_road r set r.editstatus=? where r.roadid=?";
-    private static final String SQL_QUERY_ALLROAD = "select * from route_road r ";
+    private static final String SQL_QUERY_ALLROAD = "select * from route_road r";
     private static final String SQL_QUERY_ROADBYPARAM = "select * from route_road";
 
     private static final String SQL_INSERT_LINK = "insert into route_roadlink(roadid,linkid,isformatted,strcoords,linkname) values(?,?,?,?,?)";
@@ -48,11 +48,13 @@ public class RouteDataHandlerDAO {
     private static final String SQL_DELETE_NODE = "delete from route_node r where r.nodeid=?";
     private static final String SQL_DELETE_NODEINTS = "update route_node r set r.intsid = ? where r.intsid=?";
     private static final String SQL_UPDATEE_NODEINTS = "update route_node r set r.intsid = ? where r.nodeid=?";
+    private static final String SQL_UPDATEE_NODEUTCINTS = "update route_node r set r.utcintsids = ? where r.nodeid=?";
     private static final String SQL_UPDATE_ARCSTARTNODE = "UPDATE route_arc r SET r.startnode=? WHERE r.startnode=? ";
     private static final String SQL_UPDATE_ARCENDNODE = "UPDATE route_arc r SET r.endnode=? WHERE r.endnode=? ";
     private static final String SQL_QUERY_NEARNODE_WITHNULLINTS = "SELECT * from route_node r WHERE r.intsid IS NULL AND SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(?,0),null,null),'distance=20 querytype=WINDOW') = 'TRUE'";
     private static final String SQL_QUERY_NEARNODE = "SELECT * from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE'";
     private static final String SQL_INSERT_DNODE = "insert into route_dnode(dnodeid,dnodename,pointid,x,y,arcids,edistances,pos) values(?,?,?,?,?,?,?,?)";
+    private static final String SQL_QUERY_ALLNODE = "select * from route_node r";
 
     private static final String SQL_INSERT_ARC= "insert into route_arc(arcid,arclength,strcoords,startnode,endnode,direction,roadid,linkid) values(?,?,?,?,?,?,?,?)";
     private static final String SQL_DELETE_ARC="delete from route_arc a where a.arcid=?";
@@ -108,6 +110,10 @@ public class RouteDataHandlerDAO {
         return this.jdbcTemplate.query(SQL_QUERY_MONITORINTS.replaceFirst("#", pos).replaceFirst("#", Integer.toString(distance)).replace("#", pos), new BeanPropertyRowMapper<RtIntsVO>(RtIntsVO.class));
     }
 
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    public List<RtNodeVO>  getAllNodeList(){
+        return this.jdbcTemplate.query(SQL_QUERY_ALLNODE, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+    }
     /**
      * 保存合并后的link
      *
@@ -579,6 +585,20 @@ public class RouteDataHandlerDAO {
         for (RtIntsVO ints: intslist) {
             this.jdbcTemplate.update(SQL_INSERT_INTS, ints.getIntsid(),ints.getIntsname(), ints.getLongitude(), ints.getLatitude(), ints.getXzqh(),ints.getCrosspoints(),ints.getPointids(),ints.getRoadid1(),ints.getRoadid2(),ints.getUtcintsid(),ints.getViointsid());
             this.jdbcTemplate.update(SQL_UPDATEE_NODEINTS,ints.getIntsid(),ints.getLongitude()+","+ints.getLatitude());
+            //更新内存中的对象
+
+        }
+    }
+
+    /**
+     * 保存合并后的link
+     *
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void updateNodeInts(List<RtNodeVO> nodelist) {
+        for (RtNodeVO node: nodelist) {
+            this.jdbcTemplate.update(SQL_UPDATEE_NODEINTS,node.getInstid(),node.getNodeid());
+            this.jdbcTemplate.update(SQL_UPDATEE_NODEUTCINTS,node.getUtcintsids(),node.getNodeid());
             //更新内存中的对象
 
         }

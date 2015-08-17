@@ -15,7 +15,7 @@ import java.util.List;
 @Repository("baseDAO")
 public class BaseDAO {
 
-    private static final String SQL_QUERY_NEARNODE = "SELECT * from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE' ORDER BY sdo_geom.sdo_distance(R.GEOMETRY,MDSYS.SDO_GEOMETRY(2001,8307,MDSYS.SDO_POINT_TYPE(#, 0),NULL,NULL),1)";
+    private static final String SQL_QUERY_NEARNODE = "SELECT r.nodeid,r.x,r.y,r.intsid from route_node r WHERE  SDO_WITHIN_DISTANCE(r.geometry, mdsys.sdo_geometry(2001,8307,MDSYS.SDO_POINT_TYPE(#,0),null,null),'distance=# querytype=WINDOW') = 'TRUE' ORDER BY sdo_geom.sdo_distance(R.GEOMETRY,MDSYS.SDO_GEOMETRY(2001,8307,MDSYS.SDO_POINT_TYPE(#, 0),NULL,NULL),1)";
 
     @Inject
     @Named("jdbcTemplate")

@@ -103,6 +103,7 @@ public class AStar {
                 }
             }
             closedSet.add(currentNode);
+            //System.out.println(this.numSearchSteps+"--"+currentNode.toString());
             this.numSearchSteps += 1;
         }
         

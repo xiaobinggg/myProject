@@ -10,6 +10,7 @@ public class RtNodeVO {
     private String instid;//路口编号
     private String distance;
     private String pointids;//安装点编
+    private String utcintsids;
 
     //动态节点专有属性
     private String dnodeid;
@@ -23,6 +24,14 @@ public class RtNodeVO {
     private String dldm;
     private String lkdm;
     private String ddms;
+
+    public String getUtcintsids() {
+        return utcintsids;
+    }
+
+    public void setUtcintsids(String utcintsids) {
+        this.utcintsids = utcintsids;
+    }
 
     public String getDnodeid() {
         return dnodeid;

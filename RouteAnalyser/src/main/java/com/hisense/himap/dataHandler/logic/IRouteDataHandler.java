@@ -24,6 +24,9 @@ public interface IRouteDataHandler {
      */
     void preMonitor();
 
+
+    void genAllNodeInts();
+
     /**
      * 反转roadlink
      * @param linkid link编号

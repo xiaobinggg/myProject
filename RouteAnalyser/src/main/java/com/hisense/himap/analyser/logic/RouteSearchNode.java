@@ -81,7 +81,7 @@ public class RouteSearchNode extends ASearchNode {
         ArrayList<ISearchNode> successors = new ArrayList<ISearchNode>();
 
         RtNodeVO node = new RtNodeVO();
-        node.setNodeid(GISUtils.formatPos(Double.toString(this.getX()),4)+","+GISUtils.formatPos(Double.toString(this.getY()),5));
+        node.setNodeid(this.toString());
         List<RtArcVO> arclist = MemRouteData.getRtArcByStartNode(node);
         for(RtArcVO arc:arclist){
             if(arc.getStartnode().equalsIgnoreCase(arc.getEndnode())){
@@ -111,7 +111,7 @@ public class RouteSearchNode extends ASearchNode {
 
     
     public Integer keyCode() {
-        return null;
+        return this.toString().hashCode();
     }
 
     public double getX() {
@@ -146,6 +146,19 @@ public class RouteSearchNode extends ASearchNode {
         return distance;
     }
     public String toString(){
-        return this.getX()+","+this.getY();
+        String x = Double.toString(this.getX());
+        String y = Double.toString(this.getY());
+        if(x.split("\\.")[1].length()<4){
+            for(int i=0;i<4-x.split("\\.")[1].length();i++){
+                x = x+"0";
+            }
+        }
+        if(y.split("\\.")[1].length()<5){
+            for(int i=0;i<5-y.split("\\.")[1].length();i++){
+                y = y+"0";
+            }
+        }
+
+        return x+","+y;
     }
 }
