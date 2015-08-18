@@ -46,6 +46,7 @@ public class RouteDataHandlerDAO {
 
     private static final String SQL_INSERT_NODE = "insert into route_node(nodeid,x,y,intsid) values(?,?,?,?)";
     private static final String SQL_DELETE_NODE = "delete from route_node r where r.nodeid=?";
+    private static final String SQL_DELETE_ALLDNODE = "delete from route_dnode";
     private static final String SQL_DELETE_NODEINTS = "update route_node r set r.intsid = ? where r.intsid=?";
     private static final String SQL_UPDATEE_NODEINTS = "update route_node r set r.intsid = ? where r.nodeid=?";
     private static final String SQL_UPDATEE_NODEUTCINTS = "update route_node r set r.utcintsids = ? where r.nodeid=?";
@@ -87,6 +88,16 @@ public class RouteDataHandlerDAO {
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     public List<RtNodeVO> getMonitorList(){
         return this.jdbcTemplate.query(SQL_QUERY_MONITOR, new BeanPropertyRowMapper<RtNodeVO>(RtNodeVO.class));
+
+    }
+
+    /**
+     * 查询安装点列表
+     *
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void delAllRouteDnode(){
+        this.jdbcTemplate.update(SQL_DELETE_ALLDNODE);
 
     }
 

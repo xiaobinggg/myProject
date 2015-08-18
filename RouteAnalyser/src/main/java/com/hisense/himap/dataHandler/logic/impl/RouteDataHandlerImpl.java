@@ -341,7 +341,7 @@ public class RouteDataHandlerImpl implements IRouteDataHandler {
      * 根据安装点预处理动态节点数据
      */
     public void preMonitor(){
-
+        this.routeDataHandlerDAO.delAllRouteDnode();
         List<RtNodeVO> monitorList = this.routeDataHandlerDAO.getMonitorList();
         List<RtNodeVO> dnodeList = new ArrayList<RtNodeVO>();
         Map<String,RtNodeVO> dnodeMap = new HashMap<String, RtNodeVO>();

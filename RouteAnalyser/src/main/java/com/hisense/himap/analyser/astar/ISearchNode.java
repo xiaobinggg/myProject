@@ -30,5 +30,6 @@ public interface ISearchNode {
     public boolean equals(Object other);
 
     public int hashCode();
+
 }
 

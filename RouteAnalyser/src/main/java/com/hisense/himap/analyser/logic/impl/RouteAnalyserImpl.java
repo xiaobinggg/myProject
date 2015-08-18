@@ -582,11 +582,11 @@ public class RouteAnalyserImpl implements IRouteAnalyser {
             node = MemRouteData.nodeMap.get(pointid);
         }else{
             RtNodeVO monitor = this.routeAnalyserDAO.getMonitor(pointid);
-            String pos = monitor.getX()+","+monitor.getY();
-            List<RtNodeVO> nodelist = this.routeAnalyserDAO.getNearNode(pos,"50");
-            if(nodelist!=null && nodelist.size()>0){
-                node =  nodelist.get(0);
+            if(null == monitor){
+                return null;
             }
+            String pos = monitor.getX()+","+monitor.getY();
+            return this.getNodeByPos(pos);
         }
         return node;
     }
