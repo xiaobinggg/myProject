@@ -8,6 +8,8 @@
     <script>
         var geoserverURL="http://10.16.1.105:8088/geoserver"; //geoserver 服务器地址
         //geoserverURL = "http://10.231.32.35:8088/geoserver";
+        var rooturl = document.URL.split( "/" )[0]+"/"+ document.URL.split( "/" )[1]
+                +"/"+ document.URL.split( "/" )[2]+"/"+ document.URL.split( "/" )[3];
         function createHttpRequest() {
             if (window.ActiveXObject) {
                 request = new ActiveXObject("Microsoft.XMLHTTP");
@@ -51,7 +53,7 @@
 
             _MapApp.clear();
             createHttpRequest();
-            var url =  "http://localhost:8080/rt/getNextInts.do?pointid="+pointid;
+            var url =  rooturl+"/getNextInts.do?pointid="+pointid;
             try {
                 request.onreadystatechange = function(){
                     if (request.readyState == 4) {
@@ -84,7 +86,7 @@
 
             _MapApp.clear();
             createHttpRequest();
-            var url =  "http://localhost:8080/rt/getShortestPath.do?points="+pointids;
+            var url =  rooturl+"/getShortestPath.do?points="+pointids;
             try {
                 request.onreadystatechange = function(){
                     if (request.readyState == 4) {

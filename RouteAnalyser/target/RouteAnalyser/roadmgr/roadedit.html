@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>路网数据维护</title>
+    <link rel="stylesheet" href="css/roadedit.css"/>
+    <link rel="stylesheet" href="../js/css/bootstrap.css"/>
+    <script src="../js/jquery-1.10.2.js"></script>
+    <script src="../js/bootstrap.js"></script>
+
+    <script src="js/roadedit.js"></script>
+
+</head>
+<body>
+
+<div id="left">
+    <iframe id="mapframe" src="roadedit_map.html" scrolling="no"  frameborder="0"  style="width:100%;height:100%;border:0px"></iframe>
+</div>
+
+<div id="right">
+    <div id="rightpanel" class="panel panel-primary" style="background:#F5F5F5;width:100%;height:100%;padding: 2px;margin:2px 0 0 0px;border:0;">
+
+        <div role="tabpanel" class="panel-body" style="margin:0px;padding:1px;width:100%;height:100%;overflow:hidden">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" style="" role="tablist">
+                <li role="presentation"  class="active"><a href="#home" style="font-size:14px" class="label label-default" id="jqtab" aria-controls="home" role="tab" data-toggle="tab">&nbsp;&nbsp;路段维护&nbsp;&nbsp;</a></li>
+                <li role="presentation"><a href="#profile" style="font-size:14px" class="label label-default" id="gpstab" aria-controls="profile" role="tab" data-toggle="tab">&nbsp;&nbsp;路口维护&nbsp;&nbsp;</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content" style ="height:100%;padding:5px;background:white;">
+
+                <div role="tabpanel" class="tab-pane fade in active" id="home" style="height:100%;width: 100%">
+                    <div id="casetab" class="panel panel-primary" style="width:100%;height:50%;">
+                        <div class="panel-heading" style="width:100%;height:15%;padding: 0px;">
+                            <div style="background: #ffffff;width: 100%;height: 100%;padding-top: 2px;">
+                                <form class="form-inline">
+                                    <div class="form-group" style="height: 100%;color:black;">
+                                        <label for="xzqh" >行政区划</label>
+                                        <select class="form-control-static" id="xzqh" style="width: 70px;"></select>
+                                        <label for="editstatus" >状态</label>
+                                        <select class="form-control-static" id="editstatus" style="width: 65px;">
+                                            <option value="-1">全部</option>
+                                            <option value="1">已调整</option>
+                                            <option value="0">未调整</option>
+                                        </select>
+                                        <label for="roadname" style="color:black;">&nbsp;&nbsp;名称</label>
+                                        <input type="text" class="form-control-static" id="roadname" style="width: 80px;">
+
+                                        <button type="button" onclick="getRoadList()" style="height:25px;width: 50px;padding:2px"  class="btn btn-primary form-control-static">确定</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="panel-body" id="roadtable" style="width:100%;height:85%;overflow: auto;padding: 0px">
+                            <table class="table table-hover" style="height: 100%;">
+                                <thead>
+                                <tr style="background:#919193;color:white;">
+                                    <th nowrap width="55%" style="text-align:center">道路名称</th>
+                                    <th nowrap width="15%" style="text-align:center">道路类型</th>
+                                    <th nowrap width="10%" style="text-align:center">道路宽度</th>
+                                    <th nowrap width="15%" style="text-align:center">状态</th>
+                                    <th nowrap width="10%" style="text-align:center">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="roadlist">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="arcdiv" class="panel panel-primary" style="width:100%;height:40%;background: #E3E4E6;margin-top:5px">
+                        <div class="panel-heading" style="width:100%;height:8%;padding: 0px;">
+                            <div style="float: left;width: 95%;height: 100%" class="panel-title">路段坐标串</div>
+                            <div style="width: 5%;height: 100%;float: right"><img src="img/icon_add.png" title="添加" onclick="javascript:addArc()"></div>
+                        </div>
+                        <div class="panel-body" id="arctable" style="width:100%;height:80%;overflow: auto;padding: 5px 0 0 0;">
+                                <table class="table table-hover" style="height:100%;background: #ffffff">
+                                    <thead>
+                                    <tr style="background:#919193;color:white">
+                                        <th nowrap style="text-align:left">序号</th>
+                                        <th nowrap style="text-align:left">长度</th>
+                                        <th nowrap style="text-align:center">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="arclist">
+
+                                    </tbody>
+                                </table>
+                        </div>
+                        <div align='right' style="width:100%;height:12%;padding: 0px;" class="panel-footer">
+                            <input type='button' style="height: 95%" class='btn btn-default'  value='取消'/>&nbsp;
+                            <input type='button' id="submitbtn" style="height: 95%" class='btn btn-primary' onclick="submitEdit(false)" value='保存'/>&nbsp;
+                            <input type='button' style="height: 95%" class='btn btn-primary' onclick="submitEdit(true)" value='保存并修改下一条'/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GPS tab -->
+                <div role="tabpanel" class="tab-pane fade" id="profile" style ="height:100%;padding:5px;background:white;">
+                    <div id="intstab" class="panel panel-primary" style="width:100%;height:50%;">
+                        <div class="panel-heading" style="width:100%;height:15%;padding: 0px;">
+                            <div style="background: #ffffff;width: 100%;height: 100%;padding-top: 2px;">
+                                <form class="form-inline">
+                                    <div class="form-group" style="height: 100%;color:black;">
+                                        <label for="intsxzqh" >行政区划</label>
+                                        <select class="form-control-static" id="intsxzqh" style="width: 70px;"></select>
+                                        <label for="intseditstatus" >状态</label>
+                                        <select class="form-control-static" id="intseditstatus" style="width: 65px;">
+                                            <option value="-1">全部</option>
+                                            <option value="1">已调整</option>
+                                            <option value="0">未调整</option>
+                                        </select>
+                                        <label for="roadname" style="color:black;">&nbsp;&nbsp;路口名称</label>
+                                        <input type="text" class="form-control-static" id="intsname" style="width: 80px;">
+
+                                        <button type="button" onclick="getIntsList()" style="height:25px;width: 50px;padding:2px"  class="btn btn-primary form-control-static">确定</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="panel-body" id="intstable" style="width:100%;height:85%;overflow: auto;padding: 0px">
+                            <table class="table table-hover" style="height: 100%;">
+                                <thead>
+                                <tr style="background:#919193;color:white;">
+                                    <th nowrap width="75%" style="text-align:center">路口名称</th>
+                                    <th nowrap width="15%" style="text-align:center">状态</th>
+                                    <th nowrap width="10%" style="text-align:center">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="intslist">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="lanediv" class="panel panel-primary" style="width:100%;height:40%;background: #E3E4E6;margin-top:5px">
+                        <div class="panel-heading" style="width:100%;height:8%;padding: 0px;">
+                            <div style="float: left;width: 95%;height: 100%" class="panel-title">车道信息</div>
+                            <div style="width: 5%;height: 100%;float: right"><img src="img/icon_add.png" title="添加" onclick="addLaneRow()"></div>
+                        </div>
+                        <div class="panel-body" id="lanetable" style="width:100%;height:80%;overflow: auto;padding: 5px 0 0 0;">
+                            <table class="table table-hover" style="height:100%;background: #ffffff">
+                                <thead>
+                                <tr style="background:#919193;color:white">
+                                    <th nowrap style="text-align:left">行驶方向</th>
+                                    <th nowrap style="text-align:left">车道号</th>
+                                    <th nowrap style="text-align:center">直行</th>
+                                    <th nowrap style="text-align:center">左转</th>
+                                    <th nowrap style="text-align:center">右转</th>
+                                    <th nowrap style="text-align:center">掉头</th>
+                                    <th nowrap style="text-align:center">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="lanelist">
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div align='right' style="width:100%;height:12%;padding: 0px;" class="panel-footer">
+                            <input type='button' style="height: 95%" class='btn btn-default'  value='取消'/>&nbsp;
+                            <input type='button' id="lanesubmitbtn" style="height: 95%" class='btn btn-primary' onclick="submitlane(false)" value='保存'/>&nbsp;
+                            <input type='button' style="height: 95%" class='btn btn-primary' onclick="submitlane(true)" value='保存并修改下一条'/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="middle">
+
+</div>
+<div class="alert alert-warning alert-dismissible" role="alert" id="warndiv" style="font-size:12px;height:30px;display:none;padding:5px;position:absolute;top:5px;left:110px;">
+    <strong>&nbsp;&nbsp;&nbsp;&nbsp;保存成功&nbsp;&nbsp;&nbsp;&nbsp;</strong>
+</div>
+
+
+
+</body>
+</html>

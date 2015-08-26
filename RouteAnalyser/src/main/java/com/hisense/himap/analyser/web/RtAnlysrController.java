@@ -58,4 +58,20 @@ public class RtAnlysrController {
         }
         return routeAnalyser.getShortestPath(pointArr);
     }
+
+
+    @RequestMapping("/EzServer/EzMap")
+    @ResponseBody
+    public String  getTileImage(HttpServletRequest request){
+        //http://10.16.1.109:9080/EzServer/EzMap?Service=getImage&Type=RGB&ZoomOffset=-1&Col=15407&Row=4616&Zoom=3&V=0.3
+        String service = request.getParameter("Service");
+        String rtype = request.getParameter("RGB");
+        String zoomoffset = request.getParameter("ZoomOffset");
+        String col = request.getParameter("Col");
+        String row = request.getParameter("Row");
+        String zoom = request.getParameter("Zoom");
+        String v = request.getParameter("V");
+        System.out.println("http://10.16.1.109:9080/EzServer/EzMap?Service="+service+"&Type="+rtype+"&ZoomOffset="+zoomoffset+"&Col="+col+"&Row="+row+"&Zoom="+zoom+"&V="+v);
+        return "http://10.16.1.109:9080/EzServer/EzMap?Service="+service+"&Type="+rtype+"&ZoomOffset="+zoomoffset+"&Col="+col+"&Row="+row+"&Zoom="+zoom+"&V="+v;
+    }
 }

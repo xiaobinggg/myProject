@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+                http://www.springframework.org/schema/beans 
+                http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                http://www.springframework.org/schema/aop
+                http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+                http://www.springframework.org/schema/tx
+                http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+                ">
+
+    <!-- 引入Config.properties配置文件 -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+          id="propertyConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:Config.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--JDBC事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="HiatmpOraBean"/>
+    </bean>
+
+    <!--启用切面自动代理类-->
+    <aop:aspectj-autoproxy/>
+    <!--启用注解驱动的事务 @Transactional-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!-- 数据源  -->
+    <bean id="HiatmpOraBean"
+          class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${HIATMP_DRIVERCLASS}"/>
+        <property name="jdbcUrl" value="${HIATMP_URL}"/>
+        <property name="user" value="${HIATMP_USR}"/>
+        <property name="password" value="${HIATMP_PWD}"/>
+        <property name="maxPoolSize" value="${HIATMP_MAXPOOLSIZE}"/>
+        <property name="minPoolSize" value="${HIATMP_MINPOOLSIZE}"/>
+        <property name="initialPoolSize" value="${HIATMP_INITIALPOOLSIZE}"/>
+        <!-- 最大空闲时间，超过空闲时间的连接将被丢弃。为0或负数则永不丢弃。默认为0秒 -->
+        <property name="maxIdleTime" value="${HIATMP_MAXIDLETIME}"/>
+        <property name="acquireIncrement" value="${HIATMP_ACQUIRE_INCREMENT}"></property>
+        <property name="idleConnectionTestPeriod" value="${HIATMP_IDLE_CONNECTION_TEST_PERIOD}"/>
+        <!-- 定义在从数据库获取新连接失败后重复尝试获取的次数，默认为30 -->
+        <property name="acquireRetryAttempts" value="${HIATMP_ACQUIRE_RETRY_ATTEMPTS}"/>
+        <property name="acquireRetryDelay" value="${HIATMP_ACQUIRE_RETRY_DELAY}"></property>
+        <property name="checkoutTimeout" value="${HIATMP_CHECKOUT_TIMEOUT}"/>
+        <!-- 连接长时间未释放则关闭之 -->
+        <property name="unreturnedConnectionTimeout" value="${HIATMP_UNTRTURNED_CONNECTION_TIMEOUT}"/>
+        <property name="debugUnreturnedConnectionStackTraces" value="${HIATMP_DEBUG_UNRETURNED}"/>
+        <!-- 连接关闭时默认将所有未提交的操作回滚。默认为false -->
+        <property name="autoCommitOnClose" value="true"/>
+        <!--缓存被关闭-->
+        <property name="maxStatements" value="0"/>
+    </bean>
+
+    <bean id="jdbcTemplate"
+          class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="HiatmpOraBean"/>
+    </bean>
+
+
+
+    <!-- blob、clob设置 -->
+    <bean id="defaultLobHandler"
+          class="org.springframework.jdbc.support.lob.DefaultLobHandler"
+          lazy-init="true" />
+
+</beans>

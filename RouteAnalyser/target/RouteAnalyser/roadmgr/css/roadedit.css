@@ -1,0 +1,39 @@
+
+body {
+    margin: 0;
+    padding:0;
+    height:100%;
+    font-size:12px;
+    overflow:hidden
+}
+html {
+    height: 100%
+}
+img{
+    cursor:hand;
+}
+#left {
+    position:absolute;
+    top:0;
+    left:0;
+    width: 65%;
+    height: 100%;
+    background: #F5F5F5;
+    min-height:660px;
+    border:0;
+}
+#right {
+    float:right;
+    width:35%;
+    margin: 0 0px 0 0;
+    height: 100%;
+    background-color: #F5F5F5;
+    min-height:660px;
+}
+#map {
+    margin: 0 0 0 102px;
+    height: 100%;
+    background-color: #F5F5F5;
+    min-height:660px;
+}
+
