@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+    <title>指挥长地图监控</title>
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/amq_jquery_adapter.js"></script>
+    <script src="js/amq.js"></script>
+    <script>
+        $(document).ready(function () {
+            amq = org.activemq.Amq;
+            amq.init(
+                    {
+                        uri: 'amq',
+                        logging: true,
+                        timeout: 10,
+                        clientId:(new Date()).getTime().toString()
+                    }
+            )
+        });
+        function startsendmsg(){
+            setInterval(sendmsg,2000);
+        }
+        function sendmsg(){
+            var msg = "<msg type='发送消息"+(new Date()).getSeconds()+"'>"
+                    +  "<id>msg1</id>"
+                    +  "<content>This is test content</content>"
+                    + "</msg>";
+            var msg2 = "<msg type='发送消息2"+(new Date()).getSeconds()+"'>"
+                    +  "<id>msg1</id>"
+                    +  "<content>This is test content</content>"
+                    + "</msg>";
+            amq.sendMessage("topic://HIATMP.HISENSE.AJAXMQTEST", msg);
+            //amq.sendMessage("topic://HIATMP.HISENSE.AJAXMQTEST2", msg2);
+
+        }
+
+        function receiveMsg(){
+            var myHandler =
+            {
+                rcvMessage: function(message)
+                {
+
+
+                    $("#msginfo").text(message.getAttribute('type')+"   "+ (new Date()).toLocaleTimeString() );
+                },
+                rcvMessage2: function(message)
+                {
+                    $("#msginfo2").text(message.getAttribute('type')+"   "+ (new Date()).toLocaleTimeString() );
+                },
+            };
+
+            amq.addListener("testhandler","topic://HIATMP.HISENSE.AJAXMQTEST",myHandler.rcvMessage);
+            amq.addListener("testhandler2","topic://HIATMP.HISENSE.AJAXMQTEST2",myHandler.rcvMessage2);
+        }
+
+    </script>
+</head>
+
+<body>
+
+<input type="button" value="发送消息" onclick="startsendmsg()"/>
+<input type="button" value="接收消息" onclick="receiveMsg()"/>
+<div id="msginfo"></div>
+<div id="msginfo2"></div>
+
+</body>
+</html>
