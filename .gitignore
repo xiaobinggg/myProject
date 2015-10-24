@@ -1,5 +1,8 @@
 *.class
 
 .idea/
+out/
 
 RouteAnalyser/src/main/webapp/WEB-INF/classes/
+RouteAnalyser/target/
+AjaxMQ/target/
