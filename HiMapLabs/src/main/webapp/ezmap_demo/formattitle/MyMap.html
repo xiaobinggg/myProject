@@ -1,0 +1,54 @@
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>交通地图服务</title>
+    <SCRIPT language="javascript" src="http://10.16.1.109:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
+    <script>
+        var mapframe = window;
+        function initmap(){
+            _MapApp = new EzMap(document.getElementById("map"));
+            var pOverview=new OverView();
+            pOverview.minLevel=8;
+            pOverview.maxLevel=10;
+            _MapApp.addOverView(pOverview);
+            _MapApp.editOverlay();
+
+            _MapApp.showMapControl();
+            _MapApp.hideCopyright();
+            _MapApp.map.hideMapControl();//隐藏比例尺
+            _MapApp.map.hideMapServer();//隐藏图层切换按钮
+            _MapApp.centerAndZoom(new Point(120.40948,36.05952,120.40969), 3);
+            pline = new Polyline("120.40948,36.05952,120.40969,36.05951,120.40994,36.05949,120.41027,36.05945,120.41062,36.05936,120.41175,36.05905","red",8);
+            pline2 = new Polyline("120.40943,36.05942,120.40964,36.05943,120.40994,36.05942,120.41028,36.05937,120.41067,36.05929,120.41179,36.05895","green",5);
+            pline3= new Polyline("120.41131,36.06528,120.41136,36.06275,120.41204,36.06149,120.41205,36.06146,120.41181,36.05909","green",5);
+            _MapApp.addOverlay(pline);
+            _MapApp.addOverlay(pline2);
+            _MapApp.addOverlay(pline3);
+            pline.setColor("yellow");
+            pline.addListener("mouseover",function(){
+                var iIndex = Math.floor(pline.points.length / 2);
+                var point = new mapframe.Point(pline.points[iIndex].x, pline.points[iIndex].y);
+                var pTitle = new mapframe.Title("<div style='border:5px;background:darkseagreen;padding: 5px;'>福州北路(伊春路-依兰路)北向南</br><a href='#'>aaaaa</a> </br><a href='javascript:closeTiwindow()'>关闭</a></div>", 13, 7, "Microsoft YaHei", "#000000","#FFFFFF",'#FFFFFF', 1, "true");
+                pTitle.name = "福州北路(伊春路-依兰路)北向南";
+
+                var pIcon = new Icon();
+                pIcon.width = 5;
+                pIcon.height = 5;
+                pIcon.image = "policeIcon.png";
+                var newmarker = new Marker(point, pIcon, pTitle);
+                _MapApp.addOverlay(newmarker);
+                pline.titlemarker = newmarker;
+            });
+
+        }
+
+        function closeTiwindow(){
+            pline.titlemarker.hideTitle();
+            _MapApp.removeOverlay(pline.titlemarker);
+        }
+    </script>
+</head>
+<body onload="initmap()">
+<div id="map" style="top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;"></div>
+</body>
+</html>
