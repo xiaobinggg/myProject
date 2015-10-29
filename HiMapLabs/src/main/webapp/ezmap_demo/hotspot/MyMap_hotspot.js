@@ -1,14 +1,15 @@
 require.config({
 	baseUrl:'',
-	paths: {
+	paths:{
 		'jquery':'../../js/common/jquery-1.7.2',
 		'common':'../../js/common'
-　　　},shim: {
-　　　　　'common/kdTree':{
-	　　　　　　　　exports: 'kdTree'
-　　　　　}
-　　　}
+	},shim:{
+		'common/kdTree':{
+			exports: 'kdTree'
+		}
+	}
 });
+
 //地图对象
 var _MapApp;
 var kdtree;
@@ -18,6 +19,7 @@ var mousepos = new Object();
 
 require(['jquery','common/kdTree','common/KdTreeExtend'], function ($,kdTree,kdTreeExtend){
 	var markers = policedata.rows['01'];
+	alert(markers.length);
 	kdtree = new kdTree(markers,kdTreeExtend.distance, ["latitude", "longitude"]);
 	//alert(kdtree.root.obj.devicename);
 	//绑定事件
@@ -54,8 +56,8 @@ function handleMouseover(){
 		
 		if(hotspot!=null && hotspot[0][1]<distance){
 			document.getElementById("map").style.cursor = "hand";
-			//alert(hotspot[0][1]);
-			var marker = hotspot[0][0];
+
+			/*var marker = hotspot[0][0];
 			var point = new Point(marker.longitude,marker.latitude);
 			var pTitle = new Title(marker.devicename, 13, 7, "Microsoft YaHei", "#000000","#FFFFFF",'#FFFFFF', 1, "true");
 			var pIcon = new Icon();
@@ -64,9 +66,9 @@ function handleMouseover(){
 			pIcon.image = "policeIcon.png";
 			var newmarker = new Marker(point, pIcon, pTitle);
 			newmarker.hideTitle();
-			_MapApp.addOverlay(newmarker);
+			_MapApp.addOverlay(newmarker);*/
 		}
-	},200);
+	},10);
 	
 }
   
