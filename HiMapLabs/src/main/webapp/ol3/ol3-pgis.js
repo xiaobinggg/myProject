@@ -13,7 +13,7 @@ require(['jquery','HiMaps1.0'], function ($,himap){
     //_MapApp.moveTo("120.35595, 36.07525",4);
 
     //画点测试
-    _MapApp.drawCircle(function(pos){
+    _MapApp.drawRect(function(pos){
         alert(pos);
     });
 });

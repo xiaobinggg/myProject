@@ -855,7 +855,7 @@ Point.prototype.countMileage = function (pPoint) {
 };
 Point.prototype.toString = function () {
     return this.x + "," + this.y;
-};
+};i
 Point.prototype.equals = function (aa) {
     if (!aa) return false;
     return this.x == aa.x && this.y == aa.y

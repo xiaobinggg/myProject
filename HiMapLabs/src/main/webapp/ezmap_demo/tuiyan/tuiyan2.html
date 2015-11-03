@@ -23,6 +23,8 @@
             _MapApp.hideCopyright();
             _MapApp.centerAndZoom(new Point(120.41184,36.05894), 1);
 
+
+
         }
 
         function playtest(){
@@ -99,11 +101,9 @@
             pIcon.height = 34;
             pIcon.image = "dd-start.gif";
             var newmarker = new Marker(point, pIcon, pTitle);
-            //newmarker.bIsCenter = true;
+
             _MapApp.addOverlay(newmarker);
             newmarker.hideTitle();
-            newmarker.titleDiv = null;
-            //newmarker.rotate(30);
             return newmarker;
         }
 

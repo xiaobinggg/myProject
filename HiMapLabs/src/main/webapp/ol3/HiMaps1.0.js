@@ -124,8 +124,9 @@ define(['jquery', 'IHiMap'], function ($, IHiMap) {
 
     function addInteraction(geotype,callback){
         var geometryFunction,maxPoints;
+        var drawtype = geotype;
         if(geotype == "Rect"){
-            geotype = "LineString";
+            drawtype = "LineString";
             maxPoints = 2;
             geometryFunction = function(coordinates,geometry){
                 if(!geometry){
@@ -133,13 +134,15 @@ define(['jquery', 'IHiMap'], function ($, IHiMap) {
                 }
                 var start = coordinates[0];
                 var end = coordinates[1];
-                geometry.setCoordinates([start,[start[0],end[1]],[end[0],start[1]],end]);
+                geometry.setCoordinates([
+                    [start, [start[0], end[1]], end, [end[0], start[1]], start]
+                ]);
                 return geometry;
             }
         }
         this.draw = new ol.interaction.Draw({
             features: this.features,
-            type: geotype,
+            type: drawtype,
             geometryFunction: geometryFunction,
             maxPoints: maxPoints
         });
@@ -148,6 +151,9 @@ define(['jquery', 'IHiMap'], function ($, IHiMap) {
             var coordinates = null;
             if(geotype == "Circle"){
                 coordinates = feature.getGeometry().getCenter().join(",")+","+feature.getGeometry().getRadius();
+            }else if(geotype == "Rect"){
+                var fullcoordinates = feature.getGeometry().getCoordinates()[0];
+                coordinates = fullcoordinates[0][0]+","+fullcoordinates[0][1]+","+fullcoordinates[2][0]+","+fullcoordinates[2][1];
             }else{
                 coordinates = feature.getGeometry().getCoordinates().join(",");
             }
