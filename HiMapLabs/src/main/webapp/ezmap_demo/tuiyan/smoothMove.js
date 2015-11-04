@@ -15,10 +15,10 @@ function SmoothMove(timeinterval,stepdistance,path){
     this.PATH = path;
 
     this.points = this.tranStr2Points(this.PATH);
-    this.steppoints = null;
     this.steps = 0;
     this.currstep = 0;
     this.pathlength = 0;
+    this.steppoints = null;
     this.initStepPoints();
 }
 
@@ -34,6 +34,7 @@ SmoothMove.prototype.initStepPoints = function(){
         this.points[i-1].angle = this.getAngle(this.points[i-1].x,this.points[i-1].y,this.points[i].x,this.points[i].y);
         this.points[i].distance = this.pathlength+0;
     }
+
     //根据总长度与步幅计算步数
     this.steps = this.pathlength/this.STEPDISTANCE;
     this.steps = Math.ceil(this.steps);//向上取整
@@ -56,16 +57,21 @@ SmoothMove.prototype.initStepPoints = function(){
             this.steppoints.push(steppoint);
             stepdistance = (++currstep)/this.steps*this.pathlength;
         }
-        if(stepdistance==nodedistance){
+        if (nodedistance == stepdistance) {
             currstep++;
         }
         this.points[j].isnode = true;
         this.steppoints.push(this.points[j]);
     }
-
-
 };
 
+/**
+ * 开始移动
+ * @param callback 回调函数，每一步移动都调用一次
+ * 在回调函数中返回当前的坐标点对象。分为节点坐标点和非节点坐标点。
+ * 节点坐标点{x:float,y:float,isnode:true,angle:float}表示路线上的拐点，在此处理转向
+ * 非节点坐标点{x:float,y:float} 表示步进点
+ */
 SmoothMove.prototype.move = function(callback){
     this.timeinterval = this.setInterval(function(){
         if(this.currstep>=this.steppoints.length){
@@ -78,7 +84,13 @@ SmoothMove.prototype.move = function(callback){
 
 };
 
-
+/**
+ * 计算线段上指定距离的点坐标
+ * @param pSPoint   开始点
+ * @param pEPoint   结束点
+ * @param dDist 距离
+ * @returns {*} 返回距离开始节点指定距离的点坐标
+ */
 SmoothMove.prototype.getDistPoint = function (pSPoint, pEPoint, dDist) {
     var dLen = this.getdistance(pSPoint.x,pSPoint.y,pEPoint.x,pEPoint.y);
     if (dDist > dLen || dLen == 0) {
@@ -96,12 +108,28 @@ SmoothMove.prototype.getDistPoint = function (pSPoint, pEPoint, dDist) {
     return pPoint;
 };
 
+/**
+ * 计算两点间距离(平面坐标距离)
+ * @param startx    开始点x
+ * @param starty    开始点y
+ * @param endx  结束点x
+ * @param endy  结束点y
+ * @returns {number} 平面距离
+ */
 SmoothMove.prototype.getdistance = function (startx,starty,endx,endy) {
     var Da = startx - endx;
     var Ha = starty - endy;
     return Math.sqrt(Da * Da + Ha * Ha)
 };
 
+/**
+ * 计算线段与x轴夹角
+ * @param startx    开始点x
+ * @param starty    开始点y
+ * @param endx  结束点x
+ * @param endy  结束点y
+ * @returns {number} 夹角(取值范围:-180~180)
+ */
 SmoothMove.prototype.getAngle = function (startx,starty,endx,endy) {
     var diff_x = endx - startx,
         diff_y = endy - starty;
@@ -114,6 +142,11 @@ SmoothMove.prototype.getAngle = function (startx,starty,endx,endy) {
     }
 };
 
+/**
+ * 转换路径字符串为坐标点数组
+ * @param a 路径字符串
+ * @returns {Array} 坐标点数组
+ */
 SmoothMove.prototype.tranStr2Points =function(a) {
     var p = a.split(",");
     var len = p.length / 2;
@@ -129,10 +162,14 @@ SmoothMove.prototype.tranStr2Points =function(a) {
 
 
 // Enable the passage of the 'this' object through the JavaScript timers
-
-
 var __nativeST__ = window.setTimeout, __nativeSI__ = window.setInterval;
 
+/**
+ * 扩展setTimeout方法，使支持参数传递、this赋值
+ * @param vCallback 执行方法
+ * @param nDelay    延迟时间
+ * @returns {number}
+ */
 SmoothMove.prototype.setTimeout = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
     var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
     return __nativeST__(vCallback instanceof Function ? function () {
@@ -140,6 +177,12 @@ SmoothMove.prototype.setTimeout = function (vCallback, nDelay /*, argumentToPass
     } : vCallback, nDelay);
 };
 
+/**
+ * 扩展setInterval方法，使支持参数传递、this赋值
+ * @param vCallback 执行方法
+ * @param nDelay    延迟时间
+ * @returns {number}
+ */
 SmoothMove.prototype.setInterval = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
     var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
     return __nativeSI__(vCallback instanceof Function ? function () {
