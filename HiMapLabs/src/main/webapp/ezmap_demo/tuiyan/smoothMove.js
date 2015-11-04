@@ -3,15 +3,13 @@
  * 平滑移动类
  */
 
-
-
 /**
  * 平滑移动类
  * @param timeinterval 移动时间间隔
- * @param distance  步幅
+ * @param stepdistance  步幅
  * @param path  路径
  */
-function smoothMove(timeinterval,stepdistance,path){
+function SmoothMove(timeinterval,stepdistance,path){
     this.TIMEINTERVAL = timeinterval;
     this.STEPDISTANCE = stepdistance;
     this.PATH = path;
@@ -27,13 +25,12 @@ function smoothMove(timeinterval,stepdistance,path){
 /**
  * 初始化平滑移动的点序列
  */
-smoothMove.prototype.initStepPoints = function(){
+SmoothMove.prototype.initStepPoints = function(){
     //计算路线总长度
     this.pathlength = 0;
     this.points[0].distance = 0;
     for(var i=1;i<this.points.length;i++){
-        var distance = this.getdistance(this.points[i].x,this.points[i].y,this.points[i-1].x,this.points[i-1].y);
-        this.pathlength+=distance;
+        this.pathlength+= this.getdistance(this.points[i].x,this.points[i].y,this.points[i-1].x,this.points[i-1].y);
         this.points[i-1].angle = this.getAngle(this.points[i-1].x,this.points[i-1].y,this.points[i].x,this.points[i].y);
         this.points[i].distance = this.pathlength+0;
     }
@@ -45,16 +42,16 @@ smoothMove.prototype.initStepPoints = function(){
     }
 
     //计算每一步的坐标节点
-    this.steppoints = new Array();
+    this.steppoints = [];
     this.points[0].isnode = true;
     this.steppoints.push(this.points[0]);
     var currstep = 1;
-    for(var i=1;i<this.points.length;i++){
-        var nodedistance = this.points[i].distance;
-        var prenodedistance = this.points[i-1].distance;
+    for(var j=1;j<this.points.length;j++){
+        var nodedistance = this.points[j].distance;
+        var prenodedistance = this.points[j-1].distance;
         var stepdistance = currstep/this.steps*this.pathlength;
         while(stepdistance<nodedistance){
-            var steppoint = this.getDistPoint(this.points[i-1],this.points[i],stepdistance-prenodedistance);
+            var steppoint = this.getDistPoint(this.points[j-1],this.points[j],stepdistance-prenodedistance);
             steppoint.isnode = false;
             this.steppoints.push(steppoint);
             stepdistance = (++currstep)/this.steps*this.pathlength;
@@ -62,14 +59,14 @@ smoothMove.prototype.initStepPoints = function(){
         if(stepdistance==nodedistance){
             currstep++;
         }
-        this.points[i].isnode = true;
-        this.steppoints.push(this.points[i]);
+        this.points[j].isnode = true;
+        this.steppoints.push(this.points[j]);
     }
 
 
-}
+};
 
-smoothMove.prototype.move = function(callback){
+SmoothMove.prototype.move = function(callback){
     this.timeinterval = this.setInterval(function(){
         if(this.currstep>=this.steppoints.length){
             window.clearInterval(this.timeinterval);
@@ -79,10 +76,10 @@ smoothMove.prototype.move = function(callback){
         this.currstep++;
     },this.TIMEINTERVAL);
 
-}
+};
 
 
-smoothMove.prototype.getDistPoint = function (pSPoint, pEPoint, dDist) {
+SmoothMove.prototype.getDistPoint = function (pSPoint, pEPoint, dDist) {
     var dLen = this.getdistance(pSPoint.x,pSPoint.y,pEPoint.x,pEPoint.y);
     if (dDist > dLen || dLen == 0) {
         return pEPoint;
@@ -93,42 +90,42 @@ smoothMove.prototype.getDistPoint = function (pSPoint, pEPoint, dDist) {
         alert("坐标计算有问题,x:" + dx + ",:" + dy);
         throw new Error(101, "startPoint:" + pSPoint.toString() + ",endPoint:" + pEPoint.toString() + ",len:" + dLen);
     }
-    var pPoint = new Object();
+    var pPoint = {};
     pPoint.x = dx;
     pPoint.y = dy;
     return pPoint;
-}
+};
 
-smoothMove.prototype.getdistance = function (startx,starty,endx,endy) {
+SmoothMove.prototype.getdistance = function (startx,starty,endx,endy) {
     var Da = startx - endx;
     var Ha = starty - endy;
     return Math.sqrt(Da * Da + Ha * Ha)
-}
+};
 
-smoothMove.prototype.getAngle = function (startx,starty,endx,endy) {
+SmoothMove.prototype.getAngle = function (startx,starty,endx,endy) {
     var diff_x = endx - startx,
         diff_y = endy - starty;
     //返回角度,不是弧度
     var angle =  360*Math.atan(diff_y/diff_x)/(2*Math.PI);
     if(diff_x<0){
-        return 180+ngle;
+        return 180+angle;
     }else{
         return angle;
     }
-}
+};
 
-smoothMove.prototype.tranStr2Points =function(a) {
+SmoothMove.prototype.tranStr2Points =function(a) {
     var p = a.split(",");
     var len = p.length / 2;
-    var points = new Array();
+    var points = [];
     for (var iIndex = 0; iIndex < len; iIndex++) {
-        var pPoint = new Object();
+        var pPoint = {};
         pPoint.x = parseFloat(p[2 * iIndex]);
         pPoint.y = parseFloat(p[2 * iIndex + 1]);
         points.push(pPoint);
     }
     return points;
-}
+};
 
 
 // Enable the passage of the 'this' object through the JavaScript timers
@@ -136,17 +133,24 @@ smoothMove.prototype.tranStr2Points =function(a) {
 
 var __nativeST__ = window.setTimeout, __nativeSI__ = window.setInterval;
 
-smoothMove.prototype.setTimeout = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
+SmoothMove.prototype.setTimeout = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
     var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
     return __nativeST__(vCallback instanceof Function ? function () {
         vCallback.apply(oThis, aArgs);
     } : vCallback, nDelay);
 };
 
-smoothMove.prototype.setInterval = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
+SmoothMove.prototype.setInterval = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
     var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
     return __nativeSI__(vCallback instanceof Function ? function () {
         vCallback.apply(oThis, aArgs);
     } : vCallback, nDelay);
 };
 
+
+/*调用示例
+var test = new SmoothMove(10,0.00001,"120.41187,36.05895,120.41215,36.05886,120.41257,36.05872");
+test.move(function(obj){
+    console.info(obj.x+","+obj.y+","+obj.isnode);
+});
+*/

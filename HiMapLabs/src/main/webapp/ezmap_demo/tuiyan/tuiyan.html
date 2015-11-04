@@ -1,16 +1,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=gb2312"/>
-    <title>ΩªÕ®µÿÕº∑˛ŒÒ Õ∆—›≤‚ ‘</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>‰∫§ÈÄöÂú∞ÂõæÊúçÂä° Êé®ÊºîÊµãËØï</title>
     <SCRIPT language="javascript" src="http://10.16.1.72:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
     <SCRIPT language="javascript" src="../js/data/policeequip.js"></SCRIPT>
-    <script language="javascript" src="tuiyan.js"></script>
+    <script language="javascript" src="smoothMove.js"></script>
     <script>
-    	var steps = 300;
-        var interval = 100;
-        var stepcount = 0;
+
         var newmarker = null;
-        var moveinterval = null;
 
         function initmap(){
             _MapApp = new EzMap(document.getElementById("map"));
@@ -23,23 +20,29 @@
             _MapApp.showMapControl();
             _MapApp.hideCopyright();
             _MapApp.centerAndZoom(new Point(120.41384,36.05894), 1);
-            var basemarker = showMarker("120.41187,36.05895");
 
         }
 
         function playtest(){
+
             _MapApp.clear();
              newmarker = showMarker("120.41187,36.05895");
-            var test = new smoothMove(1,0.00001,"120.41187,36.05895,120.41215,36.05886,120.41257,36.05872,120.4131,36.05856,120.41343,36.05844,120.41388,36.05832,120.41423,36.05827,120.41482,36.05824,120.41543,36.05825,120.41626,36.05836,120.41668,36.05841,120.41713,36.0585,120.41698,36.05877,120.41611,36.06002,120.41579,36.06063,120.41572,36.06072,120.41549,36.06077,120.41496,36.06076,120.41435,36.06073,120.41361,36.0607,120.41206,36.06066,120.41202,36.06059,120.41199,36.06024,120.41186,36.05895");
+            //var circle = new Circle('120.41187,36.05895,0.001','#ff00FF',1,0.3,'#33CC00');
+            //_MapApp.addOverlay(circle);
+
+            var test = new SmoothMove(10,0.00001,"120.41187,36.05895,120.41215,36.05886,120.41257,36.05872,120.4131,36.05856,120.41343,36.05844,120.41388,36.05832,120.41423,36.05827,120.41482,36.05824,120.41543,36.05825,120.41626,36.05836,120.41668,36.05841,120.41713,36.0585,120.41698,36.05877,120.41611,36.06002,120.41579,36.06063,120.41572,36.06072,120.41549,36.06077,120.41496,36.06076,120.41435,36.06073,120.41361,36.0607,120.41206,36.06066,120.41202,36.06059,120.41199,36.06024,120.41186,36.05895");
             test.move(function(obj){
-                if(obj.isnode==true && typeof(obj.angle)!='undefined'){//Ω⁄µ„¥¶µ˜’˚≥µÕ∑∑ΩœÚ
+                if(obj.isnode==true && typeof(obj.angle)!='undefined'){//ËäÇÁÇπÂ§ÑË∞ÉÊï¥ËΩ¶Â§¥ÊñπÂêë
                     var angle = -obj.angle;
                     newmarker.rotate(angle);
                 }else{
                     var point = new Point(obj.x,obj.y);
                     newmarker.point = point;
                     newmarker.redraw();
+                    //circle.center = point;
+                    //circle.redraw();
                 }
+
             });
 
         }
@@ -80,6 +83,6 @@
 <body onload="initmap()">
 <div id="map" style="width:100%;height:700px;top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;"></div>
 <input type="button" value="  play  " onclick="playtest()"/>
-<input type="button" value="ªÒ»°◊¯±Í" onclick="getstrcoords()"/>
+<input type="button" value="Ëé∑ÂèñÂùêÊ†á" onclick="getstrcoords()"/>
 </body>
 </html>
