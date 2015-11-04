@@ -4,6 +4,7 @@
     <title>交通地图服务 推演测试</title>
     <SCRIPT language="javascript" src="http://10.16.1.72:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
     <SCRIPT language="javascript" src="../js/data/policeequip.js"></SCRIPT>
+    <script language="javascript" src="tuiyan.js"></script>
     <script>
     	var steps = 300;
         var interval = 100;
@@ -21,83 +22,37 @@
 
             _MapApp.showMapControl();
             _MapApp.hideCopyright();
-            _MapApp.centerAndZoom(new Point(120.41184,36.05894), 1);
+            _MapApp.centerAndZoom(new Point(120.41384,36.05894), 1);
+            var basemarker = showMarker("120.41187,36.05895");
 
         }
 
         function playtest(){
-            newmarker = showMarker("120.35595,36.07525");
-            showMarker("120.35595,36.07525");
-
-            var steps = 300;
-            var interval = 100;
-            var strPath = "120.41187,36.05895,120.41215,36.05886,120.41257,36.05872,120.4131,36.05856,120.41343,36.05844,120.41388,36.05832,120.41423,36.05827,120.41482,36.05824,120.41543,36.05825,120.41626,36.05836,120.41668,36.05841,120.41713,36.0585,120.41698,36.05877,120.41611,36.06002,120.41579,36.06063,120.41572,36.06072,120.41549,36.06077,120.41496,36.06076,120.41435,36.06073,120.41361,36.0607,120.41206,36.06066,120.41202,36.06059,120.41199,36.06024,120.41186,36.05895";
-            newmarker.setDrawInterval(interval);//设置推演的周期
-            newmarker.setDrawPath(0,steps,strPath);//表示从0*interval毫秒开始推演，持续steps*interval毫秒，按照strPath路径进行推演
-            newmarker.playDraw(showMovingTrack);//开始播放推演
-        }
-
-        /**
-         * 推演的回调函数，用于在地图上描绘经过的轨迹
-         */
-        function showMovingTrack(marker){
-            var point = marker.getPoint();
-            if(marker.isnode){
-                showMarker(marker.prex+","+marker.prey+"");
-            }else{
-                if(marker.pline !=null){
-                    _MapApp.removeOverlay(marker.pline);
+            _MapApp.clear();
+             newmarker = showMarker("120.41187,36.05895");
+            var test = new smoothMove(1,0.00001,"120.41187,36.05895,120.41215,36.05886,120.41257,36.05872,120.4131,36.05856,120.41343,36.05844,120.41388,36.05832,120.41423,36.05827,120.41482,36.05824,120.41543,36.05825,120.41626,36.05836,120.41668,36.05841,120.41713,36.0585,120.41698,36.05877,120.41611,36.06002,120.41579,36.06063,120.41572,36.06072,120.41549,36.06077,120.41496,36.06076,120.41435,36.06073,120.41361,36.0607,120.41206,36.06066,120.41202,36.06059,120.41199,36.06024,120.41186,36.05895");
+            test.move(function(obj){
+                if(obj.isnode==true && typeof(obj.angle)!='undefined'){//节点处调整车头方向
+                    var angle = -obj.angle;
+                    newmarker.rotate(angle);
+                }else{
+                    var point = new Point(obj.x,obj.y);
+                    newmarker.point = point;
+                    newmarker.redraw();
                 }
-                var path = "";
-                var fullpaths = marker.drawpaths.split(",");
-                var nextnum = marker.nextnum;
-                if(nextnum>1){
-                    path = fullpaths[nextnum*2-4]+","+fullpaths[nextnum*2-3]+","+fullpaths[nextnum*2-2]+","+fullpaths[nextnum*2-1];
-                    var newpLine = new Polyline(path,"#00FF00",4,1,1);// 构造一个多义线对象
-                    _MapApp.addOverlay(newpLine);// 将多义线对象添加到地图中
-                }
-            }
-
-
-             var  path=marker.prex+","+marker.prey+","+point;
-             var  newpLine = new Polyline(path,"#00FF00",4,1,1);// 构造一个多义线对象
-
-            _MapApp.addOverlay(newpLine);// 将多义线对象添加到地图中
-            marker.pline = newpLine;
+            });
 
         }
 
-        function pausetest(){
-            newmarker.pauseDraw();
-        }
 
-        function resumetest(){
-            newmarker.resumeDraw();
-        }
-
-        function speeduptest(){
-            var currinterval = newmarker.drawStepInterval;
-            currinterval = currinterval-20;
-            newmarker.pauseDraw();
-            newmarker.setDrawInterval(currinterval);
-            newmarker.resumeDraw();
-        }
-
-        function speeddowntest(){
-            var currinterval = newmarker.drawStepInterval;
-            currinterval = currinterval+50;
-            newmarker.pauseDraw();
-            newmarker.setDrawInterval(currinterval);
-            newmarker.resumeDraw();
-        }
 
         function showMarker(pos){
             var point = new Point(pos);
             var pTitle = new Title("title", 13, 7, "Microsoft YaHei", "#000000","#FFFFFF",'#FFFFFF', 1, "true");
             var pIcon = new Icon();
-            pIcon.width = 20;
-            pIcon.height = 34;
-            pIcon.image = "dd-start.gif";
+            pIcon.width = 32;
+            pIcon.height = 32;
+            pIcon.image = "car.jpg";
             var newmarker = new Marker(point, pIcon, pTitle);
             //newmarker.bIsCenter = true;
             _MapApp.addOverlay(newmarker);
@@ -108,128 +63,7 @@
         }
 
 
-        /**
-         * 设置推演的路径，开始周期与结束周期
-         * @param iStartS 开始周期
-         * @param steps 结束周期
-         * @param strPoints 路径字符串
-         */
-        iOverLay.prototype.setDrawPath = function(iStartS, steps, strPoints){
-            var paths = strPoints.split(",");
-            this.nextnum = 1;
-            if(this.prex == null){
-                this.prex = paths[0];
-            }
-            if(this.prey == null){
-                this.prey = paths[1];
-            }
 
-
-            this.nextx = paths[2];
-            this.nexty = paths[3];
-            this.currangel = (this.nexty-this.prey)/(this.nextx-this.prex);
-
-            this.steps = steps;
-            this.stepcount = 0;
-            this.drawpaths = strPoints;
-
-            this.setPath(iStartS,steps,strPoints);
-        }
-
-        iOverLay.prototype.onDraw = function(callback){
-            this.isnode = false;
-            if(this.stepcount ==null){
-                this.stepcount = 0;
-            }
-            this.stepcount++;
-            if(this.stepcount>=this.steps){
-                this.isnode = true;
-                //callback.call(this,this);
-                clearInterval(this.ondrawinterval);
-            }
-
-            var currpoint = this.getPoint();
-            var currx = currpoint.x;
-            var curry = currpoint.y;
-            var angel = (curry-this.prey)/(currx-this.prex);
-
-            var ioverlay = this;
-            if((angel -this.currangel >0.000001) || (this.currangel-angel) >0.000001){
-                //console.log(angel+"---"+this.currangel);
-                this.isnode = true;
-                //callback.call(this,ioverlay);
-                this.nextnum++;
-                var paths = this.drawpaths.split(",");
-                this.prex = paths[this.nextnum*2-2];
-                this.prey = paths[this.nextnum*2-1];
-                this.nextx = paths[this.nextnum*2];
-                this.nexty = paths[this.nextnum*2+1];
-                this.currangel = (this.nexty-this.prey)/(this.nextx-this.prex);
-                //console.log(this.currangel);
-            }
-
-            if(callback!=null){
-                callback.call(this,this);
-            }
-        }
-
-        /**
-         * 设置推演的周期
-         * @param drawinterval 周期（单位ms）
-         */
-        iOverLay.prototype.setDrawInterval = function(drawinterval){
-            if(drawinterval<=0){
-                drawinterval = 1;
-            }
-            this.drawStepInterval = drawinterval;
-            this.setInterval(drawinterval);
-        }
-        /**
-         * 开始推演
-         * @param callback 回调函数，图标移动时触发
-         */
-        iOverLay.prototype.playDraw = function(callback){
-            this.play();
-            var ioverlay = this;
-            this.callback = callback;
-            this.ondrawinterval = window.setInterval(function(){ioverlay.onDraw(callback)},this.drawStepInterval);
-        }
-        /**
-         * 暂停推演
-         */
-        iOverLay.prototype.pauseDraw = function(){
-            this.stopDraw();
-            var newpath = this.getPoint()+",";
-            var currnum = this.nextnum;
-            var prepath = this.drawpaths.split(",");
-            for(var i=currnum;i<prepath.length/2;i++){
-                newpath+=prepath[i*2]+","+prepath[i*2+1]+",";
-
-            }
-            newpath = newpath.substring(0,newpath.length-1);
-            this.setDrawPath(0,this.steps-this.stepcount,newpath);
-
-        }
-        /**
-         * 继续推演
-         */
-        iOverLay.prototype.resumeDraw = function(){
-            this.playDraw(this.callback);
-            var currpath = this.drawpaths.split(",");
-            var newpath=this.prex+","+this.prey;
-            for(var i=1;i<currpath.length/2;i++){
-                newpath += ","+currpath[i*2]+","+currpath[i*2+1];
-            }
-            this.drawpaths = newpath;
-        }
-        /**
-         * 停止推演
-         */
-        iOverLay.prototype.stopDraw = function(){
-            this.stop();
-            window.clearInterval(this.ondrawinterval);
-
-        }
 
         function getstrcoords(){
             _MapApp.changeDragMode('drawPolyline',null,null,
@@ -245,11 +79,7 @@
 </head>
 <body onload="initmap()">
 <div id="map" style="width:100%;height:700px;top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;"></div>
-<input type="button" value="play" onclick="playtest()"/>
-<input type="button" value="pause" onclick="pausetest()"/>
-<input type="button" value="resume" onclick="resumetest()"/>
-<input type="button" value="speed++" onclick="speeduptest()"/>
-<input type="button" value="speed--" onclick="speeddowntest()"/>
+<input type="button" value="  play  " onclick="playtest()"/>
 <input type="button" value="获取坐标" onclick="getstrcoords()"/>
 </body>
 </html>
