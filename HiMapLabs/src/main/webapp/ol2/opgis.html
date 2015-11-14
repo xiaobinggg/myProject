@@ -1,8 +1,7 @@
 <html>
 	<head>
 		<title>切片浏览</title>
-		<link rel="stylesheet" href="css/style.css" type="text/css" />
-		<script src="js/OpenLayers.js"></script>
+		<script src="../js/common/ol2/OpenLayers.js"></script>
 		<style type="text/css">
 		.olImageLoadError {
 			background-color: transparent !important;
@@ -14,13 +13,11 @@
  
 
             var map, layer; //complex object of type OpenLayers.Map  
-			var strImageUrl = "pgis";
-			
+
             var proj = new OpenLayers.Projection("EPSG:4326");
             //Initialise the 'map' object   
             function init() {
 
-                var imageUrl = GetParamValue("strImageUrl", strImageUrl);
                 var extent = new OpenLayers.Bounds(
                     119.399,35.585,121.780,37.022
                 );
@@ -28,17 +25,17 @@
                 map = new OpenLayers.Map("map", {
                     maxExtent: extent,
                     // restrictedExtent: extent,
-                    maxResolution: 0.000976566472126202, // corresponds to level 8 in the cache 
+                    maxResolution: 0.000976566472126202, // corresponds to level 8 in the cache
                     numZoomLevels: 10,
                     units: 'degrees',
                     projection: "EPSG:4326"
                 });
 
                 layer = new OpenLayers.Layer.TMS("Name",
-                   imageUrl, {
+                   "pgis", {
                        'type': 'png',
                        'tileOrigin': new OpenLayers.LonLat(0,0),
-                       'getURL': getUrl//get_my_url
+                       'getURL': getUrl
                 });
                 map.tileSize = new OpenLayers.Size(256, 256);
                 layer.setTileSize(new OpenLayers.Size(256, 256));
@@ -46,13 +43,8 @@
                 map.addControl(new OpenLayers.Control.MousePosition());
                 map.addLayers([layer]);
 
-                map.addControl(new OpenLayers.Control.PanZoomBar());
-                map.events.register("click", null, function (e) {
-                    var ContextLonLat = map.getLonLatFromPixel(new OpenLayers.Pixel(e.x, e.y));
-                    alert(ContextLonLat.lon + " " + ContextLonLat.lat);
-                });
+
                 var lonLat = new OpenLayers.LonLat(120.35595,36.07525);
-                lonLat.transform(map.displayProjection, map.getProjectionObject());
                 map.setCenter(lonLat, parseInt(4));
 
             }
@@ -69,37 +61,12 @@
 
 
             var x2 = (Math.round(Math.abs((center.lon - originTileX) / (res * this.tileSize.w)))); 
-            var y2 = (Math.round(Math.abs((center.lat-originTileY) / (res * this.tileSize.h)))); 
-	      //alert(url);
-	      //x2=7222+x2;
-	      //y2=2164+y2;
-	      z=8-z;
-	      var imgsrc = "http://10.16.1.105:9080/EzServer/EzMap?Service=getImage&Type=RGB&ZoomOffset=-1&Zoom=" + z + "&Col=" + x2 + "&Row=" + y2 + "&V=0.3";
+            var y2 = (Math.round(Math.abs((center.lat-originTileY) / (res * this.tileSize.h))));
+	        z=8-z;
+	      var imgsrc = "http://10.16.1.72:9080/EzServer/EzMap?Service=getImage&Type=RGB&ZoomOffset=-1&Zoom=" + z + "&Col=" + x2 + "&Row=" + y2 + "&V=0.3";
 	      return imgsrc;
 	    }
 
-
-        function GetParamValue(findParam, defaultValue) {
-            var arr0 = document.location.href.split("?");
-            if (arr0.length <= 1) return defaultValue;
-            var arr;
-            if (arr0[1].indexOf("&") == -1) {
-                arr = arr0[1].split("%26");
-            }
-            else {
-                arr = arr0[1].split("&");
-            }
-            for (var i = 0; i < arr.length; i++) {
-                if (arr[i].indexOf(findParam) == 0 && arr[i].indexOf("=") == findParam.length) {
-
-                    arr = arr[i].split("=");
-                    defaultValue = arr[1];
-                    break;
-                }
-            }
-
-            return defaultValue;
-        }
         </script>
 	</head>
 

@@ -1,0 +1,92 @@
+<html>
+<head>
+    <title>ÇÐÆ¬ä¯ÀÀ</title>
+    <script src="../js/common/ol2/OpenLayers.js"></script>
+    <style type="text/css">
+        .olImageLoadError {
+            background-color: transparent !important;
+            display: none;
+        }
+    </style>
+    <script type="text/javascript">
+
+
+
+        var map, layer; //complex object of type OpenLayers.Map
+
+        var proj = new OpenLayers.Projection("EPSG:4326");
+        //Initialise the 'map' object
+        function init() {
+
+            var extent = new OpenLayers.Bounds(
+                    119.399,35.585,121.780,37.022
+            );
+
+            map = new OpenLayers.Map("map", {
+                maxExtent: extent,
+                // restrictedExtent: extent,
+                maxResolution: 0.000976566472126202, // corresponds to level 8 in the cache
+                numZoomLevels: 10,
+                units: 'degrees',
+                projection: "EPSG:4326"
+            });
+
+            layer = new OpenLayers.Layer.TMS("Name",
+                    "pgis", {
+                        'type': 'png',
+                        'tileOrigin': new OpenLayers.LonLat(0,0),
+                        'getURL': getUrl
+                    });
+            map.tileSize = new OpenLayers.Size(256, 256);
+            layer.setTileSize(new OpenLayers.Size(256, 256));
+
+            //Â·¿öwmsÍ¼²ã
+            roadstatuswmslayer = new OpenLayers.Layer.WMS("WMS",
+                    'http://10.16.1.105:8088/geoserver/sde/wms',
+                    {layers: 'sde:sectionstatus',srs:'EPSG:4326',tiled:'true',transparent: true},
+                    {
+                        transitionEffect: "resize" ,
+                        singleTile: false, //set single label
+                        isBaseLayer: false
+                    });
+
+            map.addControl(new OpenLayers.Control.MousePosition());
+            map.addLayers([layer,roadstatuswmslayer]);
+
+
+            var lonLat = new OpenLayers.LonLat(120.35595,36.07525);
+            map.setCenter(lonLat, parseInt(4));
+
+        }
+
+        function getUrl(bounds) {
+            var res = this.getResolution();
+
+            var originTileX = (this.tileOrigin.lon + (res * this.tileSize.w/2));
+            var originTileY = Math.abs((this.tileOrigin.lat +(res * this.tileSize.h/2)));
+            var z = this.map.getZoom();
+
+            var center = bounds.getCenterLonLat();
+            var point = { x: center.lon, y: center.lat };
+
+
+            var x2 = (Math.round(Math.abs((center.lon - originTileX) / (res * this.tileSize.w))));
+            var y2 = (Math.round(Math.abs((center.lat-originTileY) / (res * this.tileSize.h))));
+            z=8-z;
+            var imgsrc = "http://10.16.1.72:9080/EzServer/EzMap?Service=getImage&Type=RGB&ZoomOffset=-1&Zoom=" + z + "&Col=" + x2 + "&Row=" + y2 + "&V=0.3";
+            return imgsrc;
+        }
+
+    </script>
+</head>
+
+<!-- body.onload is called once the page is loaded (call the 'init' function) -->
+<body onload="init();">
+
+<!-- define a DIV into which the map will appear. Make it take up the whole window -->
+<div style="width: 100%; height: 100%" id="map"></div>
+
+</body>
+
+
+</html>

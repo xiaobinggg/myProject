@@ -15,6 +15,7 @@
 <a href="MyMap.html">地图测试页</a></br>
 
 <a href="ezmap_demo/tuiyan/tuiyan.html">车辆平滑移动</a></br>
+<a href="ol2/olmixedpgis.html">olmixedpgis</a></br>
 
 
   </body>

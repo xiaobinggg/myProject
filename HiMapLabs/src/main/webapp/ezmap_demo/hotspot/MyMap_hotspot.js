@@ -42,6 +42,7 @@ function handleMouseover(){
 		var pCenterLatLng = _MapApp.getCenterLatLng();
 		xpos = pCenterLatLng.x + (x - getMap().viewSize.width / 2) / _PixelsPerDegree[_MapApp.getZoomLevel()].x;
 		ypos = pCenterLatLng.y - (y - getMap().viewSize.height / 2) / _PixelsPerDegree[_MapApp.getZoomLevel()].y;
+
 		var obj = new Point(xpos,ypos);
 		obj.longitude = xpos;
 		obj.latitude = ypos;

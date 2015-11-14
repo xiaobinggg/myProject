@@ -5,7 +5,7 @@
     <artifactId>AjaxMQ</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>RouteAnalyser Maven Webapp</name>
+    <name>AjaxMQ Maven Webapp</name>
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>
@@ -36,6 +36,6 @@
 
     </dependencies>
     <build>
-        <finalName>RouteAnalyser</finalName>
+        <finalName>AjaxMQ</finalName>
     </build>
 </project>
