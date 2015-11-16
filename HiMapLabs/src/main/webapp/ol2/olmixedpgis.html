@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>ÇÐÆ¬ä¯ÀÀ</title>
+    <title></title>
     <script src="../js/common/ol2/OpenLayers.js"></script>
     <style type="text/css">
         .olImageLoadError {
@@ -40,7 +40,7 @@
             map.tileSize = new OpenLayers.Size(256, 256);
             layer.setTileSize(new OpenLayers.Size(256, 256));
 
-            //Â·¿öwmsÍ¼²ã
+
             roadstatuswmslayer = new OpenLayers.Layer.WMS("WMS",
                     'http://10.16.1.105:8088/geoserver/sde/wms',
                     {layers: 'sde:sectionstatus',srs:'EPSG:4326',tiled:'true',transparent: true},
