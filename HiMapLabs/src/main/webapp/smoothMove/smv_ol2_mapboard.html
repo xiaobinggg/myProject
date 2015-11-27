@@ -1,0 +1,94 @@
+<html>
+<head>
+    <title></title>
+    <script src="../js/common/ol2/OpenLayers.js"></script>
+    <script src = "../js/himap/smoothMove.js"></script>
+    <style type="text/css">
+        .olImageLoadError {
+            background-color: transparent !important;
+            display: none;
+        }
+    </style>
+    <script type="text/javascript">
+
+        var rooturl = document.URL.split( "/" )[0]+"/"+ document.URL.split( "/" )[1]+"/"+ document.URL.split( "/" )[2]+"/"+ document.URL.split( "/" )[3];
+        //Initialise the 'map' object
+        var zoomify_width = 7230;
+        var zoomify_height = 3601;
+        var zoomify_url = rooturl+"/smoothMove/shinan/";
+        function init() {
+            //地图图片
+            var zoomify = new OpenLayers.Layer.Zoomify( "Zoomify", zoomify_url,
+                    new OpenLayers.Size( zoomify_width, zoomify_height) );
+            /* Map with raster coordinates (pixels) from Zoomify image */
+            var options = {
+                controls: [
+                    //new OpenLayers.Control.MousePosition(),
+                    new OpenLayers.Control.Navigation(),
+                    new OpenLayers.Control.ArgParser(),
+                    new OpenLayers.Control.Attribution()
+                ],
+                maxExtent: new OpenLayers.Bounds(0, 0, zoomify_width, zoomify_height),
+                minExtent: new OpenLayers.Bounds(0, 0, zoomify_width/2, zoomify_height/2),
+                maxResolution: Math.pow(2, zoomify.numberOfTiers-1 ),
+                numZoomLevels: zoomify.numberOfTiers,
+                projection:'EPSG:2443',
+                units: 'pixels'
+            };
+
+
+            vectors = new OpenLayers.Layer.Vector("矢量图层",{rendererOptions: {style: {
+                graphicZIndex:18,
+                externalGraphic: "car.png",
+                pointRadius: 20
+            },displayOutsideMaxExtent:true,yOrdering: true}});
+
+
+            map = new OpenLayers.Map("map", options);
+            map.addLayers([zoomify,vectors]);
+            map.setBaseLayer(zoomify);
+            map.setCenter(new OpenLayers.LonLat(zoomify_width/2,zoomify_height/2), 3);
+
+            var feature = new OpenLayers.Feature.Vector(
+                    new OpenLayers.Geometry.Point(3514,1282.5),
+                    {}
+            );
+            feature.style = {
+                graphicZIndex:18,
+                externalGraphic: "car.png",
+                pointRadius: 20
+            };
+            vectors.addFeatures([feature]);
+            var test = new SmoothMove(10,1,"3514,1282.5,3514,1492.5,3514,1744.5,3962,1744.5,4286,1744.5,4286,1200.5");
+            test.move(function(obj){
+                if(obj.isnode==true && typeof(obj.angle)!='undefined'){//节点处调整车头方向
+                    //var angle = -obj.angle;
+                   //newmarker.rotate(angle);
+                }else{
+                    var geom = new OpenLayers.Geometry.Point(obj.x,obj.y);
+                    vectors.destroyFeatures();
+                    var feature = new OpenLayers.Feature.Vector(geom,{});
+                    feature.style = {
+                        graphicZIndex:18,
+                        externalGraphic: "car.png",
+                        pointRadius: 20
+                    };
+                    vectors.addFeatures([feature]);
+                }
+
+            });
+        }
+
+    </script>
+</head>
+
+<!-- body.onload is called once the page is loaded (call the 'init' function) -->
+<body onload="init();" style="">
+
+<!-- define a DIV into which the map will appear. Make it take up the whole window -->
+<div style="width: 100%; height: 100%" id="map"></div>
+
+</body>
+
+
+</html>

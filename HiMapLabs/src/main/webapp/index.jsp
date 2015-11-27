@@ -16,6 +16,7 @@
 
 <a href="ezmap_demo/tuiyan/tuiyan.html">车辆平滑移动</a></br>
 <a href="ol2/olmixedpgis.html">olmixedpgis</a></br>
+<a href="smoothMove/smv_ol2.html">smv_ol2.html</a></br>
 
 
   </body>

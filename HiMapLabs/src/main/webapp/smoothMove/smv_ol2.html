@@ -1,0 +1,128 @@
+<html>
+<head>
+    <title></title>
+    <script src="../js/common/ol2/OpenLayers.js"></script>
+    <script src = "../js/himap/smoothMove.js"></script>
+    <style type="text/css">
+        .olImageLoadError {
+            background-color: transparent !important;
+            display: none;
+        }
+    </style>
+    <script type="text/javascript">
+
+        var rooturl = document.URL.split( "/" )[0]+"/"+ document.URL.split( "/" )[1]+"/"+ document.URL.split( "/" )[2]+"/"+ document.URL.split( "/" )[3];
+        //Initialise the 'map' object
+        var zoomify_width = 7230;
+        var zoomify_height = 3601;
+        var zoomify_url = rooturl+"/smoothMove/shinan/";
+        function init() {
+
+            var extent = new OpenLayers.Bounds(
+                    119.399,35.585,121.780,37.022
+            );
+
+            map = new OpenLayers.Map("map", {
+                maxExtent: extent,
+                // restrictedExtent: extent,
+                maxResolution: 0.00390625, // corresponds to level 8 in the cache
+                numZoomLevels: 10,
+                units: 'degrees',
+                projection: "EPSG:4326"
+            });
+
+            layer = new OpenLayers.Layer.TMS("Name",
+                    "pgis", {
+                        'type': 'png',
+                        'tileOrigin': new OpenLayers.LonLat(0,0),
+                        'getURL': getUrl,
+                        isBaseLayer:true
+                    });
+            map.tileSize = new OpenLayers.Size(256, 256);
+            layer.setTileSize(new OpenLayers.Size(256, 256));
+
+            vectors = new OpenLayers.Layer.Vector("矢量图层",{style: {
+                graphicZIndex:28,
+                externalGraphic: "car.png",
+                pointRadius: 20
+            },rendererOptions: {displayOutsideMaxExtent:true,yOrdering: true}});
+
+
+            map.addControl(new OpenLayers.Control.MousePosition());
+            map.addLayers([layer,vectors]);
+            var lonLat = new OpenLayers.LonLat(120.41384,36.05894);
+            map.setCenter(lonLat, parseInt(9));
+
+            var feature = new OpenLayers.Feature.Vector(
+                    new OpenLayers.Geometry.Point(120.41187,36.05895),
+                    {}
+            );
+
+            vectors.addFeatures([feature]);
+
+            var path = "120.41187,36.05895,120.41215,36.05886,120.41257,36.05872,120.4131,36.05856,120.41343,36.05844,120.41388,36.05832,120.41423,36.05827,120.41482,36.05824,120.41543,36.05825,120.41626,36.05836,120.41668,36.05841,120.41713,36.0585,120.41698,36.05877,120.41611,36.06002,120.41579,36.06063,120.41572,36.06072,120.41549,36.06077,120.41496,36.06076,120.41435,36.06073,120.41361,36.0607,120.41206,36.06066,120.41202,36.06059,120.41199,36.06024,120.41186,36.05895";
+            path = "120.41187,36.05895,120.42187,36.06995";
+            /*var pointArr = [];
+            var p = path.split(",");
+            var len = p.length / 2;
+            var points = [];
+            for (var iIndex = 0; iIndex < len; iIndex++) {
+                var pPoint = {};
+                pPoint.x = parseFloat(p[2 * iIndex]);
+                pPoint.y = parseFloat(p[2 * iIndex + 1]);
+                points.push(pPoint);
+            }
+
+            var linestr =  new OpenLayers.Feature.Vector(
+                    new OpenLayers.Geometry.LineString(points),
+                    {}
+            );
+            vectors.addFeatures([linestr]);*/
+
+            var test = new SmoothMove(10,0.00001,path);
+            test.move(function(obj){
+                var angle = -obj.angle;
+                feature.style.rotation = angle;
+                if(obj.isnode==true && typeof(obj.angle)!='undefined'){//节点处调整车头方向
+                    vectors.drawFeature(feature);
+                }else{
+                    var geom = new OpenLayers.Geometry.Point(obj.x,obj.y);
+                    vectors.eraseFeatures([feature]);
+                    feature.geometry = geom;
+                    vectors.addFeatures([feature]);
+                }
+
+            });
+
+        }
+
+        function getUrl(bounds) {
+            var res = this.getResolution();
+
+            var originTileX = (this.tileOrigin.lon + (res * this.tileSize.w/2));
+            var originTileY = Math.abs((this.tileOrigin.lat +(res * this.tileSize.h/2)));
+            var z = this.map.getZoom();
+
+            var center = bounds.getCenterLonLat();
+            var point = { x: center.lon, y: center.lat };
+
+
+            var x2 = (Math.round(Math.abs((center.lon - originTileX) / (res * this.tileSize.w))));
+            var y2 = (Math.round(Math.abs((center.lat-originTileY) / (res * this.tileSize.h))));
+            z=10-z;
+            var imgsrc = "http://10.16.1.72:9080/EzServer/EzMap?Service=getImage&Type=RGB&ZoomOffset=-1&Zoom=" + z + "&Col=" + x2 + "&Row=" + y2 + "&V=0.3";
+            return imgsrc;
+        }
+    </script>
+</head>
+
+<!-- body.onload is called once the page is loaded (call the 'init' function) -->
+<body onload="init();" style="">
+
+<!-- define a DIV into which the map will appear. Make it take up the whole window -->
+<div style="width: 100%; height: 100%" id="map"></div>
+
+</body>
+
+
+</html>

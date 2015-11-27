@@ -3,7 +3,8 @@ if (typeof(EzServerClient.GlobeParams.MapSrcURL[0][1]) != "undefined") {
     if (EzServerClient.GlobeParams.MapSrcURL.length < 1) {
         throw new Error("EzServerClient.GlobeParams.MapSrcURL中至少要有一个图片引擎的地址")
     }
-    _VectorMapService = EzServerClient.GlobeParams.MapSrcURL[0]
+    _VectorMapService = EzServerClie
+    nt.GlobeParams.MapSrcURL[0]
 } else {
     _VectorMapService = [""]
 }
