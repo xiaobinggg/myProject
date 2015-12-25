@@ -3,8 +3,8 @@
  */
 require.config({
     paths:{
-        "avalon":"../../../library/avalon/avalon.shim",
-        "domReady":"../../../library/require/domReady"
+        "avalon":"../../library/avalon/avalon.shim.js",
+        "domReady":"../../library/require/domReady"
     }
 });
 
