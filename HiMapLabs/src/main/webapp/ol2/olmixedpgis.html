@@ -41,7 +41,7 @@
 
 
             roadstatuswmslayer = new OpenLayers.Layer.WMS("WMS",
-                    'http://10.16.1.105:8088/geoserver/sde/wms',
+                    'http://10.16.1.72:8088/geoserver/sde/wms',
                     {layers: 'sde:sectionstatus',srs:'EPSG:4326',tiled:'true',transparent: true,cql_filter:'ZOOMLEVEL='+0},
                     {
                         transitionEffect: "resize" ,
@@ -49,8 +49,15 @@
                         isBaseLayer: false
                     });
 
+            demolayer = new OpenLayers.Layer.WMS(
+                    "sde:sectionstatus","http://10.16.1.72:8088/geoserver/gwc/service/wms",
+                    {layers: 'sde:sectionstatus', format: 'image/png' },
+                    { tileSize: new OpenLayers.Size(256,256)});
+
+
             map.addControl(new OpenLayers.Control.MousePosition());
             map.addLayers([layer]);
+            map.addLayer(demolayer);
 
 
             var lonLat = new OpenLayers.LonLat(120.35595,36.07525);
