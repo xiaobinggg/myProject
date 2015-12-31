@@ -1,0 +1,85 @@
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=GB2312"/>
+    <title>road</title>
+    <SCRIPT language="javascript" src="http://10.16.1.109:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
+    <script>
+        var geoserverURL="http://10.16.1.105:8088/geoserver"; //geoserver 服务器地址
+        function initmap(){
+            _MapApp = new EzMap(document.getElementById("map"));
+            var pOverview=new OverView();
+            pOverview.minLevel=8;
+            pOverview.maxLevel=10;
+            _MapApp.addOverView(pOverview);
+            _MapApp.editOverlay();
+
+            _MapApp.showMapControl();
+            _MapApp.hideCopyright();
+            //_MapApp.map.hideMapControl();//隐藏比例尺
+            _MapApp.map.hideMapServer();//隐藏图层切换按钮
+            _MapApp.centerAndZoom(new Point(120.38013,36.08662), 5);
+            showheatmap();
+        }
+
+        var clicktimeout = null;
+        function showheatmap(){
+            var listlen = _MapApp.map.stateListeners.length;
+            legendfunc=new LegendFunc();
+
+            legendfunc.format=geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true&sld_body="+setstyle();
+            alert(legendfunc.format.length);
+			legendfunc.open(_MapApp);
+            //_MapApp.removeMapChangeListener(_MapApp.map.stateListeners[listlen]);
+            //_MapApp.addMapChangeListener(mapChangeListenerForGeoServer);
+            //legendfunc.setRefreshTime(300000);
+            //alert(_MapApp.map.viewSize.width/256);
+
+
+        }
+		
+		
+		function setstyle(){
+			var sld = '<?xml version="1.0" encoding="ISO-8859-1"?>'+
+						'<StyledLayerDescriptor version="1.0.0" '+
+						 'xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" '+
+						 'xmlns="http://www.opengis.net/sld" '+
+						 'xmlns:ogc="http://www.opengis.net/ogc" '+
+						 'xmlns:xlink="http://www.w3.org/1999/xlink" '+
+						 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
+						 '<UserLayer><Name>sde:faci_info</Name>'+
+						' <UserStyle>'+
+						'	<Name>default_point</Name>'+
+						'	 <FeatureTypeStyle>'+
+						'	 <Rule>'+
+						'		<ogc:Filter>'+
+						'		 <ogc:PropertyIsEqualTo>'+
+						'		   <ogc:PropertyName>COORDTYPE</ogc:PropertyName>'+
+						'		   <ogc:Literal>1</ogc:Literal>'+
+						'		 </ogc:PropertyIsEqualTo>'+
+						'	   </ogc:Filter>'+
+						'	   <PointSymbolizer>'+
+						'		 <Graphic>'+
+						'		   <ExternalGraphic>'+
+						'			 <OnlineResource'+
+						'			   xlink:type="simple"'+
+						'			   xlink:href="ftp://equip:equip123@10.16.1.109:21/faciimg/20151130101029.jpg" />'+
+						'			 <Format>image/jpeg</Format>'+
+						'		   </ExternalGraphic>'+
+						'		   <Size>24</Size>'+
+						'		 </Graphic>'+
+						'	   </PointSymbolizer>'+
+						'	 </Rule>'+
+						'   </FeatureTypeStyle>'+
+							  
+						'  </UserStyle>'+
+						'</UserLayer>'+
+						'</StyledLayerDescriptor>';
+			return encodeURIComponent(sld);
+						
+		}
+    </script>
+</head>
+<body onload="initmap()">
+<div id="map" style="top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;width:800;height:600"></div>
+</body>
+</html>

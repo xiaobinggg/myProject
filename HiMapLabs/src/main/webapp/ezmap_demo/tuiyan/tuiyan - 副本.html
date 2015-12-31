@@ -1,0 +1,126 @@
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>交通地图服务 推演测试</title>
+    <SCRIPT language="javascript" src="http://10.16.1.72:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/data/policeequip.js"></SCRIPT>
+    <script language="javascript" src="../../js/himap/smoothMove.js"></script>
+    <script>
+
+        var newmarker = null;
+
+        function initmap(){
+            _MapApp = new EzMap(document.getElementById("map"));
+            var pOverview=new OverView();
+            pOverview.minLevel=8;
+            pOverview.maxLevel=10;
+            _MapApp.addOverView(pOverview);
+            _MapApp.editOverlay();
+
+            _MapApp.showMapControl();
+            _MapApp.hideCopyright();
+            _MapApp.centerAndZoom(new Point(120.41384,36.05894), 0);
+            showLight();
+
+        }
+
+        function showLight(){
+            var marker = showMarker("120.41187,36.05895","cctvwithlight.png",58,42);
+			var marker2 = showMarker("120.41364,36.05840","cctvwithlight.gif",58,42);
+			var marker3 = showMarker("120.41714,36.05849","cctvwithlight.gif",58,42);
+			marker2.rotate(30);
+            /*var centerpoint = {x:120.41187,y:36.05895};
+            var xparam = 0.00003;
+            var yparam = 0.000015;
+            for(var i=1;i<10;i++){
+                var pointplus = {x:centerpoint.x+xparam*i,y:centerpoint.y+yparam*i};
+                var pointmid = {x:(pointplus.x-centerpoint.x)/2+centerpoint.x,y:centerpoint.y};
+                pointmid = pointplus;
+                var pointreduce = {x:centerpoint.x+xparam*i,y:centerpoint.y-yparam*i};
+                var str = centerpoint.x+","+centerpoint.y+","+pointplus.x+","+pointplus.y+","+pointmid.x+","+pointmid.y+","+pointreduce.x+","+pointreduce.y+","+centerpoint.x+","+centerpoint.y;
+                var polygon = new Polygon(str,'#FEE500',1,1-i*0.1,'#FEE500');
+                _MapApp.addOverlay(polygon);
+            }*/
+
+
+        }
+
+        function playtest(){
+
+            _MapApp.clear();
+            showLight();
+
+            newmarker = showMarker("120.41187,36.05895");
+            var circle = new Circle('120.41187,36.05895,0.0005','#FF0000',1,0.3,'#FDF1A5');
+            _MapApp.addOverlay(circle);
+
+            var test = new SmoothMove(10,0.00001,"120.41187,36.05895,120.41215,36.05886,120.41257,36.05872,120.4131,36.05856,120.41343,36.05844,120.41388,36.05832,120.41423,36.05827,120.41482,36.05824,120.41543,36.05825,120.41626,36.05836,120.41668,36.05841,120.41713,36.0585,120.41698,36.05877,120.41611,36.06002,120.41579,36.06063,120.41572,36.06072,120.41549,36.06077,120.41496,36.06076,120.41435,36.06073,120.41361,36.0607,120.41206,36.06066,120.41202,36.06059,120.41199,36.06024,120.41186,36.05895");
+            var opacity = 0.3;
+            var opacityflag = 1;
+            test.move(function(obj){
+                if(obj.isnode==true && typeof(obj.angle)!='undefined'){//节点处调整车头方向
+                    var angle = -obj.angle;
+                    newmarker.rotate(angle);
+                }else{
+                    var point = new Point(obj.x,obj.y);
+                    newmarker.point = point;
+                    newmarker.redraw();
+
+                }
+                if(opacity>=0.8){
+                    opacityflag = 0;
+                }else if(opacity<=0.3){
+                    opacityflag = 1;
+                }
+                if(opacityflag==1){
+                    opacity+=0.008;
+                }else{
+                    opacity-=0.008;
+                }
+                _MapApp.removeOverlay(circle);
+                circle = new Circle(obj.x+','+obj.y+',0.0005','#FF0000',1,opacity,'#ffD131');
+                _MapApp.addOverlay(circle);
+
+            });
+
+        }
+
+
+
+        function showMarker(pos,picimg,width,height){
+            var point = new Point(pos);
+            var pTitle = new Title("title", 13, 7, "Microsoft YaHei", "#000000","#FFFFFF",'#FFFFFF', 1, "true");
+            var pIcon = new Icon();
+            pIcon.width = width||32;
+            pIcon.height = height||25;
+            pIcon.image = picimg || "car.png";
+            var newmarker = new Marker(point, pIcon, pTitle);
+            //newmarker.bIsCenter = true;
+            _MapApp.addOverlay(newmarker);
+            newmarker.hideTitle();
+            newmarker.titleDiv = null;
+            //newmarker.rotate(30);
+            return newmarker;
+        }
+
+
+
+
+        function getstrcoords(){
+            _MapApp.changeDragMode('drawPolyline',null,null,
+                    function(pos){
+                        _MapApp.changeDragMode('');
+                        _MapApp.changeDragMode('pan');
+                        alert(pos);
+                    });
+        }
+
+
+    </script>
+</head>
+<body onload="initmap()">
+<div id="map" style="width:100%;height:700px;top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;"></div>
+<input type="button" value="  play  " onclick="playtest()"/>
+<input type="button" value="获取坐标" onclick="getstrcoords()"/>
+</body>
+</html>
