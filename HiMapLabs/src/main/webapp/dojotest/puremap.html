@@ -1,0 +1,113 @@
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>交通地图服务</title>
+    <SCRIPT language="javascript" src="http://10.16.1.72:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/jquery-1.10.2.js"></SCRIPT>
+
+    <script>
+        var isdragging = false;
+        var currMousePos;
+        var currGisPos;
+        $(document).ready(function(){
+            initmap();
+            currMousePos = getMousePosition();
+            currGisPos = _MapApp.getCenterLatLng();
+
+            $(_MapApp.map.div).mousedown(function(){
+                isdragging = true;
+                currMousePos = getMousePosition();
+            });
+
+            $(_MapApp.map.div).mouseup(function(){
+                isdragging = false;
+            });
+
+            $("#map").mousemove(function(){
+                if(isdragging){
+                    var nowpos = getMousePosition();
+                    var x = nowpos.x-currMousePos.x;
+                    var y = nowpos.y-currMousePos.y;
+                    reposElements(x,y);
+                    currMousePos = nowpos;
+                    currGisPos = _MapApp.getCenterLatLng();
+                }
+            });
+            $("#map").click(function(){
+                currMousePos = getMousePosition();
+                coord2Map(currMousePos.x,currMousePos.y);
+
+            })
+        });
+
+        function moveTo(x,y){
+            var point = map2Coord(x,y);
+            _MapApp.centerAtLatLng(new Point(point.x,point.y));
+        }
+
+        function initmap(){
+            _MapApp = new EzMap(document.getElementById("map"));
+            var pOverview=new OverView();
+            pOverview.minLevel=8;
+            pOverview.maxLevel=10;
+            _MapApp.addOverView(pOverview);
+            _MapApp.editOverlay();
+
+            _MapApp.showMapControl();
+            _MapApp.hideCopyright();
+            _MapApp.map.hideMapControl();//隐藏比例尺
+            _MapApp.map.hideMapServer();//隐藏图层切换按钮
+            _MapApp.centerAndZoom(new Point(120.38013,36.08662), 3);
+
+
+           
+        }
+        /**获得当前鼠标的屏幕坐标*/
+        function getMousePosition(e){
+            var mousePosition={x:0,y:0};
+            var e = e||window.event;
+            mousePosition.x = e.clientX+document.body.scrollLeft+document.documentElement.scrollLeft;
+            mousePosition.y = e.clientY+document.body.scrollTop+document.documentElement.scrollTop;
+            return mousePosition;
+        }
+
+
+        function reposElements(x,y){
+            console.log("moving..."+x+","+y);
+            
+        }
+
+        //地理坐标转屏幕坐标
+        function map2Coord(x,y){
+            var xpos,ypos;
+            var pCenterLatLng = _MapApp.getCenterLatLng();
+            if( typeof(_PixelsPerDegree) == "undefined"){
+                xpos = (x-pCenterLatLng.x)/_MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution + _MapApp.map.viewSize.width / 2 ;
+                ypos = (y+pCenterLatLng.y)/_MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution + _MapApp.map.viewSize.height / 2 ;
+            }else{
+                xpos = (x-pCenterLatLng.x)*_PixelsPerDegree[_MapApp.getZoomLevel()].x+getMap().viewSize.width / 2;
+                ypos = (pCenterLatLng.y-y)*_PixelsPerDegree[_MapApp.getZoomLevel()].y+getMap().viewSize.height / 2;
+            }
+
+            return {"x":xpos,"y":ypos};
+        }
+        //屏幕坐标转地理坐标
+        function coord2Map(x,y){
+            var xpos,ypos;
+            var pCenterLatLng = _MapApp.getCenterLatLng();
+            if( typeof(_PixelsPerDegree) == "undefined"){
+                xpos = pCenterLatLng.x + (x - _MapApp.map.viewSize.width / 2) * _MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution;
+                ypos = pCenterLatLng.y - (y - _MapApp.map.viewSize.height / 2) * _MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution;;
+            }else{
+                xpos = pCenterLatLng.x + (x - getMap().viewSize.width / 2) / _PixelsPerDegree[_MapApp.getZoomLevel()].x;
+                ypos = pCenterLatLng.y - (y - getMap().viewSize.height / 2) / _PixelsPerDegree[_MapApp.getZoomLevel()].y;
+            }
+            return{"x":xpos,"y":ypos};
+        }
+
+    </script>
+</head>
+<body onload="initmap()">
+<div id="map" ></div>
+</body>
+</html>

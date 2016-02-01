@@ -7,7 +7,7 @@ require.config({
         jquery:"vendor/jquery/jquery-1.10.2.min",
         bootstrap:"vendor/bootstrap/js/bootstrap.min",
         text: 'vendor/require/text',
-        css: 'vendor/require/css.js',      
+        css: 'vendor/require/cs.js',
         domReady:"vendor/require/domReady"
     }
 });
@@ -35,8 +35,5 @@ require(["avalon","jquery","domReady!"],function(avalon,$,domReady){
         avalon.log("加载其他完毕")
     });
 
-    /*require(['./modules/dropdowntest/dropdown'], function() {//第三块，加载其他模块
-        avalon.log("加载其他完毕")
-    });*/
 
 });

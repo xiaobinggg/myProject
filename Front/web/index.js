@@ -9,8 +9,7 @@ require.config({
     
 });
 
-require(["jquery","domReady!"],function($,domReady){
-
+require(["domReady!"],function(domReady){
 	avalon.log("加载avalon完毕，开始构建根VM与加载其他模块")
     avalon.templateCache.empty = " ";
 
@@ -24,7 +23,8 @@ require(["jquery","domReady!"],function($,domReady){
 
     avalon.scan(document.body);
 
-    require(['./modules/leaderindex/leaderindex'], function() {//第三块，加载其他模块
+    require(['./modules/leaderindex/js/header','./modules/leaderindex/js/left',
+            './modules/leaderindex/js/center','./modules/leaderindex/js/right'], function() {//第三块，加载其他模块
         avalon.log("加载其他完毕")
     });
 

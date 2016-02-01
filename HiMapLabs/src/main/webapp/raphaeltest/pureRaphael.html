@@ -1,0 +1,63 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>交通地图服务</title>
+    <SCRIPT language="javascript" src="../js/common/raphael.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/utils.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/jquery-1.10.2.js"></SCRIPT>
+    <script>
+        var isdragging = false;
+        var currMousePos;
+        var currGisPos;
+        $(document).ready(function(){
+           // 创建矢量图层
+            paper = Raphael("map",$("#map").width(), $("#map").height());
+
+            //paper.path("M 20,40 C 20,20,50,20,50,40 S 20,60,20,40").attr({fill: "#036DA0", stroke: "#036DA0",opacity:0.95,cursor:'hand'});
+            //paper.path("M 25,35,38,35,38,45,25,45 Z").attr({fill: "#FFFFFF", stroke: "#FFFFFF",opacity:0.95,cursor:'hand'});
+            //paper.path("M 40,38,45,34,45,46,40,42 Z").attr({fill: "#FFFFFF", stroke: "#FFFFFF",opacity:0.95,cursor:'hand'});
+
+            //drawIcon(40,40,20);
+            paper.renderfix();
+            var img1 = paper.image("cctvIcon1.png", 10, 30, 43, 43);
+            var img = paper.image("cctvIcon.png", 10, 80, 32, 32);
+            var img = paper.image("Bayonet.png", 10, 120, 32, 32);
+            var img = paper.image("passIcon1.png", 10, 160, 40, 40);
+            var img = paper.image("signalPic.jpg", 60, 30, 97, 241);
+
+
+
+
+        });
+
+       
+        function testfunc(){
+            circle = circle.transform("T100,100");
+            alert(circle.transform());
+        }
+
+        function drawIcon(x,y,r){
+            paper.circle(x, y, r).attr({fill: "#036DA0", stroke: "#036DA0",opacity:0.95,cursor:'hand'});
+
+
+            var path = "M"+(x-r)+","+y;
+            path+="c0,"+(-r)+","+(2*r)+","+(-r)+","+2*r+","+0;
+            path+="s,"+(-2*r)+","+r+","+(-2*r)+",0";
+            path+="Z";
+            
+            paper.path(path).attr({fill: "#036DA0", stroke: "#036DA0",opacity:0.95,cursor:'hand'});
+            //alert(path);
+        }
+
+
+
+
+
+
+
+    </script>
+</head>
+<body>
+<div id="map" style="top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;width:1200px;height:800px;"></div>
+</body>
+</html>

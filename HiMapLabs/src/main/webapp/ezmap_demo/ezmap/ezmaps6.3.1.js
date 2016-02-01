@@ -3823,6 +3823,7 @@ DragEvent.prototype.moveTo = function (left, top) {
     }
 };
 DragEvent.prototype.onMouseDown = function (b) {
+    console.log("dragevent on mousedown"+ b.clientX+","+ b.clientY);
     this.bIsMouseDown = true;
     if (b.cancelDrag) {
         return
@@ -3850,6 +3851,7 @@ DragEvent.prototype.onMouseDown = function (b) {
     S(b);
 };
 DragEvent.prototype.onMouseMove = function (b) {
+    console.log("dragevent onMouseMove fired");
     if (_IEBrowser.os == 1) {
         if (b == null) {
             return
@@ -3898,6 +3900,7 @@ DragEvent.prototype.onMouseMove = function (b) {
     }
 };
 DragEvent.prototype.onMouseUp = function (b) {
+    console.log("dragevent onmouseup fired");
     this.bIsMouseDown = false;
     unbindingEvent(this.eventSrc, "mousemove", this.mouseMoveHandler);
     unbindingEvent(this.eventSrc, "mouseup", this.mouseUpHandler);

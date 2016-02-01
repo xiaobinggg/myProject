@@ -1,0 +1,98 @@
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta charset="utf-8">
+    <title>test</title>
+
+    <script src="../js/common/dojo-release-1.10.4/dojo/dojo.js" data-dojo-config="async: true"></script>
+    <script>
+		var isdragging = false;
+		var currMousePos;
+		var beforeMovePos;
+		var movecounts;
+		var _MapApp;
+	    require(["dojox/gfx","dojo/dom" ,"dojo/on" ,"dojo/mouse","dojo/domReady!"], function(gfx,dom,on,mouse) {
+	        var surface = gfx.createSurface("surfaceElement", 1200, 800);
+
+			var rect = surface.createRect({ x: 100, y: 50, width: 200, height: 100 })
+			    .setFill("yellow")
+			    .setStroke("blue");
+			rect.on("click", function(e) {				
+			    rect.setFill("red");			    
+			});
+
+			surface.createImage({x:100, y:300, width: 32, height: 32, src: "cctvIcon.png"});
+			 
+			var mouseDownEvt = on.pausable(dom.byId("surfaceElement"),'mousedown',function(listen){
+				_MapApp = mapframe.contentWindow._MapApp;
+				movecounts=[];
+				movecounts.x = movecounts.y = 0;
+				beforeMovePos = [];
+				var mapdiv = _MapApp.map.div;
+				beforeMovePos.x  = parseFloat(mapdiv.style.left);
+				beforeMovePos.y  = parseFloat(mapdiv.style.top);
+			 	mouseUpEvt.resume();
+				mouseMoveEvt.resume();
+				currMousePos = getMousePosition();
+			});
+			var mouseUpEvt = on.pausable(dom.byId("surfaceElement"),'mouseup',function(listen){
+				mouseUpEvt.pause();
+				mouseMoveEvt.pause();
+
+				var nowMovePos = [];
+				var mapdiv = _MapApp.map.div;
+				nowMovePos.x  = parseFloat(mapdiv.style.left);
+				nowMovePos.y  = parseFloat(mapdiv.style.top);
+				var x = nowMovePos.x-beforeMovePos.x;
+				var y = nowMovePos.y-beforeMovePos.y;
+				console.log(x+","+y+":"+movecounts.x+","+movecounts.y);
+				//_MapApp.pan(movecounts.x-x,-(movecounts.y-y));
+
+			});
+
+			var mouseMoveEvt = on.pausable(dom.byId("surfaceElement"),'mousemove',function(listen){
+				var nowpos = getMousePosition();
+				var x = nowpos.x-currMousePos.x;
+				movecounts.x+=x;
+				var y = nowpos.y-currMousePos.y;
+				movecounts.y+=y;
+				//_MapApp.pan(x,-y);
+
+				_MapApp.map.dragObject.onMouseMove(listen);
+
+				currMousePos = nowpos;
+				beforeMovePos.x+=x;
+				beforeMovePos.y+=y;
+
+
+
+			});
+			mouseUpEvt.pause();
+			mouseMoveEvt.pause();
+			//dom.byId("surfaceElement").style.pointerEvents = "none";
+			//setTimeout(function(){mapframe.contentWindow._MapApp.pan(200,0)},5000);
+	    });
+	    function testfunc(){
+	    	console.log("ddddd");
+	    }
+		/**获得当前鼠标的屏幕坐标*/
+		function getMousePosition(e){
+			var mousePosition={x:0,y:0};
+			var e = e||window.event;
+			mousePosition.x = e.clientX+document.body.scrollLeft+document.documentElement.scrollLeft;
+			mousePosition.y = e.clientY+document.body.scrollTop+document.documentElement.scrollTop;
+			return mousePosition;
+		}
+	</script>        
+</head>
+<body>
+    
+ <!-- DOM element which will become the surface -->
+ <div style="width:1500px;height:800px;" id="maindiv">
+	<div  style="position:absolute;width:1600px;height:800px;">
+		<iframe id="mapframe" src="puremap.html" width="100%" height="100%"></iframe>
+	</div>
+	<div  id="surfaceElement" style="position:absolute;width:1500px;height:800px;"></div>
+ </div>
+
+</body>
+</html>

@@ -1,27 +1,51 @@
-<hi:panel style="height:55%">
-	<div style="background-color: #666666;font-weight: bold;color: #ffffff;">
-		<h4 class="panel-title">待办事项</h4>
-	</div>
+
+<hi:panel style="height: 55%;">
+	<div><h4>待办事项</h4></div>
 	<div>
-		Panel content
+		<hi:listgroup style="border:0px" msResolved>
+			<a href="#" class="active">项目信息<span class="badge">14</span></a>
+			<a href="#"><span class="badge">3</span>设备信息</a>
+			<a href="#">安装点信息</a>
+			<a href="#">道路信息</a>
+			<a href="#">设施信息</a>
+			<a href="#">警员信息</a>
+		</hi:listgroup>
+
 	</div>
 </hi:panel>
 
-<hi:panel style="height: 45%;margin-top: -15px;">
+<hi:panel style="height: 45%;width:100%;margin-top: -15px;">
 	<div>
-		<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+		<hi:treeview $id="menutree" config="treeconfig" style="width:100%"></hi:treeview>
 	</div>
 </hi:panel>
 
 
-
-<!--
-<div class="panel panel-default" style="height: 55%;">
+<!-- bootstrap原始写法-->
+<!--<div class="panel panel-default" style="height: 55%;">
     <div class="panel-heading" style="background-color: #666666;font-weight: bold;color: #ffffff;">
         <h4 class="panel-title">待办事项</h4>
     </div>
     <div class="panel-body">
-        Panel content
+        <ul class="list-group" style="height:100%;">
+		  <li href="#" class="list-group-item">
+		    <span class="badge">14</span>项目信息	    
+		  </li>
+		  <li href="#" class="list-group-item">
+		    <span class="badge">14</span>安装点信息		    
+		  </li>
+		  <li href="#" class="list-group-item">
+		    <span class="badge">14</span>道路信息		    
+		  </li>
+		  <li href="#" class="list-group-item">
+		    <span class="badge">14</span>设施信息		    
+		  </li>
+		  <li href="#" class="list-group-item">
+		    <span class="badge">14</span>警员信息		    
+		  </li>
+
+		</ul>
+
     </div>
 </div>
 
@@ -29,5 +53,4 @@
     <div class="panel-body">
         Panel content
     </div>
-</div>
--->
+</div>-->

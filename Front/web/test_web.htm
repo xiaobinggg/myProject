@@ -1,0 +1,564 @@
+<html>
+<head>
+<title>test</title>
+<script language="javascript">
+
+  function SetLayout1()
+  {
+    commonVideoActiveX.SetLayout(1);
+  }
+  function SetLayout4()
+  {
+    commonVideoActiveX.SetLayout(2);
+  }
+  function SetLayout6A()
+  {
+    commonVideoActiveX.SetLayout(4);
+  }
+  function SetLayout9() 
+  {
+    commonVideoActiveX.SetLayout(3);
+  }
+  
+  function Login()
+  {
+    var strURL = document.getElementById("URL").value;
+	commonVideoActiveX.GetInstance(strURL);
+  }
+  
+  function Logout()
+  {
+    commonVideoActiveX.ReleaseInstance();
+  }
+  
+  function RequestCam()
+  {
+	var cameraid = document.getElementById("Camera").value;
+    commonVideoActiveX.Play(cameraid, 1);
+  }
+  
+  function RequestCamNoPTZ()
+  {
+	var cameraid = document.getElementById("Camera").value;
+    commonVideoActiveX.Play(cameraid, 0);
+  }
+  
+  function Stop()
+  {
+	commonVideoActiveX.Stop();
+  }
+  
+  
+  function PlayVideo()
+  {
+	var cameraid = document.getElementById("HisCamera").value;
+	var strFile = document.getElementById("HisFile").value;
+    commonVideoActiveX.HisPlay(cameraid, strFile, strFile);
+  }
+  
+
+  function StartRecord()
+  {
+      var path = commonVideoActiveX.Record("D:\\HisenseZp\\Record");
+	  WriteLog2(path);
+  }
+  function StopRecord()
+  {
+      WriteLog2(commonVideoActiveX.StopRecord());
+  }
+
+  function SetPreset()
+  {
+	  var presetIndex = document.getElementById("PresetIndex").value;
+      var pos = commonVideoActiveX.PTZSetPreset(presetIndex);
+  }
+
+  function Snap()
+  {
+      var picPath = commonVideoActiveX.Snapshot("D:\\HisenseZp\\Record\\");
+	  WriteLog2(picPath);
+  }
+  
+  function fullscreen()
+  {
+    commonVideoActiveX.FullScreen(1);
+  }
+  
+  function exitfullscreen()
+  {
+    commonVideoActiveX.FullScreen(0);
+  }
+  function Left()
+  {
+      commonVideoActiveX.PTZTilt(3,30);
+  }
+  function LeftStop()
+  {
+      commonVideoActiveX.PTZTiltStop(3);
+  }
+  function Right()
+  {
+      commonVideoActiveX.PTZTilt(4,30);
+  }
+  function RightStop()
+  {
+      commonVideoActiveX.PTZTiltStop(4);
+  }
+  function Up()
+  {
+      commonVideoActiveX.PTZTilt(1,30);
+  }
+  function UpStop()
+  {
+      commonVideoActiveX.PTZTiltStop(1);
+  }
+  function Down()
+  {
+      commonVideoActiveX.PTZTilt(2,30);
+  }
+  function DownStop()
+  {
+      commonVideoActiveX.PTZTiltStop(2);
+  }
+  function UpLeft()
+  {
+      commonVideoActiveX.PTZTilt(5,30);
+  }
+  function UpLeftStop()
+  {
+      commonVideoActiveX.PTZTiltStop(5);
+  }
+  function UpRight()
+  {
+      commonVideoActiveX.PTZTilt(7,30);
+  }
+  function UpRightStop()
+  {
+      commonVideoActiveX.PTZTiltStop(7);
+  }
+  function DownLeft()
+  {
+      commonVideoActiveX.PTZTilt(6,30);
+  }
+  function DownLeftStop()
+  {
+      commonVideoActiveX.PTZTiltStop(6);
+  }
+  function DownRight()
+  {
+      commonVideoActiveX.PTZTilt(8,30);
+  }
+  function DownRightStop()
+  {
+      commonVideoActiveX.PTZTiltStop(8);
+  }
+  function FocusNear()
+  {
+      commonVideoActiveX.PTZFocus(1);
+  }
+  function FocusFar()
+  {
+      commonVideoActiveX.PTZFocus(0);
+  }
+  function StopFocus() 
+  {
+      commonVideoActiveX.PTZFocusStop();
+  }
+  function ZoomIn()
+  {
+      commonVideoActiveX.PTZZoom(0);
+  }
+  function ZoomOut()
+  {
+      commonVideoActiveX.PTZZoom(1);
+  }
+  function StopZoom() 
+  {
+      commonVideoActiveX.PTZZoomStop();
+  }
+  
+  function ApertureOpen()
+  {
+      commonVideoActiveX.PTZAperture(0);
+  }
+  function ApertureClose()
+  {
+      commonVideoActiveX.PTZAperture(1);
+  }
+  function StopAperture() 
+  {
+      commonVideoActiveX.PTZApertureStop();
+  }
+ 
+  function AuxLight()
+  {
+	commonVideoActiveX.PTZAux(1);
+  }
+  function AuxLightStop()
+  {
+	commonVideoActiveX.PTZAuxStop(1);
+  }
+  
+  function AuxWiper()
+  {
+	commonVideoActiveX.PTZAux(2);
+  }
+  
+  function AuxWiperStop()
+  {
+	commonVideoActiveX.PTZAuxStop(2);
+  }
+ 
+  function Forward()
+  {
+      commonVideoActiveX.HisFaster();
+ }
+  function Backward()
+  {
+      commonVideoActiveX.HisSlower();
+  }
+  function Frame()
+  {
+	commonVideoActiveX.HisNextFrame();
+  }
+  function Replay()
+  {
+      commonVideoActiveX.HisRePlay();
+  }
+  function PTZPreset() 
+  {
+      var presetIndex = document.getElementById("PresetIndex").value;
+      commonVideoActiveX.PTZGotoPreset(presetIndex);
+  }
+  function Search() 
+  {
+	var cameraid = document.getElementById("HisCamera").value;
+	var strBeginTime = document.getElementById("BeginTime").value;
+	var strEndTime = document.getElementById("EndTime").value;
+    commonVideoActiveX.HisSearch(cameraid, strBeginTime, strEndTime);
+  }
+  function Pause() 
+  {
+      commonVideoActiveX.HisPause();
+  }
+  function Download() 
+  {
+	var cameraid = document.getElementById("HisCamera").value;
+	var strBeginTime = document.getElementById("BeginTime").value;
+	var strEndTime = document.getElementById("EndTime").value;
+	var strFile = document.getElementById("HisFile").value;
+    commonVideoActiveX.HisDown(cameraid, strFile, strBeginTime, strEndTime, "D:\\HisenseZp\\Record\\", "1");
+  }
+
+  function StopVideo()
+  {
+	 commonVideoActiveX.HisStop();
+  }
+
+  function GetPlayPos()
+  {
+	WriteLog2(commonVideoActiveX.HisGetPlayPos());
+  }
+
+  function SetPlayPos()
+  {
+	var pos = document.getElementById("HisPos").value;  
+	commonVideoActiveX.HisSetPlayPos(pos, pos);
+  }
+  
+
+  function GetDownloadPos()
+  {
+	WriteLog2(commonVideoActiveX.HisGetDownPos());
+  }
+
+  function HisSnap()
+  {
+	var path = commonVideoActiveX.HisSnapshot("D:\\HisenseZp\\Record\\");
+	WriteLog2(path);
+  }
+
+  function DownloadStop()
+  {
+	var cameraid = document.getElementById("HisCamera").value;
+	var strFile = document.getElementById("HisFile").value;
+	commonVideoActiveX.HisStopDown(cameraid, strFile);
+  }
+  
+  function PlayLocalVideo()
+  {
+	var file = document.getElementById("LocalFile").value;
+	WriteLog2(file);
+	commonVideoActiveX.LocalPlay(file);
+  }
+  
+  function StopLocalVideo()
+  {
+	commonVideoActiveX.LocalStop();
+  }
+  
+  function LocalSnap()
+  {
+	var path = commonVideoActiveX.LocalSnapshot("D:\\HisenseZp\\Record\\");
+	WriteLog2(path);
+  }
+  
+  function SetLocalPlayPos()
+  {
+	var pos = document.getElementById("LocalPos").value;
+	commonVideoActiveX.LocalSetPlayPos(pos);
+  }
+  
+  function GetLocalPlayPos()
+  {
+	WriteLog2(commonVideoActiveX.LocalGetPlayPos());
+  }
+  
+  function LocalPlayTime()
+  {
+	WriteLog2(commonVideoActiveX.LocalGetFileTime());
+  }
+  
+  function SetFocus()
+  {
+	var pos = document.getElementById("WinIndex").value;
+	var res = commonVideoActiveX.SetFocus(pos);
+	if (res != 0)
+	{
+		WriteLog2("change focus failed");
+	}
+  }
+  
+  function SetShowRate()
+  {
+	var showRate = document.getElementById("ShowRate").value;
+	commonVideoActiveX.SetVideoShowRate(showRate);
+  }
+
+  
+  function WriteLog2(text)
+  {    
+    log.innerHTML = text + "<br />" + log.innerHTML;
+  }
+</script>
+
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnGetInstance()" >
+     WriteLog2("login success");
+</script> 
+
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnGetInstanceFailed(error)" >
+  WriteLog2("login failed	" + error);
+</script> 
+<script language="javascript" FOR="commonVideoActiveX" EVENT="FinshedSearch()">
+WriteLog2("finish search");
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnPTZEvent()">
+WriteLog2("ptz event success");
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnPTZEventFailed(lRet)">
+WriteLog2("ptz event failed		" + lRet);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisSearch(cameraId, begin, end, path)">
+WriteLog2("His Video Search");
+WriteLog2(cameraId + "		" + begin + "		" + end + "		" + path);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnSearchFailed(camera, reason)">
+WriteLog2("search failed  " + camera + "	" + reason);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisSearchEnd(cCameraId, count)">
+WriteLog2("search finished	" + cCameraId + "    " + count);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisDownEnd()">
+WriteLog2("finish download");
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisStopDown()">
+WriteLog2("stop download");
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnPlay(lWndIndex, pstrCameraId)">
+WriteLog2("play	" + lWndIndex + " " + pstrCameraId);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnPlayError(lWndIndex, pstrCameraId)">
+WriteLog2("play error	" + lWndIndex + "	" + pstrCameraId);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnStop(lWndIndex, pstrCameraId)">
+WriteLog2("stop	" + lWndIndex + "	" + pstrCameraId);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisPlay(lWndIndex, pstrCameraId)">
+WriteLog2("His play	" + lWndIndex + "	" + pstrCameraId);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisPlayError(lWndIndex, pstrCameraId)">
+WriteLog2("His play error	" + lWndIndex + "	" + pstrCameraId);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisStop(lWndIndex, pstrCameraId)">
+WriteLog2("His stop	" + lWndIndex + "	" + pstrCameraId);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnHisEndReach()">
+WriteLog2("His play over");
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnFocusChanged(lWndIndex)">
+WriteLog2("focus changed " + lWndIndex);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnLocalPlay(lWndIndex)">
+WriteLog2("local play " + lWndIndex);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnLocalPlayError(lWndIndex)">
+WriteLog2("local play error " + lWndIndex);
+</script>
+<script language="javascript" FOR="commonVideoActiveX" EVENT="OnLocalStop(lWndIndex)">
+WriteLog2("local stop " + lWndIndex);
+</script>
+</head>
+<body>
+<center>
+<object id="commonVideoActiveX" classid="clsid:A8B6BBF3-DA78-4BCB-ABAB-FB0410A463E4" width=800 height=500 codebase="/CommonCMSOCX.cab#version=1,0,0,1729" VIEWASTEXT>
+</object>
+</center>
+ <fieldset>
+<legend>测试</legend>
+<div style="text-align:left;background-color: #C0C0C0;width:100%">画面布局</div>
+<table width="100%" height="50px" style="border: thin solid #C0C0C0">
+<tr>
+  <td width = "10%"><input type = "button"  onclick = "SetLayout9()" value = "9画面" />  
+  <td width = "10%"><input type = "button"  onclick = "SetLayout6A()" value = "6A画面" /> 
+  <td width = "10%"><input type = "button"  onclick = "SetLayout4()" value = "4画面" />  
+  <td width = "10%"><input type = "button"  onclick = "SetLayout1()" value = "单画面" />  
+  <td width = "10%">窗口号：</td>
+ <td width = "10%"><input id="WinIndex" style="width:50px" type="text" value="1" /></td>
+ <td width = "10%"><input type = "button"  onclick = "SetFocus()" value = "设置焦点" />  
+ <td width = "10%">显示比例：</td>
+ <td width = "10%"><input id="ShowRate" style="width:50px" type="text" value="1" /></td>
+ <td width = "10%"><input type = "button"  onclick = "SetShowRate()" value = "设置显示比例" />  
+ </tr>
+</table>
+
+<div style="text-align:left;background-color: #C0C0C0;width:100%">云台控制</div>
+  <table width="100%" height="50px" style="border: thin solid #C0C0C0">
+ <tr>
+  <td width = "10%"><input type = "button"  onclick = "UpLeft()" value = "左上" /> 
+  <td width = "10%"><input type = "button"  onclick = "Up()" value = "上" /> 
+  <td width = "10%"><input type = "button"  onclick = "UpRight()" value = "右上" /> 
+  <td width = "10%"><input type = "button"  onclick = "Left()" value = "左" /> 
+  <td width = "10%"><input type = "button"  onclick = "Right()" value = "右" /> 
+  <td width = "10%"><input type = "button"  onclick = "DownLeft()" value = "左下" /> 
+  <td width = "10%"><input type = "button"  onclick = "Down()" value = "下" /> 
+  <td width = "10%"><input type = "button"  onclick = "DownRight()" value = "右下" /> 
+  </tr>
+   <tr>
+  <td width = "10%"><input type = "button"  onclick = "UpLeftStop()" value = "停止左上" /> 
+  <td width = "10%"><input type = "button"  onclick = "UpStop()" value = "停止上" /> 
+  <td width = "10%"><input type = "button"  onclick = "UpRightStop()" value = "停止右上" /> 
+  <td width = "10%"><input type = "button"  onclick = "LeftStop()" value = "停止左" /> 
+  <td width = "10%"><input type = "button"  onclick = "RightStop()" value = "停止右" />  
+  <td width = "10%"><input type = "button"  onclick = "DownLeftStop()" value = "停止左下" /> 
+  <td width = "10%"><input type = "button"  onclick = "DownStop()" value = "停止下" /> 
+  <td width = "10%"><input type = "button"  onclick = "DownRightStop()" value = "停止右下" /> 
+  </tr>
+ <tr>	
+  <td width = "10%"><input type = "button"  onclick = "FocusNear()" value = "聚焦近" /> 
+  <td width = "10%"><input type = "button"  onclick = "FocusFar()" value = "聚焦远" /> 
+  <td width = "10%"><input type = "button"  onclick = "StopFocus()" value = "停止聚焦" /> 
+  <td width = "10%"><input type = "button"  onclick = "ZoomIn()" value = "拉近" /> 
+  <td width = "10%"><input type = "button"  onclick = "ZoomOut()" value = "推远" /> 
+  <td width = "10%"><input type = "button"  onclick = "StopZoom()" value = "停止" /> 
+  </tr>
+  <tr>
+  <td width = "10%"><input type = "button"  onclick = "ApertureOpen()" value = "打开光圈" /> 
+  <td width = "10%"><input type = "button"  onclick = "ApertureClose()" value = "关闭光圈" /> 
+  <td width = "10%"><input type = "button"  onclick = "StopAperture()" value = "停止" /> 
+  <td width = "10%"><input type = "button"  onclick = "AuxLight()" value = "打开灯光" /> 
+  <td width = "10%"><input type = "button"  onclick = "AuxLightStop()" value = "关闭灯光" /> 
+  <td width = "10%"><input type = "button"  onclick = "AuxWiper()" value = "打开雨刷" /> 
+  <td width = "10%"><input type = "button"  onclick = "AuxWiperStop()" value = "关闭雨刷" /> 
+ </tr>
+ <tr>
+ <td width = "10%">预置位列号：</td>
+ <td width = "10%"><input id="PresetIndex" style="width:50px" type="text" value="1" /></td>
+  <td width = "10%"><input type = "button"  onclick = "SetPreset()" value ="设置预置位" />
+  <td width = "10%"><input type = "button"  onclick = "PTZPreset()" value = "调用预置位" /> 	
+  </tr>
+ </table>
+
+<div style="text-align:left;background-color: #C0C0C0;width:100%">平台信息</div>
+<table width="100%" height="50px" style="border: thin solid #C0C0C0">
+ <tr>
+ <td width = "10%">登陆信息：</td>
+ <td width = "10%"><input id="URL" style="width:220px" type="text" value="http://10.16.5.168:8080/VideoService/query?wsdl" /></td>
+ <td width = "10%"><input type = "button"  onclick = "Login()" value = "登录" /> </td>
+ <td width = "10%"><input type = "button"  onclick = "Logout()" value = "退出" /> </td>
+ </tr>
+ 
+ </table>
+ <div style="text-align:left;background-color: #C0C0C0;width:100%">实时视频操作</div>
+ <table width="100%" height="50px" style="border: thin solid #C0C0C0">
+  <tr>
+ <td width = "10%">摄像机：</td>
+ <td width = "10%"><input id="Camera" style="width:50px" type="text" value="30001" /></td>
+  <td width = "10%"><input type = "button"  onclick = "RequestCamNoPTZ()" value = "播放视频不可操作云台" /> 
+  <td width = "10%"><input type = "button"  onclick = "RequestCam()" value = "播放视频可操作云台" />
+  <td width = "10%"><input type = "button"  onclick = "Stop()" value = "停止" />
+ </tr>
+
+ <tr>
+  <td width = "10%"><input type = "button"  onclick = "StartRecord()" value = "开始录像" />
+  <td width = "10%"><input type = "button"  onclick = "StopRecord()" value = "停止录像" />
+  <td width = "10%"><input type = "button"  onclick = "Snap()" value = "抓图" />
+  <td width = "10%"><input type = "button"  onclick = "fullscreen()" value = "全屏" />
+  <td width = "10%"><input type = "button"  onclick = "exitfullscreen()" value = "退出全屏" />
+ </tr>
+  </table>
+  
+ <div style="text-align:left;background-color: #C0C0C0;width:100%">历史视频操作</div>
+  <table width="100%" height="50px" style="border: thin solid #C0C0C0">
+  <tr>
+  <td width = "10%">摄像机：</td>
+ <td width = "10%"><input id="HisCamera" style="width:50px" type="text" value="30001" /></td>
+ <td width = "10%">开始时间：</td>
+ <td width = "10%"><input id="BeginTime" style="width:200px" type="text" value="2015-08-12 09:00:00" /></td>
+ <td width = "10%">结束时间：</td>
+ <td width = "10%"><input id="EndTime" style="width:200px" type="text" value="2015-08-12 12:00:00" /></td>
+ <td width = "10%"><input type = "button"  onclick = "Search()" value = "搜索" />
+ </tr>
+ <tr>
+  <td width = "10%">文件名称：</td>
+ <td width = "10%"><input id="HisFile" style="width:150px" type="text" value="" /></td>
+  <td width = "10%"><input type = "button"  onclick = "PlayVideo()" value = "播放视频" /> 
+  <td width = "10%"><input type = "button"  onclick = "Pause()" value = "暂停" /> 
+  <td width = "10%"><input type = "button"  onclick = "Replay()" value = "播放" />
+  <td width = "10%"><input type = "button"  onclick = "StopVideo()" value = "停止" />
+  <td width = "10%"><input type = "button"  onclick = "Forward()" value = "快进" />
+  <td width = "10%"><input type = "button"  onclick = "Backward()" value = "慢进" />
+  <td width = "10%"><input type = "button"  onclick = "Frame()" value = "单帧" />
+  <td width = "10%"><input type = "button"  onclick = "HisSnap()" value = "抓图" />
+  </tr>
+  <tr>
+  <td width = "10%">播放位置：</td>
+ <td width = "10%"><input id="HisPos" style="width:150px" type="text" value="" /></td>
+  <td width = "10%"><input type = "button"  onclick = "SetPlayPos()" value = "设置播放位置" />
+  <td width = "10%"><input type = "button"  onclick = "GetPlayPos()" value = "获取播放位置" />
+  <td width = "10%"><input type = "button"  onclick = "Download()" value = "下载" />
+  <td width = "10%"><input type = "button"  onclick = "DownloadStop()" value = "停止下载" />
+  <td width = "10%"><input type = "button"  onclick = "GetDownloadPos()" value = "获取下载位置" />
+ </tr>
+</table>
+<div style="text-align:left;background-color: #C0C0C0;width:100%">本地视频操作</div>
+  <table width="100%" height="50px" style="border: thin solid #C0C0C0">
+  <tr>
+  <td width = "10%">文件名称：</td>
+ <td width = "10%"><input id="LocalFile" style="width:350px" type="text" value="D:\HisenseZp\Record\20130624141044_01.avi" /></td>
+  <td width = "10%"><input type = "button"  onclick = "PlayLocalVideo()" value = "播放" /> 
+  <td width = "10%"><input type = "button"  onclick = "StopLocalVideo()" value = "停止" />
+  <td width = "10%"><input type = "button"  onclick = "LocalSnap()" value = "抓图" />
+  </tr>
+  <tr>
+  <td width = "10%">播放位置：</td>
+ <td width = "10%"><input id="LocalPos" style="width:50px" type="text" value="5" /></td>
+  <td width = "10%"><input type = "button"  onclick = "SetLocalPlayPos()" value = "设置播放位置" />
+  <td width = "10%"><input type = "button"  onclick = "LocalPlayTime()" value = "获取文件时间" />
+  <td width = "10%"><input type = "button"  onclick = "GetLocalPlayPos()" value = "获取播放位置" />
+  </table>
+    <div id="log" style="overflow-y: auto; height: 700px; overflow-x: hidden;">
+        </div>
+</body>
+
+</html>

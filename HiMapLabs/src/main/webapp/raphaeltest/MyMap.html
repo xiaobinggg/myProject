@@ -1,0 +1,411 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>交通地图服务</title>
+    <!--<SCRIPT language="javascript" src="EzMapAPI.js"></SCRIPT>-->
+    <SCRIPT language="javascript" src="http://10.16.1.72:9080/EzServer/js/EzMapAPI.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/raphael.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/utils.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/jquery-1.10.2.js"></SCRIPT>
+    <SCRIPT language="javascript" src="../js/common/jquery.mousewheel.min.js"></SCRIPT>
+    <script>
+        var isdragging = false;
+        var currMousePos;
+        var currGisPos;
+        var currZoomlevel;
+        var mapmode = "pan";//地图模式
+        var drawRect = null;//地图处于绘制模式时的画布
+
+        $(document).ready(function(){
+            initmap();
+            currMousePos = getMousePosition();
+            currGisPos = _MapApp.getCenterLatLng();
+            currZoomlevel = _MapApp.getZoomLevel();
+
+            var triggerDOM = $(_MapApp.map.div);
+            if(Raphael.vml){
+                triggerDOM.on("mousedown", function (event) {
+                    console.log("gis mousedown is fired");
+                    isdragging = true;
+                    currMousePos = getMousePosition();
+                    //event.stopPropagation();
+                });
+
+                triggerDOM.mouseup(function () {
+                    isdragging = false;
+                    console.log("gis mouseup is fired!" + paper.canvas.style.pointerEvents);
+                });
+
+                triggerDOM.mousemove(function () {
+                    if (isdragging && mapmode=="pan") {
+                        var nowpos = getMousePosition();
+                        var x = nowpos.x - currMousePos.x;
+                        var y = nowpos.y - currMousePos.y;
+                        moveElements(x,y);
+                        currMousePos = nowpos;
+                        currGisPos = _MapApp.getCenterLatLng();
+                    }
+                });
+            }else if(Raphael.svg){
+                //由于矢量图层div浮在了底图div上，底图div无法捕获事件，因此设置事件的穿透属性
+                //  paper.canvas.style.pointerEvents = "";
+                $("#map").on("mousedown",function(event){
+                    //triggerDOM.trigger("mousedown");
+                    if(mapmode=="pan"){
+                        triggerEvent(_MapApp.map.div,"mousedown",event);
+                    }
+                    currMousePos = getMousePosition();
+                    //paper.canvas.style.pointerEvents = "none";
+                });
+                _MapApp.map.onpan = function(x,y){
+                    var nowpos = getMousePosition();
+                    var x = nowpos.x-currMousePos.x;
+                    var y = nowpos.y-currMousePos.y;
+                    moveElements(x,y);
+                    currMousePos = nowpos;
+                    currGisPos = _MapApp.getCenterLatLng();
+                }
+                $("#map").on("mousewheel",function(event){
+                    if(event.deltaY<0){
+                        _MapApp.zoomOut();
+                    }else{
+                        _MapApp.zoomIn();
+                    }
+                    console.log(event.deltaX, event.deltaY, event.deltaFactor);
+                });
+            }
+            _MapApp.addMapChangeListener(function(){
+                if(currZoomlevel != _MapApp.getZoomLevel()){
+                    reposElements();
+                    currZoomlevel = _MapApp.getZoomLevel();
+                }
+            });
+
+
+
+
+
+
+        });
+        function initmap(){
+            _MapApp = new EzMap(document.getElementById("map"));
+            var pOverview=new OverView();
+            pOverview.minLevel=8;
+            pOverview.maxLevel=10;
+            _MapApp.addOverView(pOverview);
+            _MapApp.editOverlay();
+
+            _MapApp.showMapControl();
+            _MapApp.hideCopyright();
+            //_MapApp.map.hideMapControl();//隐藏比例尺
+            _MapApp.map.hideMapServer();//隐藏图层切换按钮
+            _MapApp.centerAndZoom(new Point(120.38013,36.08662), 3);
+
+
+            // 创建矢量图层
+            paper = Raphael("map",$("#map").width(), $("#map").height());
+            //设置z-index，让矢量图层在底图之上
+            paper.canvas.style.zIndex = _MapApp.map.div.style.zIndex+1;
+            //由于矢量图层div浮在了底图div上，底图div无法捕获事件，因此设置事件的穿透属性
+            paper.canvas.style.pointerEvents = "";
+
+            //var pos = map2Coord(120.3703,36.08117);
+            //var circle = paper.circle(pos.x, pos.y, 10);
+            //circle.attr("fill", "#f00");
+           // circle.attr("stroke", "#fff");
+            //circle.data.longitude = "120.3703";
+            //circle.data.latitude = "36.08117";
+
+            //paper.path("M 20,40 C 20,20,50,20,50,40 S 20,60,20,40").attr({fill: "#036DA0", stroke: "#036DA0",opacity:0.95,cursor:'hand'});
+            //paper.path("M 25,35,38,35,38,45,25,45 Z").attr({fill: "#FFFFFF", stroke: "#FFFFFF",opacity:0.95,cursor:'hand'});
+            //paper.path("M 40,38,45,34,45,46,40,42 Z").attr({fill: "#FFFFFF", stroke: "#FFFFFF",opacity:0.95,cursor:'hand'});
+
+            //drawIcon(40,40,20);
+            /*for(var i=0;i<500;i++){
+                //var img = paper.image("cctvIcon.png", 40+i, 60+i, 32, 32);
+                var circle = paper.circle(10+i, 10+i, 10);
+                circle.attr("fill", "#f00");
+                circle.attr("stroke", "#fff");
+            }*/
+
+            pos = map2Coord(120.36874,36.09503);
+            var img = paper.image("cctvIcon.png", pos.x, pos.y, 32, 32);
+            img.attr("cursor","hand");
+            //drawIcon(pos.x, pos.y,20);
+            var circle1 = paper.circle(pos.x, pos.y, 10);
+            //img.data.longitude = "120.36874";
+            //img.data.latitude = "36.09503";
+
+
+
+            //var text = paper.text(800,400,"山东路南京路路口西向东监控");
+            //text.attr({"font-family":'Microsoft YaHei',"font-size":'14'});
+            //text.node.style.backgroundColor='#FFFFFF';
+
+            /*_MapApp.addMapChangeListener(function(){
+                var nowpos = _MapApp.getCenterLatLng();
+                var gisx = -nowpos.x + currGisPos.x;
+                var gisy = -nowpos.y + currGisPos.y;
+                var x,y;
+                if(typeof(_PixelsPerDegree) == "undefined"){
+                    x = gisx/_MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution;
+                    y = gisy/_MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution;
+                }else{
+                    x = gisx * _PixelsPerDegree[_MapApp.getZoomLevel()].x;
+                    y = gisy * _PixelsPerDegree[_MapApp.getZoomLevel()].y;
+                }
+                moveElements(x,y);
+                currGisPos = nowpos;
+            });*/
+        }
+
+
+        /**获得当前鼠标的屏幕坐标*/
+        function getMousePosition(e){
+            var mousePosition={x:0,y:0};
+            var e = e||window.event;
+            mousePosition.x = e.clientX+document.body.scrollLeft+document.documentElement.scrollLeft;
+            mousePosition.y = e.clientY+document.body.scrollTop+document.documentElement.scrollTop;
+            return mousePosition;
+        }
+
+
+        function moveElements(x,y){
+            //alert(paper.canvas.style.top);
+            //console.log("moving...");
+            /*paper.forEach(function(el){
+                if(el.type=="circle"){
+                    el.attr({"cx":el.attr("cx")+x,"cy":el.attr("cy")+y});
+                }else if(el.type=="image" || el.type=="text"){
+                    el.attr({"x":el.attr("x")+x,"y":el.attr("y")+y});
+                }else if(el.type =="path"){
+                    var path = el.path;
+                    for(var i=0;i<path.length;i++){
+                        var step = path[i];
+
+                    }
+                }
+                
+            });*/
+
+        }
+        function reposElements(){
+
+            /*paper.forEach(function(el){
+                if(el.type=="circle"){
+                    var pos = map2Coord(el.data.longitude,el.data.latitude);
+                    el.attr({"cx":pos.x,"cy":pos.y});
+                }else if(el.type=="image" || el.type=="text"){
+                    //var pos = map2Coord(el.data.longitude,el.data.latitude);
+                    //el.attr({"cx":pos.x,"cy":pos.y});
+                }else if(el.type =="path"){
+                    //el.transform("...t"+x+","+y);
+                    //el.path
+                }
+
+            });*/
+
+        }
+
+        //地理坐标转屏幕坐标
+        function map2Coord(x,y){
+            var xpos,ypos;
+            var pCenterLatLng = _MapApp.getCenterLatLng();
+            if( typeof(_PixelsPerDegree) == "undefined"){
+                xpos = (x-pCenterLatLng.x)/_MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution + _MapApp.map.viewSize.width / 2 ;
+                ypos = (y+pCenterLatLng.y)/_MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution + _MapApp.map.viewSize.height / 2 ;
+            }else{
+                xpos = (x-pCenterLatLng.x)*_PixelsPerDegree[_MapApp.getZoomLevel()].x+getMap().viewSize.width / 2;
+                ypos = (pCenterLatLng.y-y)*_PixelsPerDegree[_MapApp.getZoomLevel()].y+getMap().viewSize.height / 2;
+            }
+
+            return {"x":xpos,"y":ypos};
+        }
+        //屏幕坐标转地理坐标
+        function coord2Map(x,y){
+            var xpos,ypos;
+            var pCenterLatLng = _MapApp.getCenterLatLng();
+            if( typeof(_PixelsPerDegree) == "undefined"){
+                xpos = pCenterLatLng.x + (x - _MapApp.map.viewSize.width / 2) * _MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution;
+                ypos = pCenterLatLng.y - (y - _MapApp.map.viewSize.height / 2) * _MapApp.map.baseLayer.tileInfo.levelDetails[_MapApp.map.realZoomLevel].resolution;;
+            }else{
+                xpos = pCenterLatLng.x + (x - getMap().viewSize.width / 2) / _PixelsPerDegree[_MapApp.getZoomLevel()].x;
+                ypos = pCenterLatLng.y - (y - getMap().viewSize.height / 2) / _PixelsPerDegree[_MapApp.getZoomLevel()].y;
+            }
+            return{"x":xpos,"y":ypos};
+        }
+        function testfunc(){
+            mapmode = "pan";
+        }
+
+        function drawIcon(x,y,r){
+            paper.circle(x, y, r).attr({fill: "#036DA0", stroke: "#036DA0",opacity:0.95,cursor:'hand'});
+
+            /*var path = "M"+(x-r)+","+y;
+            path+="c0,"+(-r)+","+(2*r)+","+(-r)+","+2*r+","+0;
+            path+="s,"+(-2*r)+","+r+","+(-2*r)+",0";
+            path+="Z";
+            
+            paper.path(path).attr({fill: "#036DA0", stroke: "#036DA0",opacity:0.95,cursor:'hand'});
+            //alert(path);*/
+        }
+
+        function drawLine(){
+            mapmode = "drawline";
+            drawRect = paper.rect(-10, -10, $("#map").width() * 2, $("#map").height() * 2);
+            drawRect.attr({"fill": "#eee","fill-opacity": 0});
+
+
+            //绑定区域的鼠标移动事件
+            drawRect.mousemove(function (event) {
+                var mousepos = getMousePosition(event);
+                if(mousepos.x<=30){
+                    _MapApp.pan(100,0);
+                }
+                // 给区域添加两个属性ox,和oy
+                this.ox = mousepos.x - 5;
+                this.oy = mousepos.y - 5;
+            });
+
+            //区域（即鼠标）开始拖动
+            var start = function () {
+                g_masterPathArray = new Array();
+            };
+            //移动
+            var move = function (dx, dy) {
+                if (g_masterPathArray.length == 0) {
+                    g_masterPathArray[0] = ["M", this.ox, this.oy];
+                    //绘制线条
+                    g_masterDrawingBox = paper.path(g_masterPathArray);
+                    //设置线条宽度
+                    g_masterDrawingBox.attr({stroke: "#000000", "stroke-width": 3});
+                } else{
+                    g_masterPathArray[g_masterPathArray.length] = ["L", this.ox, this.oy];
+                }
+                //设置线条的path属性值
+                g_masterDrawingBox.attr({path: g_masterPathArray});
+            };
+            //松下鼠标
+            var up = function () {
+                drawRect.undrag();
+                drawRect.remove();
+                mapmode = "pan";
+            };
+            drawRect.drag(move, start, up);
+
+        }
+        var g_dashDrawingBox;
+
+        function drawLine2(){
+            mapmode = "drawline2";
+            drawRect = paper.rect(-10, -10, $("#map").width() * 2, $("#map").height() * 2);
+            drawRect.attr({"fill": "#eee","fill-opacity": 0});
+            g_masterPathArray = new Array();
+            g_dashPathArray = new Array();
+
+            //绑定区域的鼠标移动事件
+            drawRect.mousemove(function (event) {
+                var mousepos = getMousePosition(event);
+                // 给区域添加两个属性ox,和oy
+                if(Raphael.vml){
+                    mousepos.x -= 5;
+                    mousepos.y -= 5;
+                }
+                this.ox = mousepos.x;
+                this.oy = mousepos.y;
+
+                if (g_dashPathArray.length > 0) {
+                    g_dashPathArray[1] = ["L", this.ox, this.oy];
+                    if(null!=g_dashDrawingBox){
+                        g_dashDrawingBox.remove();
+                    }
+                    g_dashDrawingBox = paper.path(g_dashPathArray);
+                    g_dashDrawingBox.attr({stroke: "#000000", "stroke-width": 1});
+                    g_dashDrawingBox.toBack();
+
+                }
+                //console.log("mousemove!")
+            });
+
+            drawRect.click(function(event){
+
+                if (g_masterPathArray.length == 0) {
+                    g_masterPathArray[0] = ["M", this.ox, this.oy];
+                    //绘制线条
+                    g_masterDrawingBox = paper.path(g_masterPathArray);
+                    g_masterDrawingBox.toBack();
+                    //设置线条宽度
+                    g_masterDrawingBox.attr({stroke: "#000000", "stroke-width": 3});
+                }else{
+                    g_masterPathArray[g_masterPathArray.length] = ["L", this.ox, this.oy];
+                    g_masterDrawingBox.attr({path: g_masterPathArray});
+                }
+                g_dashPathArray[0] = ["M", this.ox, this.oy];
+
+
+                console.log(this.ox+","+this.oy);
+            });
+            drawRect.dblclick(function(event){
+                removeElements(drawRect,g_masterDrawingBox,g_dashDrawingBox);
+                //drawRect.remove();
+                //drawRect = null;
+                mapmode = "pan";
+            });
+        }
+
+        function removeElements(){
+            for(var i=0;i<arguments.length;i++){
+                arguments[i].remove();
+            }
+        }
+
+        function showInfoWindow(){
+            var point = {x:400,y:500};
+
+            var angleheight = 15;
+            var angle = 45;
+
+            var infowidth = 300;
+            var infoheight = 200;
+
+            var pathArray = new Array();
+            pathArray.push(["M",point.x,point.y]);
+            var anglewidth = Math.tan(angle/2)*angleheight;
+            pathArray.push(["l",-anglewidth,-angleheight]);
+            pathArray.push(["l",-(infowidth/2-anglewidth),0]);
+            pathArray.push(["l",0,-infoheight]);
+            pathArray.push(["l",infowidth,0]);
+            pathArray.push(["l",0,infoheight]);
+            pathArray.push(["l",-(infowidth/2-anglewidth),0]);
+            pathArray.push(["z"]);
+            var path = paper.path(pathArray);
+            path.attr({"fill": "#ffffff","stroke-opacity":0.7,"stroke-width":0.5});
+            var infodiv = document.createElement("div");
+//            infodiv.style.width="100px";
+//            infodiv.style.height="100px";
+//            infodiv.style.backgroundColor="red";
+//            infodiv.innerHTML="ddddd";
+            path.node.appendChild(infodiv);
+
+        }
+        
+
+
+
+
+
+
+
+    </script>
+</head>
+<body>
+<div id="map" style="top: 1px; left: 0px; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;width:800px;height:600px;"></div>
+<input type="button" onclick="testfunc()" value="平移"/>
+<input type="button" onclick="drawLine()" value="画线"/>
+<input type="button" onclick="drawLine2()" value="画线2"/>
+<input type="button" onclick="showInfoWindow()" value="弹窗"/>
+
+<!--<img src="cctvIcon.png" style="position:absolute;left:100px;top:300px;width:32px;height: 32px"/>-->
+</body>
+</html>
