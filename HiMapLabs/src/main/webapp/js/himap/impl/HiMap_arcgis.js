@@ -8,42 +8,43 @@ require.config({
     }
 });
 
-define(['jquery', 'IHiMap'], function ($, IHiMap) {
+define(["jquery", "IHiMap",
+		"esri/map", "esri/geometry/Point","esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/symbols/PictureMarkerSymbol","esri/symbols/SimpleFillSymbol",
+        "esri/graphic","esri/InfoTemplate",
+        "dojo/dom", "dojo/on", "dojo/domReady!"
+], function ($, IHiMap,
+            Map, Point,ArcGISTiledMapServiceLayer,
+            PictureMarkerSymbol,SimpleFillSymbol,
+            Graphic,InfoTemplate,
+            dom, on
+) {
 
 
 //××××××××××××××××××××××××××方法内部定义开始×××××××××××××××××××××××××××
 
-    var HiMap = function (mapobj) {
-
+    var HiMap = function (mapdiv,mapInitParams) {
+		this.base = IHiMap;
+		this.base();
+		this.map = new Map(mapdiv,mapInitParams);
+        var MyTiledMapServiceLayer = new ArcGISTiledMapServiceLayer(mapurl);
+        map.addLayer(MyTiledMapServiceLayer);
     };
 
     HiMap.prototype = new IHiMap();
 
-    HiMap.prototype.setCenter = function (strcoords) {
+	/**
+	 * 地图定位
+	 * @param {(String|HiPoint)} strCoords 地图中心点
+	 * @param {Number} [zoomlevel]	地图显示级别
+	 * @return {HiMap}
+	 */
+	this.centerAndZoom  = function(latLng, zoomLevel){
+		var point = new Point(latLng.split(","));
+		this.map.centerAndZoom(point,zoomlevel);
+		return this;
+	};
 
-    };
-
-    HiMap.prototype.moveTo = function (strCoords, zoomlevel) {
-
-    };
-
-    HiMap.prototype.drawPoint = function (callback) {
-
-    };
-    HiMap.prototype.drawPolyline = function (callback) {
-
-    };
-    HiMap.prototype.drawPolygon = function (callback) {
-
-    };
-    HiMap.prototype.drawCircle = function (callback) {
-
-    };
-    HiMap.prototype.drawRect = function (callback) {
-
-    };
-
-    this.HiMap = HiMap;
 
     //××××××××××××××××××××××××××方法内部定义结束×××××××××××××××××××××××××××
 

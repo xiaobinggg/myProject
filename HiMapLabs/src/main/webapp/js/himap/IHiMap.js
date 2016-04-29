@@ -5,7 +5,9 @@
 
 
 
-    var IHiMap = function (mapdiv) {
+    var IHiMap = function (mapdiv,mapInitParams) {
+		this.mapdiv = mapdiv;
+		this.mapInitParams = mapInitParams;
         this.map = null;
 
         /*************************************PGIS 接口部分******************************************/
@@ -159,7 +161,9 @@
          * @param {Number} [zoomlevel]	地图显示级别
          * @return {IHiMap}
          */
-        this.moveTo = function (strCoords,zoomlevel){};
+        this.moveTo = function (strCoords,zoomlevel){
+			return this.centerAndZoom();
+		};
 
         /**
          * 设置地图中心点

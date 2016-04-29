@@ -1,0 +1,118 @@
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:v ="urn:schemas-microsoft-com:vml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=GB2312"/>
+    <title>测绘院设施数据演示程序</title>
+    <!--<SCRIPT language="javascript" src="http://10.16.1.109:9080/EzServer/js/EzMapAPI.js"></SCRIPT>-->
+	<SCRIPT language="javascript" src="http://10.49.129.220:9080/PGIS_S_TileMap/js/EzMapAPI.js"></SCRIPT>
+    <script>
+        //var geoserverURL="http://10.16.1.72:8088/geoserver"; //geoserver 服务器地址
+		var geoserverURL = "http://10.16.32.35:8088/geoserver";
+		var checkedlayer = null;
+        function initmap(){
+            _MapApp = new EzMap(document.getElementById("map"));
+            var pOverview=new OverView();
+            pOverview.minLevel=8;
+            pOverview.maxLevel=10;
+            _MapApp.addOverView(pOverview);
+            _MapApp.editOverlay();
+
+            _MapApp.showMapControl();
+            _MapApp.hideCopyright();
+            //_MapApp.map.hideMapControl();//隐藏比例尺
+            _MapApp.map.hideMapServer();//隐藏图层切换按钮
+            _MapApp.centerAndZoom(new Point(120.37134,36.06192), 0);
+            showheatmap('sde:qd_geom');			
+        }
+
+        var clicktimeout = null;
+		
+        function showheatmap(layer){
+			if(typeof(legendfunc)!='undefined'){
+				legendfunc.close();
+			}
+            legendfunc=new LegendFunc();
+			var url = geoserverURL+"/sde/wms?REQUEST=GetMap&VERSION=1.1.0&FORMAT=image/png&SERVICE=WMS&BBOX=EZBOX&SRS=EPSG:4326&LAYERS="+layer+"&WIDTH=EZWIDTH&height=EZHEIGHT&TRANSPARENT=true"
+			if(checkedlayer != null){
+				cqlfilter = escape("&CQL_FILTER=GTTPE in("+checkedlayer.join(",")+")");
+				url+=cqlfilter;
+			}
+            legendfunc.format=url;
+			legendfunc.open(_MapApp);
+        }
+		
+		function checklayer(obj){
+			checkedlayer = [];
+			var layers = document.getElementsByName("checklayer");
+			for(var i=0;i<layers.length;i++){
+				var layer =layers[i];
+				if(layer.checked ==true){
+					checkedlayer.push("'"+layer.value+"'");
+				}				
+			}
+			showheatmap('sde:qd_geom');	
+		}
+		
+		
+		
+    </script>
+</head>
+<body onload="initmap()" style="overflow-x: hidden; overflow-y: hidden;">
+<div id="layerfilter" style="float:left;top: 15px; left: 0px;width:25%;">
+<table>
+<tr><td><b>标志牌</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='020202'/>标志牌</td></tr>
+
+
+<tr><td><b>标线</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='020504'/>网状线</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='020505'/>导向箭头</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='020506'/>其他标线</td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='020507'/>路面文字标记</td></tr>
+
+
+<tr><td><b>公安井</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='0201'/>公安井</td></tr>
+
+
+<tr><td><b>护栏</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='0204'/>护栏</td></tr>
+
+<tr><td><b>信号控制</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" onclick="checklayer(this)" type='checkbox' value='010101'/>信号机</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010102'/>杆体</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010103'/>信号灯</td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010104'/>倒计时牌</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010105'/>行人按钮</td></tr>
+
+<tr><td><b>闯红灯抓拍</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010201'/>落地机箱</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010203'/>挂杆机箱</td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010204'/>摄像机</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010205'/>补光灯</td>
+
+
+<tr><td><b>路口监控</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010604'/>摄像机</td></tr>
+
+
+<tr><td><b>路段监控 </b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010701'/>落地机箱 </td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010703'/>挂杆机箱</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010704'/>摄像机</td></tr>
+
+
+<tr><td><b>诱导发布</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010901'/>落地机箱</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010904'/>诱导屏</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='010905'/>条形屏</td></tr>
+
+
+<tr><td><b>交通信息采集</b></td></tr>
+<tr><td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='011003'/>挂杆机箱</td>
+<td><input name='checklayer' checked  onclick="checklayer(this)" type='checkbox' value='011004'/>微波</td></tr>
+
+</table>
+</div>
+<div id="map" style="float:right;top: 1px; left: 0px;width:75%; border-bottom: 0px; overflow-x: hidden; overflow-y: hidden;"></div>
+</body>
+</html>
