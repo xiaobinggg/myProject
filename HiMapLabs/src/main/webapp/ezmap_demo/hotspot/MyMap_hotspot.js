@@ -23,9 +23,10 @@ require(['jquery','common/kdTree','common/KdTreeExtend'], function ($,kdTree,kdT
 	kdtree = new kdTree(markers,kdTreeExtend.distance, ["latitude", "longitude"]);
 	//alert(kdtree.root.obj.devicename);
 	//绑定事件
-    $("#map").mousemove(function(){
+	document.getElementById("map").onmousemove = handleMouseover;
+    /*$("#map").mousemove(function(){
         handleMouseover();
-    });
+    });*/
 });
 
 function handleMouseover(){
@@ -36,6 +37,7 @@ function handleMouseover(){
 	mousepos.clientY = e.clientY;
 	
 	mouseovertimeout = setTimeout(function(){
+		console.log("fired");
 		var screenpos = getMousePosition(mousepos);
 		var x = screenpos.x;
 		var y = screenpos.y;
@@ -56,6 +58,7 @@ function handleMouseover(){
 		
 		
 		if(hotspot!=null && hotspot[0][1]<distance){
+			console.log(distance);
 			document.getElementById("map").style.cursor = "hand";
 
 			/*var marker = hotspot[0][0];

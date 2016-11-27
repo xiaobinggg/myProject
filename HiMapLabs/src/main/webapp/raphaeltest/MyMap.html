@@ -174,7 +174,7 @@
         function moveElements(x,y){
             //alert(paper.canvas.style.top);
             //console.log("moving...");
-            /*paper.forEach(function(el){
+            paper.forEach(function(el){
                 if(el.type=="circle"){
                     el.attr({"cx":el.attr("cx")+x,"cy":el.attr("cy")+y});
                 }else if(el.type=="image" || el.type=="text"){
@@ -183,28 +183,29 @@
                     var path = el.path;
                     for(var i=0;i<path.length;i++){
                         var step = path[i];
-
                     }
                 }
                 
-            });*/
+            });
 
         }
         function reposElements(){
 
-            /*paper.forEach(function(el){
+            paper.forEach(function(el){
                 if(el.type=="circle"){
                     var pos = map2Coord(el.data.longitude,el.data.latitude);
                     el.attr({"cx":pos.x,"cy":pos.y});
                 }else if(el.type=="image" || el.type=="text"){
-                    //var pos = map2Coord(el.data.longitude,el.data.latitude);
-                    //el.attr({"cx":pos.x,"cy":pos.y});
+                    var pos = map2Coord(el.data.longitude,el.data.latitude);
+                    el.attr({"cx":pos.x,"cy":pos.y});
                 }else if(el.type =="path"){
+					
+					
                     //el.transform("...t"+x+","+y);
                     //el.path
                 }
 
-            });*/
+            });
 
         }
 
@@ -381,12 +382,15 @@
             pathArray.push(["z"]);
             var path = paper.path(pathArray);
             path.attr({"fill": "#ffffff","stroke-opacity":0.7,"stroke-width":0.5});
-            var infodiv = document.createElement("div");
-//            infodiv.style.width="100px";
-//            infodiv.style.height="100px";
-//            infodiv.style.backgroundColor="red";
-//            infodiv.innerHTML="ddddd";
+            
+			var infodiv = document.createElement("div");
+            infodiv.style.width="100px";
+            infodiv.style.height="100px";
+            infodiv.style.backgroundColor="red";
+            infodiv.innerHTML="ddddd";
             path.node.appendChild(infodiv);
+			
+			$(path.node).css('left','100px');
 
         }
         
