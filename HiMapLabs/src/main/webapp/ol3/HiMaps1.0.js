@@ -23,10 +23,20 @@ define(['jquery', 'IHiMap'], function ($, IHiMap) {
         var tileSize = 256;
         var maxResolution = 0.000976566472126202;
         var resolutions = new Array(10);
-        var z;
+		resolutions[9] = 0.000003814697265625;
+		resolutions[8] = 0.00000762939453125;
+		resolutions[7] = 0.0000152587890625;
+		resolutions[6] = 0.000030517578125;
+		resolutions[5] = 0.00006103515625;
+		resolutions[4] = 0.0001220703125;
+		resolutions[3] = 0.000244140625;
+		resolutions[2] = 0.00048828125;
+		resolutions[1] = 0.0009765625;
+		resolutions[0] = 0.001953125;
+        /*var z;
         for (z = 9; z >= 0; --z) {
             resolutions[z] = maxResolution / Math.pow(2, z);
-        }
+        }*/
         var urlTemplate = 'http://10.16.1.72:9080/EzServer/EzMap?Service=getImage&Type=RGB&ZoomOffset=-1&Col={x}&Row={y}&Zoom={z}&V=0.3';
 
 
@@ -37,10 +47,10 @@ define(['jquery', 'IHiMap'], function ($, IHiMap) {
                     source: new ol.source.TileImage({
                         //attributions: [attribution],
                         tileUrlFunction: function (tileCoord, pixelRatio, projection) {
-                            var z = tileCoord[0];
+                            var z = tileCoord[0];							
                             var x = tileCoord[1];
                             var y = tileCoord[2];
-                            z = 8 - z;
+                            z = 9 - z;
                             return urlTemplate.replace('{z}', z.toString())
                                 .replace('{y}', y.toString())
                                 .replace('{x}', x.toString());

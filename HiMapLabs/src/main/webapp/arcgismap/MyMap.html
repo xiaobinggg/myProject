@@ -52,19 +52,6 @@
             ("https://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer" );
             map.addLayer(MyTiledMapServiceLayer);
 
-            function showgrapics(){
-                var pictureMarkerSymbol = new PictureMarkerSymbol('policeIcon.png', 32, 32);
-                pictureMarkerSymbol.size=0;
-                var point = new Point(120.35595,36.07525);
-                var template = "<div id='mainbox' style='margin:10px 0px 0px -5px ;background:white;width:370px;height:200px;border:0px solid black;'><div id='sidebar' style='margin:4px 0px 4px 0px;float:left;background:white;width:160px;height:172px;clear:left;'><img id='eimgshow' src ='ftp://equip:equip123@10.231.32.12:21/deviceimg/37020300000013100701.jpg' onerror=\"javascript:this.src='../../images/common/nopic.png'\" width=160px height=170px border =0><img src='ftp://equip:equip123@10.231.32.12:21/deviceimg/37020300000013100701.jpg' onerror=\"javascript:this.src='http://10.16.1.72/HiatmpPro/images/common/nopic.png'\" width='160px' height='170px' alt='' id='eimageurl1' style='display:none' /><img src='../../images/common/attemper.png' width='160px' height='170px' alt='' id='seimageurl1' style='display:none' /><img src='ftp://equip:equip123@10.231.32.12:21/deviceimg/37020300000013100702.jpg' onerror=\"javascript:this.src='http://10.16.1.72/HiatmpPro/images/common/nopic.png'\" width='160px' height='170px' alt='' id='eimageurl2' style='display:none' /><img src='../../images/common/attemper.png' width='160px' height='170px' alt='' id='seimageurl2' style='display:none' /><UL id=idNum class=num><li onmouseover='himap.showimg(1,this)' id='epiclabel1'>1</li><li onmouseover='himap.showimg(2,this)' id='epiclabel2'>2</li></UL></div><div id='fluxtitle' style='float:right;margin:4px 0px 0px 0px;width:200px;height:150px;background:white;font-family:Microsoft YaHei;'><table id='fluxtable' style='width:100%;font-size:12;font-family:Microsoft YaHei;'><tr><td >设备名称：<span  style='width:130px;overflow-x:hidden;'> <select style='width:130px;vertical-align:middle;font-size:12;font-family:Microsoft YaHei;background:white;' title='市北延安三路金狮宾馆高点' id='videoCtrlName' onchange='himap.videoCtrlChange();'><option title='市北延安三路金狮宾馆高点' selected='selected' value='370203000000131007'>市北延安三路金狮宾馆高点</option><option title='市北海信立交桥都市阳光高点' value='370203000000131003'>市北海信立交桥都市阳光高点</option></select></span></td></tr><tr><td>设备型号：<label id='devicemodel'>NVC4200</label></td></tr><tr><td>生产厂家：<label id='provider'>海信</label></td></tr><tr><td>安装地点：<label id='pointname' title='南延安三路金狮宾馆楼顶高点'>南延安三路金狮宾馆楼...</label></td></tr><tr><td>安装日期：<label id='providedate'>2014-04-10</label></td></tr><tr><td>视频编号：<b><label id='thirdsyscode'>192130</label></b></td></tr><tr><td>设备状态：<label id='devicestate'>正常</label></td></tr></table></div><div id='content' style='display:;float:right;margin:0px 0px 0px 0px;width:170px;height:20px;background:white;font-family:Microsoft YaHei;'><input type='button' style='left:10px;margin:1px 5px 0px 90px;font-size:12;font-family:Microsoft YaHei;'value='进入监控' onclick=\"javascript:himap.callCCTVCtrlInfo()\"/></div></div></div></div>";
-                template = "<div >dddddddd</div>";
-                var json = {title:"标题",content:template}
-                var infoTemplate = new InfoTemplate(json);
-                map.graphics.add(new Graphic(point, pictureMarkerSymbol,null,infoTemplate));
-
-//                map.infoWindow.resize(400,400);
-//                alert(map.infoWindow.domNode);
-            }
 
 
         });
