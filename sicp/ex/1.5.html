@@ -1,0 +1,25 @@
+!<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ex1.5</title>
+  </head>
+  <script type='text/javascript'>
+  function p() {
+    console.log('p is running recursive');
+    p();
+  }
+  function test(x, y) {
+    if (0 === x) {
+      return 0;
+    } else {
+      return y;
+    }
+  }
+  test(0,p());
+  </script>
+  <body>
+    应用序和正则序之间的区别
+
+  </body>
+</html>
